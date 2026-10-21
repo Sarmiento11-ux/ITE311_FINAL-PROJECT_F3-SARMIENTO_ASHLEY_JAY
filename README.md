@@ -1,6 +1,6 @@
 # CraftMarket
-**Student Name:** [Ashley Jay Sarmiento]
-**Course and Section:** BSIT - [F3]
+**Student Name:** Ashley Jay Sarmiento
+**Course and Section:** BSIT - F3
 
 ## Project Description
 CraftMarket is a web-based market place homepage
