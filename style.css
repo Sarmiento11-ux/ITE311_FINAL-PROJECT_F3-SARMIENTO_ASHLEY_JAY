@@ -967,17 +967,20 @@ input {
         font-size: 14px;
     }
 }
-.categories p{
+.categories p {
     line-height: 1.6;
 }
-.categories{
+
+.categories {
     padding-top: 48px;
     padding-bottom: 48px;
 }
-.products-card{
-    transition: transform 0.3s ease, box-shadow 0.2s ease;
+
+.product-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-.products-card:hover{
-    transform: translateY(-4px);
-   
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(41, 43, 36, 0.14);
 }
