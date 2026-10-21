@@ -967,3 +967,9 @@ input {
         font-size: 14px;
     }
 }
+.about-content {
+    line-height: 1.7;
+}
+.about-content h2{
+    margin-bottom: 16px;
+}
