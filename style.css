@@ -967,3 +967,14 @@ input {
         font-size: 14px;
     }
 }
+.categories h2{
+    margin-bottom: 12px;
+}
+.categories p{
+    color: #6b705c;
+    line-height: 1.6;
+}
+.categories{
+    padding-top: 48px;
+    padding-bottom: 48px;
+}
