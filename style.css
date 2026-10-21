@@ -968,9 +968,10 @@ input {
     }
 }
 .product-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
 .product-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(41, 43, 36, 0.14);
 }
-    
