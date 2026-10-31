@@ -1,6 +1,6 @@
 <template>
   <main v-if="product">
-    <!-- BREADCRUMBS & NAVIGATION RETURN -->
+    <!-- 1. BREADCRUMBS & NAVIGATION RETURN -->
     <section class="details-top-bar">
       <div class="container">
         <div class="top-nav-row">
@@ -23,7 +23,7 @@
       </div>
     </section>
 
-    <!-- PRODUCT DETAILS SHOWCASE -->
+    <!-- 2. PRODUCT DETAILS SHOWCASE -->
     <section class="product-details-section">
       <div class="container">
         
@@ -71,8 +71,10 @@
                 <span class="price-value">{{ Number(product.price).toFixed(2) }}</span>
               </div>
               <div class="stock-indicator">
-                <span class="stock-dot"></span>
-                <span>In Stock ({{ product.stock }} available)</span>
+                <span class="stock-dot" :class="{ 'dot-low': product.stock <= 5 }"></span>
+                <span>
+                  {{ product.stock > 0 ? (product.stock <= 5 ? `Low Stock (Only ${product.stock} available)` : `In Stock (${product.stock} available)`) : 'Out of Stock' }}
+                </span>
               </div>
             </div>
 
@@ -90,7 +92,7 @@
               </div>
               <div class="spec-item">
                 <span class="spec-label">Dimensions:</span>
-                <span class="spec-value">{{ product.dimensions || 'Standard Artisan Craft Dimensions' }}</span>
+                <span class="spec-value">{{ product.dimensions || 'Standard Artisan Craft Sizing' }}</span>
               </div>
               <div class="spec-item">
                 <span class="spec-label">Lead Time:</span>
@@ -102,18 +104,35 @@
               </div>
             </div>
 
-            <!-- Purchase Actions -->
+            <!-- Purchase Actions & Subtotal Calculation -->
             <div class="purchase-box">
-              <div class="quantity-control-group">
-                <label for="quantityInput" class="quantity-label">Quantity:</label>
-                <div class="quantity-selector">
-                  <button type="button" @click="decreaseQty" class="qty-btn" aria-label="Decrease quantity">−</button>
-                  <input type="number" id="quantityInput" v-model.number="quantity" min="1" :max="product.stock">
-                  <button type="button" @click="increaseQty" class="qty-btn" aria-label="Increase quantity">+</button>
+              <div class="purchase-top-row">
+                <div class="quantity-control-group">
+                  <label for="quantityInput" class="quantity-label">Quantity:</label>
+                  <div class="quantity-selector">
+                    <button type="button" @click="decreaseQty" class="qty-btn" aria-label="Decrease quantity" :disabled="quantity <= 1">−</button>
+                    <input type="number" id="quantityInput" v-model.number="quantity" min="1" :max="product.stock" @change="validateQty">
+                    <button type="button" @click="increaseQty" class="qty-btn" aria-label="Increase quantity" :disabled="quantity >= product.stock">+</button>
+                  </div>
+                </div>
+
+                <div class="subtotal-indicator">
+                  <span class="subtotal-label">Subtotal:</span>
+                  <span class="subtotal-amount">₱{{ calculatedSubtotal }}</span>
                 </div>
               </div>
 
-              <button type="button" @click="addToCart" class="btn btn-primary btn-add-cart-large">
+              <!-- Feedback message -->
+              <div v-if="cartFeedback" class="cart-feedback-note" :class="{ 'note-error': feedbackIsError }">
+                {{ cartFeedback }}
+              </div>
+
+              <button 
+                type="button" 
+                @click="addToCart" 
+                class="btn btn-primary btn-add-cart-large"
+                :disabled="product.stock <= 0"
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                   <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -144,7 +163,7 @@
       </div>
     </section>
 
-    <!-- RELATED PRODUCTS SECTION -->
+    <!-- 3. RELATED PRODUCTS SECTION -->
     <section class="related-products-section">
       <div class="container">
         <div class="section-header-split">
@@ -169,6 +188,7 @@
 
   </main>
   
+  <!-- Fallback if ID is invalid -->
   <div v-else class="container" style="padding: 100px 0; text-align: center;">
     <h2>Product Not Found</h2>
     <p>The craft piece you are looking for might have been moved or is currently sold out.</p>
@@ -177,20 +197,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ProductCard from '../components/ProductCard.vue';
-import { productService } from '../services/productService.js';
+import { sampleProducts } from '../data/products.js';
+import { cart } from '../data/cart.js';
 
 const route = useRoute();
+
 const product = ref(null);
 const relatedProducts = ref([]);
 const quantity = ref(1);
+const cartFeedback = ref('');
+const feedbackIsError = ref(false);
 
-const loadProductData = async (id) => {
-  product.value = await productService.getById(id);
-  if (product.value) {
-    relatedProducts.value = await productService.getRelated(product.value.category, product.value.id);
+const loadProductData = (id) => {
+  const numId = parseInt(id, 10);
+  const found = sampleProducts.find(p => p.id === numId);
+  product.value = found || null;
+
+  if (found) {
+    relatedProducts.value = sampleProducts.filter(
+      p => p.id !== found.id && p.category === found.category
+    ).slice(0, 4);
   }
 };
 
@@ -201,20 +230,94 @@ onMounted(() => {
 watch(() => route.params.id, (newId) => {
   if (newId) {
     quantity.value = 1;
+    cartFeedback.value = '';
     loadProductData(newId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 });
 
+const calculatedSubtotal = computed(() => {
+  if (!product.value) return '0.00';
+  return (product.value.price * quantity.value).toFixed(2);
+});
+
+const validateQty = () => {
+  if (quantity.value < 1) quantity.value = 1;
+  if (product.value && quantity.value > product.value.stock) {
+    quantity.value = product.value.stock;
+    cartFeedback.value = `Maximum available stock is ${product.value.stock}.`;
+    feedbackIsError.value = true;
+  } else {
+    cartFeedback.value = '';
+    feedbackIsError.value = false;
+  }
+};
+
 const decreaseQty = () => {
-  if (quantity.value > 1) quantity.value--;
+  if (quantity.value > 1) {
+    quantity.value--;
+    cartFeedback.value = '';
+  }
 };
 
 const increaseQty = () => {
-  if (product.value && quantity.value < product.value.stock) quantity.value++;
+  if (product.value && quantity.value < product.value.stock) {
+    quantity.value++;
+    cartFeedback.value = '';
+  }
 };
 
 const addToCart = () => {
-  alert(`Added ${quantity.value} item(s) of "${product.value.title}" to your cart!`);
+  if (!product.value) return;
+  const result = cart.addToCart(product.value, quantity.value);
+  if (result.success) {
+    cartFeedback.value = `✓ Successfully added ${quantity.value} item(s) to cart!`;
+    feedbackIsError.value = false;
+    setTimeout(() => { cartFeedback.value = ''; }, 3500);
+  } else {
+    cartFeedback.value = result.message;
+    feedbackIsError.value = true;
+  }
 };
 </script>
+
+<style scoped>
+.purchase-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.subtotal-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.subtotal-label {
+  font-size: 0.8rem;
+  color: #6b635b;
+}
+
+.subtotal-amount {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cm-charcoal, #2C221E);
+}
+
+.cart-feedback-note {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #2e7d32;
+  margin-bottom: 12px;
+}
+
+.cart-feedback-note.note-error {
+  color: #c25e3e;
+}
+
+.dot-low {
+  background-color: #c25e3e !important;
+}
+</style>

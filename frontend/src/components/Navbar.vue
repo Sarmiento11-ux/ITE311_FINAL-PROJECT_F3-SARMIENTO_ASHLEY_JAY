@@ -65,17 +65,25 @@
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <span class="cart-count">2</span>
+          <span class="cart-count">{{ cart.totalCount }}</span>
         </router-link>
       </div>
 
     </div>
+
+    <!-- Floating Global Toast Notification -->
+    <transition name="fade">
+      <div v-if="cart.showToast" class="cart-floating-toast">
+        {{ cart.toastMessage }}
+      </div>
+    </transition>
   </header>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { cart } from '../data/cart.js';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -91,3 +99,33 @@ const handleSearch = () => {
   }
 };
 </script>
+
+<style scoped>
+.cart-floating-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: var(--cm-forest, #3E5943);
+  color: #ffffff;
+  padding: 14px 22px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(12px);
+}
+</style>
