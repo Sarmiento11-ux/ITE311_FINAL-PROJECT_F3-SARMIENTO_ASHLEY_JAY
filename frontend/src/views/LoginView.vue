@@ -2,14 +2,14 @@
   <main class="auth-page-wrapper">
     <div class="container">
       
-      <div class="auth-card-container">
+      <div class="auth-card-container login-container">
 
-        <!-- Notice Banner -->
+        <!-- Simulation Notice Banner -->
         <div class="simulation-alert-banner">
           <span class="alert-icon">ℹ️</span>
           <div>
-            <strong>Prototype Simulation Notice:</strong>
-            <span>This login flow is simulated using Vue reactive state and session storage. In the upcoming Laravel backend phase, Laravel Sanctum token-based authentication will replace this client demo engine.</span>
+            <strong>Frontend Prototype Simulation:</strong>
+            <span>This login demonstrates reactive state management and session persistence. Production-grade token authentication (Laravel Sanctum) and bcrypt password hashing will connect in the upcoming backend phase.</span>
           </div>
         </div>
 
@@ -22,24 +22,24 @@
             </p>
           </div>
 
-          <!-- Registration notice -->
+          <!-- Post-Registration Success Notice -->
           <div v-if="postRegisterNotice" class="form-alert-msg alert-success">
             ✓ Account registered successfully! You can now log in below.
           </div>
 
           <form @submit.prevent="handleLogin" novalidate>
             
-            <!-- Username or Email -->
+            <!-- Email Address or Username -->
             <div class="form-group">
-              <label for="loginIdentifier" class="form-label">Email Address or Username</label>
+              <label for="loginIdentifier" class="form-label">Email Address or Username <span class="required">*</span></label>
               <input 
                 type="text" 
                 id="loginIdentifier" 
                 v-model="identifier" 
                 class="form-input" 
+                :class="{ 'input-error': identifierError }"
                 placeholder="Enter email or username" 
                 autocomplete="username"
-                required
               >
               <span v-if="identifierError" class="field-error-msg">{{ identifierError }}</span>
             </div>
@@ -47,17 +47,17 @@
             <!-- Password -->
             <div class="form-group">
               <div class="label-with-action">
-                <label for="loginPassword" class="form-label">Password</label>
-                <a href="#forgot" @click.prevent="alert('Password reset link will be sent in the upcoming Laravel backend phase.')" class="text-link-sm">Forgot password?</a>
+                <label for="loginPassword" class="form-label">Password <span class="required">*</span></label>
+                <a href="#forgot" @click.prevent="handleForgotPassword" class="text-link-sm">Forgot password?</a>
               </div>
               <input 
                 type="password" 
                 id="loginPassword" 
                 v-model="password" 
                 class="form-input" 
+                :class="{ 'input-error': passwordError }"
                 placeholder="Enter your password" 
                 autocomplete="current-password"
-                required
               >
               <span v-if="passwordError" class="field-error-msg">{{ passwordError }}</span>
             </div>
@@ -66,24 +66,25 @@
             <div class="form-group-inline">
               <label class="checkbox-container">
                 <input type="checkbox" v-model="rememberMe">
+                <span class="custom-checkbox"></span>
                 <span class="checkbox-label-text">Remember this device for 30 days</span>
               </label>
             </div>
 
-            <!-- Alert Message -->
+            <!-- Status Alert Banner -->
             <div v-if="statusMsg" class="form-alert-msg" :class="statusClass">
               {{ statusMsg }}
             </div>
 
-            <!-- Submit Button -->
+            <!-- Login Button -->
             <button type="submit" class="btn btn-primary btn-auth-submit">
-              <span>Sign In</span>
+              <span>Login</span>
               <span class="btn-arrow">→</span>
             </button>
 
           </form>
 
-          <!-- Quick Demo Accounts Box -->
+          <!-- Quick Demo Accounts for Testing Evaluation -->
           <div class="demo-accounts-box">
             <h4 class="demo-title">🔑 Quick Demo Accounts for Testing:</h4>
             <div class="demo-buttons-grid">
@@ -103,6 +104,7 @@
             <p class="demo-hint">Click any role button above to auto-fill sample credentials.</p>
           </div>
 
+          <!-- Footer Link to Register -->
           <div class="auth-card-footer">
             <p>Don't have a CraftMarket account yet? <router-link to="/register" class="auth-switch-link">Create one here ↗</router-link></p>
           </div>
@@ -118,6 +120,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { auth } from '../data/auth.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -181,26 +184,44 @@ const fillDemo = (demoEmail, demoPass) => {
   statusMsg.value = '';
 };
 
-const handleLogin = () => {
+const handleForgotPassword = () => {
+  alert('Password reset instructions will be handled by Laravel email notifications in the upcoming backend stage.');
+};
+
+const validate = () => {
+  let isValid = true;
   identifierError.value = '';
   passwordError.value = '';
-  statusMsg.value = '';
 
   if (!identifier.value.trim()) {
-    identifierError.value = 'Email or Username is required';
-    return;
+    identifierError.value = 'Email Address or Username is required.';
+    isValid = false;
   }
+
   if (!password.value) {
-    passwordError.value = 'Password is required';
-    return;
+    passwordError.value = 'Password is required.';
+    isValid = false;
+  } else if (password.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters.';
+    isValid = false;
   }
+
+  return isValid;
+};
+
+const handleLogin = () => {
+  statusMsg.value = '';
+  if (!validate()) return;
 
   const idQuery = identifier.value.trim().toLowerCase();
+  
+  // 1. Check against built-in demo accounts
   let matchedUser = demoAccounts.find(
-    acc => (acc.email.toLowerCase() === idQuery || acc.username.toLowerCase() === idQuery) && acc.password === password.value
+    acc => (acc.email.toLowerCase() === idQuery || acc.username.toLowerCase() === idQuery) && 
+           acc.password === password.value
   );
 
-  // Check custom registered user in session
+  // 2. Check against custom registered user in sessionStorage
   if (!matchedUser) {
     const rawSaved = sessionStorage.getItem('craftMarketRegisteredUser');
     if (rawSaved) {
@@ -219,16 +240,23 @@ const handleLogin = () => {
   }
 
   if (matchedUser) {
-    sessionStorage.setItem('craftMarketActiveUser', JSON.stringify(matchedUser));
+    auth.login(matchedUser);
     statusMsg.value = `✓ Welcome back, ${matchedUser.fullName}! Logging in...`;
     statusClass.value = 'alert-success';
 
     setTimeout(() => {
       router.push('/profile');
-    }, 800);
+    }, 700);
   } else {
-    statusMsg.value = 'Invalid credentials. Please click a demo button below to test.';
+    statusMsg.value = 'Invalid login credentials. Click a demo account button below to auto-fill sample credentials.';
     statusClass.value = 'alert-danger';
   }
 };
 </script>
+
+<style scoped>
+.input-error {
+  border-color: #c25e3e !important;
+  background-color: #fffaf8 !important;
+}
+</style>

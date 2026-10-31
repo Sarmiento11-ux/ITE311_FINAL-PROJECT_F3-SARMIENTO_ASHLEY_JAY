@@ -52,13 +52,21 @@
         <router-link to="/register?role=seller" class="btn-seller-link">
           <span>Become a Seller</span>
         </router-link>
-        <router-link to="/login" class="nav-icon-link" title="User Account / Sign In">
+        
+        <!-- Account / Profile Link -->
+        <router-link 
+          :to="auth.isAuthenticated ? '/profile' : '/login'" 
+          class="nav-icon-link" 
+          :title="auth.isAuthenticated ? 'View My Profile' : 'User Account / Sign In'"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <span class="icon-text">Account</span>
+          <span class="icon-text">{{ auth.isAuthenticated ? 'Profile' : 'Account' }}</span>
         </router-link>
+        
+        <!-- Cart Link -->
         <router-link to="/products" class="nav-icon-link cart-pill" title="Shopping Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -84,6 +92,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { cart } from '../data/cart.js';
+import { auth } from '../data/auth.js';
 
 const router = useRouter();
 const searchQuery = ref('');

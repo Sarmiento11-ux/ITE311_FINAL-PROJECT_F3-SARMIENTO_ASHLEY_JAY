@@ -37,41 +37,41 @@
               <button type="button" @click="toggleAvatar" class="avatar-edit-badge" title="Change profile picture">📷</button>
             </div>
 
-            <h2 class="profile-card-name">{{ user.fullName }}</h2>
-            <p class="profile-card-username">@{{ user.username }}</p>
+            <h2 class="profile-card-name">{{ currentUser.fullName }}</h2>
+            <p class="profile-card-username">@{{ currentUser.username }}</p>
 
             <!-- Role Badge -->
             <div class="role-badge-wrapper">
-              <span class="role-badge" :class="roleBadgeClass">{{ user.role }}</span>
+              <span class="role-badge" :class="roleBadgeClass">{{ currentUser.role }}</span>
             </div>
 
-            <p class="profile-bio-text">{{ user.bio }}</p>
+            <p class="profile-bio-text">{{ currentUser.bio }}</p>
 
             <div class="profile-meta-list">
               <div class="meta-item">
                 <span class="meta-icon">✉️</span>
-                <span>{{ user.email }}</span>
+                <span>{{ currentUser.email }}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-icon">📍</span>
-                <span>{{ user.address }}</span>
+                <span>{{ currentUser.address }}</span>
               </div>
             </div>
           </div>
 
           <!-- Role Permissions & Module Matrix Box -->
           <div class="role-permissions-box">
-            <h4 class="perm-title">{{ user.role }} Capabilities</h4>
-            <div v-if="user.role === 'Administrator'">
+            <h4 class="perm-title">{{ currentUser.role }} Capabilities</h4>
+            <div v-if="currentUser.role === 'Administrator'">
               <p style="font-size: 0.85rem; color: #6b635b; margin-bottom: 10px;">Full system administrative authority:</p>
               <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6;">
-                <li>Platform User & Seller Management</li>
+                <li>Platform User & Seller Moderation</li>
                 <li>Product Listing Curation & Approvals</li>
                 <li>Financial Escrow & Commission Audits</li>
                 <li>WordPress CMS Announcement Publishing</li>
               </ul>
             </div>
-            <div v-else-if="user.role === 'Seller'">
+            <div v-else-if="currentUser.role === 'Seller'">
               <p style="font-size: 0.85rem; color: #6b635b; margin-bottom: 10px;">Artisan Merchant dashboard access:</p>
               <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6;">
                 <li>Add, Edit & Inventory Handmade Products</li>
@@ -96,18 +96,19 @@
         <!-- Right Main Content: Edit Details & Security Settings -->
         <section class="profile-main-content">
           
+          <!-- Status Alert Banner -->
           <div v-if="alertMsg" class="form-alert-msg" :class="alertClass">
             {{ alertMsg }}
           </div>
 
-          <!-- Personal Information Card -->
+          <!-- 1. Personal Information Card -->
           <div class="content-panel-card">
             <div class="panel-card-header">
               <div>
                 <h3 class="panel-title">Personal Information</h3>
                 <p class="panel-subtitle">Update your personal identification and delivery contact details.</p>
               </div>
-              <button type="button" @click="isEditing = !isEditing" class="btn btn-secondary btn-sm">
+              <button type="button" @click="toggleEdit" class="btn btn-secondary btn-sm">
                 <span>{{ isEditing ? 'Cancel Edit' : 'Edit Profile' }}</span>
               </button>
             </div>
@@ -115,47 +116,86 @@
             <form @submit.prevent="saveProfile">
               <div class="form-row-2col">
                 <div class="form-group">
-                  <label for="editFullName" class="form-label">Full Name</label>
-                  <input type="text" id="editFullName" v-model="editForm.fullName" class="form-input" :disabled="!isEditing" required>
+                  <label for="editFullName" class="form-label">Full Name <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    id="editFullName" 
+                    v-model="editForm.fullName" 
+                    class="form-input" 
+                    :disabled="!isEditing" 
+                    required
+                  >
                 </div>
 
                 <div class="form-group">
-                  <label for="editUsername" class="form-label">Username</label>
-                  <input type="text" id="editUsername" v-model="editForm.username" class="form-input" :disabled="!isEditing" required>
+                  <label for="editUsername" class="form-label">Username <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    id="editUsername" 
+                    v-model="editForm.username" 
+                    class="form-input" 
+                    :disabled="!isEditing" 
+                    required
+                  >
                 </div>
               </div>
 
               <div class="form-row-2col">
                 <div class="form-group">
-                  <label for="editEmail" class="form-label">Email Address</label>
-                  <input type="email" id="editEmail" v-model="editForm.email" class="form-input" :disabled="!isEditing" required>
+                  <label for="editEmail" class="form-label">Email Address <span class="required">*</span></label>
+                  <input 
+                    type="email" 
+                    id="editEmail" 
+                    v-model="editForm.email" 
+                    class="form-input" 
+                    :disabled="!isEditing" 
+                    required
+                  >
                 </div>
 
                 <div class="form-group">
                   <label for="editPhone" class="form-label">Phone Number</label>
-                  <input type="tel" id="editPhone" v-model="editForm.phone" class="form-input" :disabled="!isEditing">
+                  <input 
+                    type="tel" 
+                    id="editPhone" 
+                    v-model="editForm.phone" 
+                    class="form-input" 
+                    :disabled="!isEditing"
+                  >
                 </div>
               </div>
 
               <div class="form-group">
                 <label for="editAddress" class="form-label">Shipping / Workshop Address</label>
-                <input type="text" id="editAddress" v-model="editForm.address" class="form-input" :disabled="!isEditing">
+                <input 
+                  type="text" 
+                  id="editAddress" 
+                  v-model="editForm.address" 
+                  class="form-input" 
+                  :disabled="!isEditing"
+                >
               </div>
 
               <div class="form-group">
                 <label for="editBio" class="form-label">About / Craft Bio</label>
-                <textarea id="editBio" v-model="editForm.bio" class="form-input textarea-bio" rows="3" :disabled="!isEditing"></textarea>
+                <textarea 
+                  id="editBio" 
+                  v-model="editForm.bio" 
+                  class="form-input textarea-bio" 
+                  rows="3" 
+                  :disabled="!isEditing"
+                ></textarea>
               </div>
 
-              <!-- Form Actions -->
+              <!-- Form Actions (Visible when editing) -->
               <div v-if="isEditing" class="edit-actions-row">
-                <button type="button" @click="isEditing = false" class="btn btn-secondary">Cancel</button>
+                <button type="button" @click="cancelEdit" class="btn btn-secondary">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
               </div>
             </form>
           </div>
 
-          <!-- Change Password Card -->
+          <!-- 2. Change Password Card -->
           <div class="content-panel-card">
             <div class="panel-card-header">
               <div>
@@ -166,19 +206,40 @@
 
             <form @submit.prevent="updatePassword">
               <div class="form-group">
-                <label for="currentPassword" class="form-label">Current Password</label>
-                <input type="password" id="currentPassword" v-model="passwords.current" class="form-input" placeholder="Enter current password" required>
+                <label for="currentPassword" class="form-label">Current Password <span class="required">*</span></label>
+                <input 
+                  type="password" 
+                  id="currentPassword" 
+                  v-model="passwords.current" 
+                  class="form-input" 
+                  placeholder="Enter current password" 
+                  required
+                >
               </div>
 
               <div class="form-row-2col">
                 <div class="form-group">
-                  <label for="newPassword" class="form-label">New Password</label>
-                  <input type="password" id="newPassword" v-model="passwords.newPass" class="form-input" placeholder="Min. 6 characters" required>
+                  <label for="newPassword" class="form-label">New Password <span class="required">*</span></label>
+                  <input 
+                    type="password" 
+                    id="newPassword" 
+                    v-model="passwords.newPass" 
+                    class="form-input" 
+                    placeholder="Min. 6 characters" 
+                    required
+                  >
                 </div>
 
                 <div class="form-group">
-                  <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
-                  <input type="password" id="confirmNewPassword" v-model="passwords.confirmPass" class="form-input" placeholder="Re-type new password" required>
+                  <label for="confirmNewPassword" class="form-label">Confirm New Password <span class="required">*</span></label>
+                  <input 
+                    type="password" 
+                    id="confirmNewPassword" 
+                    v-model="passwords.confirmPass" 
+                    class="form-input" 
+                    placeholder="Re-type new password" 
+                    required
+                  >
                 </div>
               </div>
 
@@ -199,6 +260,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { auth } from '../data/auth.js';
 
 const router = useRouter();
 const isEditing = ref(false);
@@ -218,7 +280,8 @@ const toggleAvatar = () => {
   avatarIndex.value = (avatarIndex.value + 1) % avatarUrls.length;
 };
 
-const user = ref({
+// Fallback user if not logged in
+const defaultUser = {
   fullName: 'Maria Clara Santos',
   username: 'maria_buyer',
   role: 'Customer',
@@ -226,9 +289,54 @@ const user = ref({
   phone: '+63 917 123 4567',
   address: 'Quezon City, Metro Manila, Philippines',
   bio: 'Passionate supporter of local indigenous craft and sustainable handmade home accents.'
+};
+
+const currentUser = computed(() => auth.user.value || defaultUser);
+
+const editForm = reactive({ ...currentUser.value });
+
+onMounted(() => {
+  Object.assign(editForm, currentUser.value);
 });
 
-const editForm = reactive({ ...user.value });
+const roleBadgeClass = computed(() => {
+  if (currentUser.value.role === 'Administrator') return 'role-badge-admin';
+  if (currentUser.value.role === 'Seller') return 'role-badge-seller';
+  return 'role-badge-customer';
+});
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value;
+  if (!isEditing.value) {
+    Object.assign(editForm, currentUser.value);
+  }
+};
+
+const cancelEdit = () => {
+  isEditing.value = false;
+  Object.assign(editForm, currentUser.value);
+};
+
+const saveProfile = () => {
+  if (!editForm.fullName.trim() || !editForm.email.trim() || !editForm.username.trim()) {
+    alertMsg.value = 'Full Name, Username, and Email are required.';
+    alertClass.value = 'alert-danger';
+    return;
+  }
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(editForm.email.trim())) {
+    alertMsg.value = 'Please provide a valid email format.';
+    alertClass.value = 'alert-danger';
+    return;
+  }
+
+  auth.updateProfile({ ...editForm });
+  isEditing.value = false;
+  alertMsg.value = '✓ Profile details updated successfully!';
+  alertClass.value = 'alert-success';
+  setTimeout(() => { alertMsg.value = ''; }, 3200);
+};
 
 const passwords = reactive({
   current: '',
@@ -236,55 +344,37 @@ const passwords = reactive({
   confirmPass: ''
 });
 
-onMounted(() => {
-  const active = sessionStorage.getItem('craftMarketActiveUser');
-  if (active) {
-    try {
-      const parsed = JSON.parse(active);
-      user.value = { ...user.value, ...parsed };
-      Object.assign(editForm, user.value);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-});
-
-const roleBadgeClass = computed(() => {
-  if (user.value.role === 'Administrator') return 'role-badge-admin';
-  if (user.value.role === 'Seller') return 'role-badge-seller';
-  return 'role-badge-customer';
-});
-
-const saveProfile = () => {
-  Object.assign(user.value, editForm);
-  sessionStorage.setItem('craftMarketActiveUser', JSON.stringify(user.value));
-  isEditing.value = false;
-  alertMsg.value = '✓ Profile details updated successfully!';
-  alertClass.value = 'alert-success';
-  setTimeout(() => { alertMsg.value = ''; }, 3000);
-};
-
 const updatePassword = () => {
+  alertMsg.value = '';
+
+  if (!passwords.current) {
+    alertMsg.value = 'Current password is required.';
+    alertClass.value = 'alert-danger';
+    return;
+  }
+
   if (passwords.newPass.length < 6) {
     alertMsg.value = 'New password must be at least 6 characters.';
     alertClass.value = 'alert-danger';
     return;
   }
+
   if (passwords.newPass !== passwords.confirmPass) {
-    alertMsg.value = 'New passwords do not match.';
+    alertMsg.value = 'New password and confirm password do not match.';
     alertClass.value = 'alert-danger';
     return;
   }
+
   passwords.current = '';
   passwords.newPass = '';
   passwords.confirmPass = '';
-  alertMsg.value = '✓ Password updated successfully!';
+  alertMsg.value = '✓ Password updated successfully in session!';
   alertClass.value = 'alert-success';
-  setTimeout(() => { alertMsg.value = ''; }, 3000);
+  setTimeout(() => { alertMsg.value = ''; }, 3200);
 };
 
 const handleLogout = () => {
-  sessionStorage.removeItem('craftMarketActiveUser');
+  auth.logout();
   router.push('/login');
 };
 </script>
