@@ -7,7 +7,16 @@
 ---
 
 ## 📌 Project Overview
-**CraftMarket** is a modern, responsive web-based marketplace application designed to connect local Filipino handmade artisans, weavers, potters, and crafters directly with conscious consumers. It provides small-scale producers with an accessible platform to showcase authentic handcrafted goods while supporting the local micro-artisan economy.
+**CraftMarket** is a modern, decoupled web marketplace application designed to connect local Filipino handmade artisans, weavers, potters, and crafters directly with conscious consumers. It provides micro-producers with an accessible digital storefront while safeguarding buyer confidence through escrow-based transactions and genuine craft curation.
+
+---
+
+## 🏗️ Decoupled Technology Stack
+- **Frontend SPA:** Vue.js 3, Vite, Vue Router 4, Custom Editorial Design System (CSS)
+- **Backend API:** PHP 8.2, Laravel 11, Laravel Sanctum (Token Auth)
+- **Relational Database:** MySQL 8.x (InnoDB, Foreign Key Constraints)
+- **Headless CMS:** WordPress (REST API for Community Announcements & Artisan Blogs)
+- **Version Control:** Git & GitHub
 
 ---
 
@@ -15,100 +24,75 @@
 ```text
 CraftMarket/
 │
-├── index.html                     # Primary Landing Page
-│
-├── pages/                         # Application HTML Views
-│   ├── products.html              # Product Catalog & Search
-│   ├── product-details.html       # Individual Product Details
-│   ├── register.html              # User Registration
-│   ├── login.html                 # User Login & Demo Access
-│   └── profile.html               # Profile & Role Management
-│
-├── assets/
-│   ├── css/                       # Stylesheets & Design System
-│   │   ├── style.css              # Global styles, variables & layout
-│   │   ├── products.css           # Catalog grid & filter styles
-│   │   ├── product-details.css    # Details layout & spec table styles
-│   │   ├── auth.css               # Unified login & register auth styles
-│   │   └── profile.css            # Profile page & role preview styles
+├── frontend/                          # [VUE.JS 3 + VITE SPA]
+│   ├── public/                        # Static public assets
+│   ├── src/
+│   │   ├── assets/
+│   │   │   ├── css/                   # Custom handcrafted stylesheets
+│   │   │   │   ├── style.css          # Design system, variables & global styles
+│   │   │   │   ├── products.css       # Catalog grid and filter styles
+│   │   │   │   ├── product-details.css# Details showcase & spec table styles
+│   │   │   │   ├── auth.css           # Unified login & register card styling
+│   │   │   │   └── profile.css        # Profile page & role preview styles
+│   │   │   └── images/                # Local artisan images
+│   │   │
+│   │   ├── components/                # Modular reusable Vue components
+│   │   │   ├── Navbar.vue             # Header with search & router links
+│   │   │   ├── Footer.vue             # Multi-column marketplace footer
+│   │   │   └── ProductCard.vue        # Reusable product card with price in ₱
+│   │   │
+│   │   ├── views/                     # Page route views
+│   │   │   ├── HomeView.vue           # Migrated homepage
+│   │   │   ├── ProductsView.vue       # Interactive catalog & multi-filter
+│   │   │   ├── ProductDetailsView.vue # Single craft view & quantity selector
+│   │   │   ├── RegisterView.vue       # Reactive registration form
+│   │   │   ├── LoginView.vue          # Login engine & quick demo buttons
+│   │   │   └── ProfileView.vue        # Profile management & role preview
+│   │   │
+│   │   ├── router/                    # Vue Router 4 setup
+│   │   │   └── index.js
+│   │   │
+│   │   ├── services/                  # Service layer for REST API communication
+│   │   │   └── productService.js      # Mock & upcoming Laravel API service
+│   │   │
+│   │   ├── App.vue                    # Root application component
+│   │   └── main.js                    # Vue entry point & stylesheet imports
 │   │
-│   ├── js/                        # Client-side Logic & Simulations
-│   │   ├── products.js            # Catalog search, filter & sorting
-│   │   ├── product-details.js     # Product detail loader & quantity counter
-│   │   ├── register.js            # Registration validation & storage
-│   │   ├── login.js               # Login authentication engine & demo accounts
-│   │   └── profile.js             # Profile management & role preview
-│   │
-│   └── images/                    # Image Assets
-│       ├── products/              # Product photography
-│       ├── categories/            # Category thumbnails
-│       └── general/               # Badges, icons, and illustrations
+│   ├── index.html                     # Vite HTML entry point
+│   ├── package.json                   # Dependencies (Vue 3, Vue Router 4, Vite)
+│   └── vite.config.js                 # Vite configuration
 │
-└── README.md                      # Project Documentation
+├── backend/                           # [LARAVEL RESTful API PREPARATION]
+│   └── README.md                      # Laravel setup & API endpoint blueprints
+│
+├── cms/                               # [WORDPRESS INTEGRATION]
+│   └── wordpress-integration-guide.md # Headless WP REST API documentation
+│
+├── documentation/                     # [PROJECT SPECIFICATIONS]
+│   ├── database/
+│   │   └── schema.sql                 # 7 Relational tables & seeds
+│   ├── diagrams/
+│   │   └── erd.md                     # Mermaid ERD & Architecture diagrams
+│   └── SRS/
+│       └── system-requirements.md     # Software Requirements Specification
+│
+└── README.md                          # Main project guide
 ```
 
 ---
 
-## 🛠️ Technologies Used
-- **Frontend:** HTML5, CSS3 (Custom Design System), JavaScript (ES6+ Vanilla)
-- **Backend (Upcoming):** PHP 8.x
-- **Database (Upcoming):** MySQL
-- **CMS Integration:** WordPress (Headless / Admin Panel)
-- **Version Control:** Git & GitHub
+## 🚀 How to Run the Vue.js Frontend Locally
 
----
-
-## 🌟 Implemented Modules
-
-### Step 1: Homepage (`index.html`, `assets/css/style.css`)
-- Community Announcement Bar
-- Sticky Navigation & Marketplace Header with Search Bar
-- Hero Showcase with Artisan Badge and Verified Community Statistics
-- Artisan Business Overview & Revenue Sharing Model
-- Product Categories & Curated Collections
-- Featured Handmade Products with Philippine Peso (₱) pricing
-- Cultural Heritage & Fair Trade About Section
-- Multi-column Marketplace Footer
-
-### Step 2: Product Catalog & Product Details (`pages/products.html`, `pages/product-details.html`)
-- **Interactive Product Catalog (`pages/products.html`, `assets/css/products.css`, `assets/js/products.js`):**
-  - Real-time product search by title, artisan name, or discipline
-  - Dynamic category filter buttons (Ceramics & Pottery, Woven Goods, Artisan Jewelry, Home Decor, Wooden Crafts)
-  - Sorting engine (Price: Low to High, Price: High to Low, Highest Rated, Name A-Z, Featured)
-  - Result count indicator and graceful Empty State with filter reset button
-  - Quick Add to Cart with floating toast notification
-  - View Product buttons linking to distinct product details
-- **Comprehensive Product Details Page (`pages/product-details.html`, `assets/css/product-details.css`, `assets/js/product-details.js`):**
-  - Dynamic product loading via URL parameter (`?id=X`)
-  - Large craft image showcase with artisan badges
-  - Price, stock indicator, materials, dimensions, and craft origin
-  - Interactive quantity selector with stock boundary validation
-  - Large Add to Cart button with animated cart counter update
-  - Verified local artisan maker profile box with location
-  - Contextual related crafts recommendations section
-
-### Step 3: User Registration, Login, and Profile Management (`pages/register.html`, `pages/login.html`, `pages/profile.html`)
-- **User Registration (`pages/register.html`, `assets/css/auth.css`, `assets/js/register.js`):**
-  - Full Name, Email, Username, Password, Confirm Password, and Terms agreement
-  - Role selection (Customer / Shopper vs Artisan / Seller) with visual cards
-  - Live client validation (email pattern, username characters, password match)
-  - Simulated account registration stored in `sessionStorage`
-- **User Login (`pages/login.html`, `assets/css/auth.css`, `assets/js/login.js`):**
-  - Identifier (email/username) and password input with Remember Me option
-  - One-click demo test account buttons (Customer, Seller, Administrator)
-  - Simulated authentication engine checking credentials against built-in roles & registered accounts
-  - Automatic redirect to profile with session persistence
-- **User Profile & Account Settings (`pages/profile.html`, `assets/css/profile.css`, `assets/js/profile.js`):**
-  - Avatar placeholder with one-click photo switcher
-  - Dynamic role badge display (`role-badge-customer`, `role-badge-seller`, `role-badge-administrator`)
-  - Role Capabilities & Module Matrix preview (Administrator, Seller, Customer scopes)
-  - In-place Edit Profile toggle with validation and session update
-  - Change Password form simulation
-  - Secure Logout action clearing the current session and returning to Login
-
----
-
-## 🚀 How to Run Locally
-1. Clone or download this repository.
-2. Open the folder in **Visual Studio Code**.
-3. Open `index.html` in your web browser (or right-click `index.html` and choose **Open with Live Server**).
+1. Open your terminal in the `CraftMarket/frontend` directory:
+   ```powershell
+   cd c:\CraftMarket\frontend
+   ```
+2. Install dependencies (if not already installed):
+   ```powershell
+   npm install
+   ```
+3. Start the Vite development server:
+   ```powershell
+   npm run dev
+   ```
+4. Open the displayed URL in your browser (typically `http://localhost:5173`).

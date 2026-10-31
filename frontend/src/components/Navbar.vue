@@ -1,0 +1,92 @@
+<template>
+  <!-- 1. ANNOUNCEMENT BAR -->
+  <aside class="announcement-bar" aria-label="Marketplace Announcement">
+    <div class="container announcement-content">
+      <span class="announcement-pill">Community Notice</span>
+      <p class="announcement-text">
+        Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>
+      </p>
+      <router-link to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
+    </div>
+  </aside>
+
+  <!-- 2. NAVIGATION HEADER -->
+  <header class="site-header">
+    <div class="container header-container">
+      
+      <!-- Brand Logo -->
+      <router-link to="/" class="brand-logo" aria-label="CraftMarket Homepage">
+        <span class="brand-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </span>
+        <span class="brand-name">CraftMarket<span class="brand-dot">.</span></span>
+      </router-link>
+
+      <!-- Search Bar -->
+      <form @submit.prevent="handleSearch" class="header-search">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          placeholder="Search handcrafted pottery, woven bags, jewelry..." 
+          aria-label="Search marketplace"
+        >
+      </form>
+
+      <!-- Navigation Links -->
+      <nav class="main-navigation" aria-label="Primary Navigation">
+        <router-link to="/" class="nav-link" active-class="active">Home</router-link>
+        <router-link to="/products" class="nav-link" active-class="active">Shop Catalog</router-link>
+        <a href="/#how-it-works" class="nav-link">How It Works</a>
+        <a href="/#about" class="nav-link">Our Story</a>
+      </nav>
+
+      <!-- User Actions -->
+      <div class="header-actions">
+        <router-link to="/register?role=seller" class="btn-seller-link">
+          <span>Become a Seller</span>
+        </router-link>
+        <router-link to="/login" class="nav-icon-link" title="User Account / Sign In">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="icon-text">Account</span>
+        </router-link>
+        <router-link to="/products" class="nav-icon-link cart-pill" title="Shopping Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="cart-count">2</span>
+        </router-link>
+      </div>
+
+    </div>
+  </header>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const searchQuery = ref('');
+
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({
+      path: '/products',
+      query: { search: searchQuery.value.trim() }
+    });
+  } else {
+    router.push('/products');
+  }
+};
+</script>

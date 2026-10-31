@@ -1,0 +1,340 @@
+/* ==========================================================================
+   CRAFTMARKET - PROFILE STYLESHEET (profile.css)
+   ========================================================================== */
+
+.profile-page-wrapper {
+    padding: 36px 0 80px 0;
+    background-color: var(--bg-page);
+    min-height: calc(100vh - 76px - 100px);
+}
+
+.profile-header-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.profile-page-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    color: var(--color-forest);
+    font-weight: 600;
+}
+
+.btn-logout-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #c53030;
+    border-color: #feb2b2;
+}
+
+.btn-logout-main:hover {
+    background-color: #fff5f5;
+    border-color: #e53e3e;
+    color: #9b2c2c;
+}
+
+.btn-logout-small {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #c53030;
+    background-color: #fff5f5;
+    border: 1px solid #fed7d7;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.btn-logout-small:hover {
+    background-color: #fed7d7;
+}
+
+/* 2. LAYOUT GRID */
+.profile-layout-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 36px;
+    align-items: flex-start;
+}
+
+/* 3. SIDEBAR */
+.profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.profile-summary-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 32px 24px;
+    text-align: center;
+}
+
+.profile-avatar-container {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 18px auto;
+}
+
+.profile-avatar-large {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-sage-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.avatar-edit-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--color-forest);
+    color: #ffffff;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    transition: var(--transition-base);
+}
+
+.avatar-edit-badge:hover {
+    background-color: var(--color-terracotta);
+    transform: scale(1.08);
+}
+
+.profile-card-name {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--color-forest);
+    margin-bottom: 2px;
+}
+
+.profile-card-username {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+/* Role Badges */
+.role-badge-wrapper {
+    margin-bottom: 16px;
+}
+
+.role-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.role-badge-customer {
+    background-color: var(--color-sage-light);
+    color: var(--color-forest);
+}
+
+.role-badge-seller {
+    background-color: var(--color-terracotta-light);
+    color: var(--color-terracotta);
+}
+
+.role-badge-administrator {
+    background-color: #2b3e32;
+    color: #ffffff;
+}
+
+.profile-bio-text {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    word-break: break-all;
+}
+
+/* Role Permissions Box */
+.role-permissions-box {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 22px;
+}
+
+.perm-title {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    color: var(--color-forest);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.perm-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.perm-list li {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.perm-check {
+    color: var(--color-forest);
+    font-weight: 700;
+}
+
+/* 4. MAIN CONTENT PANELS */
+.profile-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.content-panel-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 32px;
+}
+
+.panel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.panel-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--color-forest);
+    margin-bottom: 4px;
+}
+
+.panel-subtitle {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.84rem;
+}
+
+/* Inputs in Profile */
+.form-input:disabled {
+    background-color: #f6f4ee;
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    border-color: #ded9cd;
+}
+
+.textarea-bio {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.edit-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Alert Banner */
+.form-alert-msg {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.86rem;
+    margin-bottom: 20px;
+    line-height: 1.45;
+}
+
+.form-alert-msg.alert-success {
+    background-color: #e6f4ea;
+    color: #137333;
+    border: 1px solid #ceead6;
+}
+
+.form-alert-msg.alert-error {
+    background-color: #fce8e6;
+    color: #c5221f;
+    border: 1px solid #fad2cf;
+}
+
+/* 5. RESPONSIVE DESIGN */
+@media (max-width: 900px) {
+    .profile-layout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .content-panel-card {
+        padding: 24px 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .form-row-2col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .panel-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .edit-actions-row {
+        flex-direction: column;
+    }
+
+    .edit-actions-row button {
+        width: 100%;
+    }
+}
