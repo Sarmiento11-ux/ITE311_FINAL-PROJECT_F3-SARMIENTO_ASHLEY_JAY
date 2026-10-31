@@ -1,5 +1,6 @@
 /* ==========================================================================
-   CRAFTMARKET - REGISTRATION STYLESHEET (register.css)
+   CRAFTMARKET - UNIFIED AUTHENTICATION STYLESHEET (auth.css)
+   Consolidates shared styles for Registration and Login pages to avoid duplication
    ========================================================================== */
 
 .auth-page-wrapper {
@@ -11,6 +12,10 @@
 .auth-card-container {
     max-width: 620px;
     margin: 0 auto;
+}
+
+.auth-card-container.login-container {
+    max-width: 520px;
 }
 
 /* Simulation Disclaimer Banner */
@@ -44,7 +49,7 @@
 
 .auth-card-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 }
 
 .auth-title {
@@ -61,7 +66,7 @@
     line-height: 1.5;
 }
 
-/* Role Selector Grid */
+/* Role Selector Grid (Registration) */
 .role-selector-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -114,10 +119,21 @@
     margin-bottom: 20px;
 }
 
+.form-group-inline {
+    margin-bottom: 20px;
+}
+
 .form-row-2col {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+}
+
+.label-with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
 }
 
 .form-label {
@@ -130,6 +146,16 @@
 
 .form-label .required {
     color: #c53030;
+}
+
+.text-link-sm {
+    font-size: 0.78rem;
+    color: var(--color-forest);
+    text-decoration: underline;
+}
+
+.text-link-sm:hover {
+    color: var(--color-terracotta);
 }
 
 .form-input {
@@ -163,7 +189,7 @@
     min-height: 16px;
 }
 
-/* Terms Checkbox */
+/* Terms & Remember Me Checkboxes */
 .terms-group {
     margin-top: 10px;
 }
@@ -201,7 +227,7 @@
     width: 100%;
     height: 48px;
     font-size: 0.98rem;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .btn-arrow {
@@ -232,6 +258,67 @@
     background-color: #fce8e6;
     color: #c5221f;
     border: 1px solid #fad2cf;
+}
+
+/* Demo Credentials Box (Login) */
+.demo-accounts-box {
+    margin-top: 26px;
+    padding: 16px;
+    background-color: var(--bg-subtle);
+    border: 1px dashed var(--border-color-dark);
+    border-radius: var(--radius-md);
+}
+
+.demo-title {
+    font-size: 0.8rem;
+    color: var(--color-forest);
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.demo-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.btn-demo-fill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 6px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.btn-demo-fill strong {
+    color: var(--color-forest);
+    font-size: 0.8rem;
+}
+
+.btn-demo-fill span {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+}
+
+.btn-demo-fill:hover {
+    background-color: var(--color-sage-light);
+    border-color: var(--color-forest);
+    transform: translateY(-1px);
+}
+
+.demo-hint {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0;
 }
 
 /* Card Footer */
@@ -265,7 +352,8 @@
         gap: 0;
     }
 
-    .role-selector-grid {
+    .role-selector-grid,
+    .demo-buttons-grid {
         grid-template-columns: 1fr;
     }
 }

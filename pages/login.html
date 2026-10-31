@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <!-- Global Styles & Login Styles -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
 </head>
 <body>
 
@@ -22,9 +22,9 @@
         <div class="container announcement-content">
             <span class="announcement-pill">Community Notice</span>
             <p class="announcement-text">
-                Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>
+                Free shipping on local artisan orders over â‚±1,500 | <strong>Support 120+ Verified Local Makers</strong>
             </p>
-            <a href="register.html?role=seller" class="announcement-link">Sell with us ↗</a>
+            <a href="register.html?role=seller" class="announcement-link">Sell with us â†—</a>
         </div>
     </aside>
 
@@ -33,7 +33,7 @@
         <div class="container header-container">
             
             <!-- Brand Logo -->
-            <a href="index.html" class="brand-logo" aria-label="CraftMarket Homepage">
+            <a href="../index.html" class="brand-logo" aria-label="CraftMarket Homepage">
                 <span class="brand-mark">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -53,10 +53,10 @@
 
             <!-- Navigation Links -->
             <nav class="main-navigation" aria-label="Primary Navigation">
-                <a href="index.html" class="nav-link">Home</a>
+                <a href="../index.html" class="nav-link">Home</a>
                 <a href="products.html" class="nav-link">Catalog</a>
-                <a href="index.html#how-it-works" class="nav-link">How It Works</a>
-                <a href="index.html#about" class="nav-link">Our Story</a>
+                <a href="../index.html#how-it-works" class="nav-link">How It Works</a>
+                <a href="../index.html#about" class="nav-link">Our Story</a>
             </nav>
 
             <!-- User Actions -->
@@ -91,7 +91,7 @@
 
                 <!-- Notice Banner: Simulation Disclaimer -->
                 <div class="simulation-alert-banner">
-                    <span class="alert-icon">ℹ️</span>
+                    <span class="alert-icon">â„¹ï¸</span>
                     <div>
                         <strong>Prototype Simulation Notice:</strong>
                         <span>This login flow is simulated for UI/UX demonstration. In the upcoming backend phase, secure session handling with PHP and MySQL password hashing (bcrypt) will replace this client-side test engine.</span>
@@ -110,7 +110,7 @@
 
                     <!-- Registration Success Notice (when redirected from register) -->
                     <div id="postRegisterNotice" class="form-alert-msg alert-success" style="display: none;">
-                        ✓ Account registered successfully! You can now log in below.
+                        âœ“ Account registered successfully! You can now log in below.
                     </div>
 
                     <!-- Login Form -->
@@ -163,14 +163,14 @@
                         <!-- Submit Button -->
                         <button type="submit" id="submitLoginBtn" class="btn btn-primary btn-auth-submit">
                             <span>Sign In</span>
-                            <span class="btn-arrow">→</span>
+                            <span class="btn-arrow">â†’</span>
                         </button>
 
                     </form>
 
                     <!-- Sample Test Credentials Box (for easy teacher/student evaluation) -->
                     <div class="demo-accounts-box">
-                        <h4 class="demo-title">🔑 Quick Demo Accounts for Testing:</h4>
+                        <h4 class="demo-title">ðŸ”‘ Quick Demo Accounts for Testing:</h4>
                         <div class="demo-buttons-grid">
                             <button type="button" class="btn-demo-fill" data-user="customer@craftmarket.ph" data-pass="password123" data-role="Customer">
                                 <strong>Customer</strong>
@@ -190,7 +190,7 @@
 
                     <!-- Footer Link to Register -->
                     <div class="auth-card-footer">
-                        <p>Don't have a CraftMarket account yet? <a href="register.html" class="auth-switch-link">Create one here ↗</a></p>
+                        <p>Don't have a CraftMarket account yet? <a href="register.html" class="auth-switch-link">Create one here â†—</a></p>
                     </div>
 
                 </div>
@@ -206,11 +206,11 @@
             <div class="footer-bottom-bar">
                 <div class="copyright-info">
                     <p>&copy; 2026 CraftMarket Philippines. All rights reserved.</p>
-                    <p class="student-credit">Student Project Portfolio • Enterprise Web Application Prototype</p>
+                    <p class="student-credit">Student Project Portfolio â€¢ Enterprise Web Application Prototype</p>
                 </div>
                 <div class="footer-legal-links">
-                    <a href="index.html#privacy">Privacy Policy</a>
-                    <a href="index.html#terms">Terms of Service</a>
+                    <a href="../index.html#privacy">Privacy Policy</a>
+                    <a href="../index.html#terms">Terms of Service</a>
                     <a href="login.html">Login</a>
                     <a href="register.html">Register</a>
                 </div>
@@ -219,6 +219,7 @@
     </footer>
 
     <!-- Login Client Logic -->
-    <script src="login.js"></script>
+    <script src="../assets/js/login.js"></script>
 </body>
 </html>
+

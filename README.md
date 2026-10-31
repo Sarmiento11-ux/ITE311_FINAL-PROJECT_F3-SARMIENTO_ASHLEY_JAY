@@ -11,6 +11,44 @@
 
 ---
 
+## 📁 Project Directory Structure
+```text
+CraftMarket/
+│
+├── index.html                     # Primary Landing Page
+│
+├── pages/                         # Application HTML Views
+│   ├── products.html              # Product Catalog & Search
+│   ├── product-details.html       # Individual Product Details
+│   ├── register.html              # User Registration
+│   ├── login.html                 # User Login & Demo Access
+│   └── profile.html               # Profile & Role Management
+│
+├── assets/
+│   ├── css/                       # Stylesheets & Design System
+│   │   ├── style.css              # Global styles, variables & layout
+│   │   ├── products.css           # Catalog grid & filter styles
+│   │   ├── product-details.css    # Details layout & spec table styles
+│   │   ├── auth.css               # Unified login & register auth styles
+│   │   └── profile.css            # Profile page & role preview styles
+│   │
+│   ├── js/                        # Client-side Logic & Simulations
+│   │   ├── products.js            # Catalog search, filter & sorting
+│   │   ├── product-details.js     # Product detail loader & quantity counter
+│   │   ├── register.js            # Registration validation & storage
+│   │   ├── login.js               # Login authentication engine & demo accounts
+│   │   └── profile.js             # Profile management & role preview
+│   │
+│   └── images/                    # Image Assets
+│       ├── products/              # Product photography
+│       ├── categories/            # Category thumbnails
+│       └── general/               # Badges, icons, and illustrations
+│
+└── README.md                      # Project Documentation
+```
+
+---
+
 ## 🛠️ Technologies Used
 - **Frontend:** HTML5, CSS3 (Custom Design System), JavaScript (ES6+ Vanilla)
 - **Backend (Upcoming):** PHP 8.x
@@ -22,7 +60,7 @@
 
 ## 🌟 Implemented Modules
 
-### Step 1: Homepage (`index.html`, `style.css`)
+### Step 1: Homepage (`index.html`, `assets/css/style.css`)
 - Community Announcement Bar
 - Sticky Navigation & Marketplace Header with Search Bar
 - Hero Showcase with Artisan Badge and Verified Community Statistics
@@ -32,15 +70,15 @@
 - Cultural Heritage & Fair Trade About Section
 - Multi-column Marketplace Footer
 
-### Step 2: Product Catalog & Product Details (`products.*`, `product-details.*`)
-- **Interactive Product Catalog (`products.html`, `products.css`, `products.js`):**
+### Step 2: Product Catalog & Product Details (`pages/products.html`, `pages/product-details.html`)
+- **Interactive Product Catalog (`pages/products.html`, `assets/css/products.css`, `assets/js/products.js`):**
   - Real-time product search by title, artisan name, or discipline
   - Dynamic category filter buttons (Ceramics & Pottery, Woven Goods, Artisan Jewelry, Home Decor, Wooden Crafts)
   - Sorting engine (Price: Low to High, Price: High to Low, Highest Rated, Name A-Z, Featured)
   - Result count indicator and graceful Empty State with filter reset button
   - Quick Add to Cart with floating toast notification
   - View Product buttons linking to distinct product details
-- **Comprehensive Product Details Page (`product-details.html`, `product-details.css`, `product-details.js`):**
+- **Comprehensive Product Details Page (`pages/product-details.html`, `assets/css/product-details.css`, `assets/js/product-details.js`):**
   - Dynamic product loading via URL parameter (`?id=X`)
   - Large craft image showcase with artisan badges
   - Price, stock indicator, materials, dimensions, and craft origin
@@ -49,18 +87,18 @@
   - Verified local artisan maker profile box with location
   - Contextual related crafts recommendations section
 
-### Step 3: User Registration, Login, and Profile Management (`register.*`, `login.*`, `profile.*`)
-- **User Registration (`register.html`, `register.css`, `register.js`):**
+### Step 3: User Registration, Login, and Profile Management (`pages/register.html`, `pages/login.html`, `pages/profile.html`)
+- **User Registration (`pages/register.html`, `assets/css/auth.css`, `assets/js/register.js`):**
   - Full Name, Email, Username, Password, Confirm Password, and Terms agreement
   - Role selection (Customer / Shopper vs Artisan / Seller) with visual cards
   - Live client validation (email pattern, username characters, password match)
   - Simulated account registration stored in `sessionStorage`
-- **User Login (`login.html`, `login.css`, `login.js`):**
+- **User Login (`pages/login.html`, `assets/css/auth.css`, `assets/js/login.js`):**
   - Identifier (email/username) and password input with Remember Me option
   - One-click demo test account buttons (Customer, Seller, Administrator)
   - Simulated authentication engine checking credentials against built-in roles & registered accounts
   - Automatic redirect to profile with session persistence
-- **User Profile & Account Settings (`profile.html`, `profile.css`, `profile.js`):**
+- **User Profile & Account Settings (`pages/profile.html`, `assets/css/profile.css`, `assets/js/profile.js`):**
   - Avatar placeholder with one-click photo switcher
   - Dynamic role badge display (`role-badge-customer`, `role-badge-seller`, `role-badge-administrator`)
   - Role Capabilities & Module Matrix preview (Administrator, Seller, Customer scopes)
