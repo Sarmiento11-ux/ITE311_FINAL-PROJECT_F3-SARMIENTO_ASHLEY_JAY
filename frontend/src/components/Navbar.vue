@@ -43,16 +43,45 @@
         <router-link to="/" class="nav-link" exact-active-class="active">Home</router-link>
         <a href="/#categories" class="nav-link">Categories</a>
         <router-link to="/products" class="nav-link" active-class="active">Shop</router-link>
+        <router-link 
+          v-if="auth.isAuthenticated && (auth.user.value?.role === 'Seller' || auth.user.value?.role === 'Administrator')" 
+          to="/dashboard/seller" 
+          class="nav-link"
+          active-class="active"
+        >
+          Seller Portal
+        </router-link>
+        <router-link 
+          v-else-if="auth.isAuthenticated" 
+          to="/dashboard/customer" 
+          class="nav-link"
+          active-class="active"
+        >
+          My Orders
+        </router-link>
         <a href="/#how-it-works" class="nav-link">How It Works</a>
         <a href="/#about" class="nav-link">Our Story</a>
       </nav>
 
       <!-- User Actions -->
       <div class="header-actions">
-        <router-link to="/register?role=seller" class="btn-seller-link">
+        <router-link 
+          v-if="!auth.isAuthenticated || auth.user.value?.role !== 'Seller'" 
+          to="/register?role=seller" 
+          class="btn-seller-link"
+        >
           <span>Become a Seller</span>
         </router-link>
         
+        <router-link 
+          v-else 
+          to="/dashboard/seller" 
+          class="btn-seller-link"
+          style="background-color: var(--cm-forest, #3E5943); color: #ffffff;"
+        >
+          <span>Artisan Dashboard</span>
+        </router-link>
+
         <!-- Account / Profile Link -->
         <router-link 
           :to="auth.isAuthenticated ? '/profile' : '/login'" 

@@ -5,6 +5,8 @@ import ProductDetailsView from '../views/ProductDetailsView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import LoginView from '../views/LoginView.vue';
 import ProfileView from '../views/ProfileView.vue';
+import CustomerDashboardView from '../views/CustomerDashboardView.vue';
+import SellerDashboardView from '../views/SellerDashboardView.vue';
 
 const routes = [
   {
@@ -36,6 +38,16 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: ProfileView
+  },
+  {
+    path: '/dashboard/customer',
+    name: 'customer-dashboard',
+    component: CustomerDashboardView
+  },
+  {
+    path: '/dashboard/seller',
+    name: 'seller-dashboard',
+    component: SellerDashboardView
   }
 ];
 

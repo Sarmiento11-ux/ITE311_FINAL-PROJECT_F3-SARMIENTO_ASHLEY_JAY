@@ -62,32 +62,44 @@
           <!-- Role Permissions & Module Matrix Box -->
           <div class="role-permissions-box">
             <h4 class="perm-title">{{ currentUser.role }} Capabilities</h4>
+            
             <div v-if="currentUser.role === 'Administrator'">
               <p style="font-size: 0.85rem; color: #6b635b; margin-bottom: 10px;">Full system administrative authority:</p>
-              <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6;">
+              <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6; margin-bottom: 14px;">
                 <li>Platform User & Seller Moderation</li>
                 <li>Product Listing Curation & Approvals</li>
                 <li>Financial Escrow & Commission Audits</li>
                 <li>WordPress CMS Announcement Publishing</li>
               </ul>
+              <router-link to="/dashboard/seller" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                Open Artisan Portal Demo →
+              </router-link>
             </div>
+
             <div v-else-if="currentUser.role === 'Seller'">
               <p style="font-size: 0.85rem; color: #6b635b; margin-bottom: 10px;">Artisan Merchant dashboard access:</p>
-              <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6;">
+              <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6; margin-bottom: 14px;">
                 <li>Add, Edit & Inventory Handmade Products</li>
                 <li>View Customer Orders & Tracking Status</li>
                 <li>Artisan Workshop Profile Customization</li>
                 <li>Direct Bank & GCash Payout Management</li>
               </ul>
+              <router-link to="/dashboard/seller" class="btn btn-primary btn-sm" style="width: 100%; text-align: center;">
+                Open Artisan Dashboard →
+              </router-link>
             </div>
+
             <div v-else>
               <p style="font-size: 0.85rem; color: #6b635b; margin-bottom: 10px;">Verified Shopper capabilities:</p>
-              <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6;">
+              <ul style="padding-left: 18px; font-size: 0.82rem; color: #423b36; line-height: 1.6; margin-bottom: 14px;">
                 <li>Curated Marketplace Browsing & Search</li>
                 <li>Escrow-Protected Shopping Cart Checkout</li>
                 <li>Order Tracking with Delivery Confirmation</li>
                 <li>Artisan Direct Reviews & Ratings</li>
               </ul>
+              <router-link to="/dashboard/customer" class="btn btn-primary btn-sm" style="width: 100%; text-align: center;">
+                Open Customer Dashboard →
+              </router-link>
             </div>
           </div>
 
