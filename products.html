@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse authentic handmade pottery, woven baskets, jewelry, wooden crafts, and home decorations directly from local artisans at CraftMarket.">
+    <title>Handmade Product Catalog | CraftMarket</title>
+
+    <!-- Google Fonts for Editorial Artisan Feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Global Styles & Catalog Specific Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="products.css">
+</head>
+<body>
+
+    <!-- 1. ANNOUNCEMENT BAR -->
+    <aside class="announcement-bar" aria-label="Marketplace Announcement">
+        <div class="container announcement-content">
+            <span class="announcement-pill">Community Notice</span>
+            <p class="announcement-text">
+                Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>
+            </p>
+            <a href="index.html#sellers" class="announcement-link">Sell with us ↗</a>
+        </div>
+    </aside>
+
+    <!-- 2. NAVIGATION HEADER -->
+    <header class="site-header">
+        <div class="container header-container">
+            
+            <!-- Brand Logo -->
+            <a href="index.html" class="brand-logo" aria-label="CraftMarket Homepage">
+                <span class="brand-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </span>
+                <span class="brand-name">CraftMarket<span class="brand-dot">.</span></span>
+            </a>
+
+            <!-- Search Bar in Header -->
+            <form action="products.html" method="GET" class="header-search">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="search" id="headerSearchInput" placeholder="Quick search crafts..." aria-label="Search marketplace">
+            </form>
+
+            <!-- Navigation Links -->
+            <nav class="main-navigation" aria-label="Primary Navigation">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="products.html" class="nav-link active">Catalog</a>
+                <a href="index.html#how-it-works" class="nav-link">How It Works</a>
+                <a href="index.html#about" class="nav-link">Our Story</a>
+            </nav>
+
+            <!-- User Actions -->
+            <div class="header-actions">
+                <a href="index.html#seller-join" class="btn-seller-link">
+                    <span>Become a Seller</span>
+                </a>
+                <a href="index.html#login" class="nav-icon-link" title="User Account / Sign In">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="icon-text">Account</span>
+                </a>
+                <a href="index.html#cart" class="nav-icon-link cart-pill" title="Shopping Cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span class="cart-count" id="navCartCount">2</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <main>
+
+        <!-- 3. CATALOG HERO / BREADCRUMB -->
+        <section class="catalog-hero">
+            <div class="container">
+                <div class="breadcrumb-trail">
+                    <a href="index.html">Home</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">Product Catalog</span>
+                </div>
+
+                <div class="catalog-header-text">
+                    <span class="section-eyebrow">ARTISAN SHOP</span>
+                    <h1 class="catalog-title">Handmade Product Catalog</h1>
+                    <p class="catalog-subtitle">
+                        Explore authentic creations crafted by independent local makers across the archipelago. Every purchase supports sustainable livelihoods and heritage craft techniques.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. CONTROLS BAR: SEARCH, FILTERS & SORTING -->
+        <section class="catalog-controls-section">
+            <div class="container">
+                
+                <div class="controls-card">
+                    
+                    <!-- Search Input -->
+                    <div class="catalog-search-wrapper">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input 
+                            type="text" 
+                            id="catalogSearchInput" 
+                            placeholder="Search by product name or artisan..." 
+                            aria-label="Search handmade products"
+                        >
+                        <button id="clearSearchBtn" class="clear-search-btn" title="Clear search" aria-label="Clear search input">&times;</button>
+                    </div>
+
+                    <!-- Category Filter Buttons / Tabs -->
+                    <div class="category-filters-scroll" role="tablist" aria-label="Filter products by category">
+                        <button class="cat-filter-btn active" data-category="all">All Crafts</button>
+                        <button class="cat-filter-btn" data-category="Ceramics & Pottery">Ceramics & Pottery</button>
+                        <button class="cat-filter-btn" data-category="Woven Goods & Bags">Woven Goods & Bags</button>
+                        <button class="cat-filter-btn" data-category="Artisan Jewelry">Artisan Jewelry</button>
+                        <button class="cat-filter-btn" data-category="Home Decor & Candles">Home Decor & Candles</button>
+                        <button class="cat-filter-btn" data-category="Wooden Crafts">Wooden Crafts</button>
+                    </div>
+
+                    <!-- Sorting and Results Count Bar -->
+                    <div class="catalog-meta-bar">
+                        <div class="results-count-text">
+                            Showing <strong id="resultsCount">0</strong> handmade products
+                        </div>
+
+                        <div class="sort-selector-wrapper">
+                            <label for="sortSelect" class="sort-label">Sort by:</label>
+                            <select id="sortSelect" class="sort-select" aria-label="Sort products">
+                                <option value="featured">Featured Picks</option>
+                                <option value="price-low-high">Price: Low to High</option>
+                                <option value="price-high-low">Price: High to Low</option>
+                                <option value="rating-high">Highest Rated</option>
+                                <option value="name-a-z">Name: A to Z</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 5. PRODUCT GRID & EMPTY STATE -->
+        <section class="catalog-grid-section">
+            <div class="container">
+
+                <!-- Product Grid (Populated dynamically via products.js) -->
+                <div class="catalog-product-grid" id="productGrid" aria-live="polite">
+                    <!-- Dynamic Product Cards Injected Here -->
+                </div>
+
+                <!-- Empty State Message (Hidden by default, shown when no matches) -->
+                <div class="empty-state-box" id="emptyState" style="display: none;">
+                    <div class="empty-icon">🍂</div>
+                    <h3 class="empty-title">No handmade products found</h3>
+                    <p class="empty-desc">
+                        We couldn't find any crafts matching your search terms or selected filters. Try searching for something else or reset your filters.
+                    </p>
+                    <button id="resetFiltersBtn" class="btn btn-primary">
+                        Reset All Filters
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 6. FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            
+            <div class="footer-top-grid">
+                
+                <!-- Brand Column -->
+                <div class="footer-col brand-col">
+                    <a href="index.html" class="brand-logo footer-logo">
+                        <span class="brand-mark">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </span>
+                        <span class="brand-name">CraftMarket<span class="brand-dot">.</span></span>
+                    </a>
+                    <p class="footer-tagline">
+                        The trusted local handmade marketplace. Connecting thoughtful shoppers with passionate artisans across the Philippines.
+                    </p>
+                    <div class="footer-badges">
+                        <span class="footer-pill">🇵🇭 Proudly Local</span>
+                        <span class="footer-pill">🛡 Escrow Protected</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Column 1: Marketplace -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">Marketplace</h4>
+                    <ul class="footer-links">
+                        <li><a href="products.html">All Catalog</a></li>
+                        <li><a href="products.html?category=Ceramics+%26+Pottery">Ceramics & Tableware</a></li>
+                        <li><a href="products.html?category=Woven+Goods+%26+Bags">Woven Textiles & Bags</a></li>
+                        <li><a href="products.html?category=Artisan+Jewelry">Handcrafted Jewelry</a></li>
+                        <li><a href="products.html?category=Wooden+Crafts">Wooden Crafts</a></li>
+                    </ul>
+                </div>
+
+                <!-- Navigation Column 2: For Sellers & Admin -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">For Artisans</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html#seller-portal">Seller Central</a></li>
+                        <li><a href="index.html#seller-register">Open a Shop</a></li>
+                        <li><a href="index.html#commission-policy">Fee Structure (8%)</a></li>
+                        <li><a href="index.html#seller-guidelines">Handmade Standards</a></li>
+                        <li><a href="index.html#admin-portal">Administrator Panel</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter / Updates Column -->
+                <div class="footer-col newsletter-col">
+                    <h4 class="footer-heading">Craft Newsletter</h4>
+                    <p class="newsletter-desc">Subscribe to discover new artisan arrivals and weekly maker highlights.</p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing to CraftMarket updates!');">
+                        <input type="email" placeholder="Enter your email address" required aria-label="Email address for newsletter">
+                        <button type="submit" class="btn-newsletter">Subscribe</button>
+                    </form>
+                    <p class="privacy-note">Zero spam. Only authentic craft news.</p>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom-bar">
+                <div class="copyright-info">
+                    <p>&copy; 2026 CraftMarket Philippines. All rights reserved.</p>
+                    <p class="student-credit">Student Project Portfolio • Enterprise Web Application Prototype</p>
+                </div>
+                <div class="footer-legal-links">
+                    <a href="index.html#privacy">Privacy Policy</a>
+                    <a href="index.html#terms">Terms of Service</a>
+                    <a href="index.html#security">Payment Security</a>
+                    <a href="index.html#sitemap">Sitemap</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Catalog JavaScript Logic -->
+    <script src="products.js"></script>
+</body>
+</html>

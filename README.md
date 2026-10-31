@@ -12,7 +12,7 @@
 ---
 
 ## 🛠️ Technologies Used
-- **Frontend:** HTML5, CSS3 (Custom Design System), JavaScript (Vanilla)
+- **Frontend:** HTML5, CSS3 (Custom Design System), JavaScript (ES6+ Vanilla)
 - **Backend (Upcoming):** PHP 8.x
 - **Database (Upcoming):** MySQL
 - **CMS Integration:** WordPress (Headless / Admin Panel)
@@ -20,16 +20,34 @@
 
 ---
 
-## 🌟 Key Features (Phase 1 Homepage)
-1. **Community Announcement Bar:** Displays sitewide alerts, shipping offers, and artisan seller onboarding.
-2. **Sticky Navigation & Marketplace Header:** Brand logo, search bar, role-based navigation (Categories, Shop, How It Works, About), Seller onboarding CTA, account access, and cart badge.
-3. **Hero Showcase:** Highlights handcrafted mission with clear CTAs, community statistics, and featured artisan badge.
-4. **Artisan Business Overview:** 3-step breakdown explaining artisan onboarding, escrow payments, and sustainable 8% revenue commission sharing.
-5. **Marketplace Benefits:** Badges for 100% genuine handmade goods, escrow buyer protection, and direct local empowerment.
-6. **Craft Disciplines / Categories:** Visual navigation for Ceramics & Pottery, Woven Goods, Artisan Jewelry, and Home Decor.
-7. **Featured Handmade Products:** Curated artisan product grid with maker bylines, ratings, stock, price in Philippine Peso (₱), and quick add-to-cart.
-8. **About / Artisan Story:** Editorial section showcasing cultural heritage preservation and fair compensation.
-9. **Marketplace Footer:** Multi-column links for shoppers and sellers, newsletter subscription, and project credentials.
+## 🌟 Implemented Modules
+
+### Step 1: Homepage (`index.html`, `style.css`)
+- Community Announcement Bar
+- Sticky Navigation & Marketplace Header with Search Bar
+- Hero Showcase with Artisan Badge and Verified Community Statistics
+- Artisan Business Overview & Revenue Sharing Model
+- Product Categories & Curated Collections
+- Featured Handmade Products with Philippine Peso (₱) pricing
+- Cultural Heritage & Fair Trade About Section
+- Multi-column Marketplace Footer
+
+### Step 2: Product Catalog & Product Details (`products.*`, `product-details.*`)
+- **Interactive Product Catalog (`products.html`, `products.css`, `products.js`):**
+  - Real-time product search by title, artisan name, or discipline
+  - Dynamic category filter buttons (Ceramics & Pottery, Woven Goods, Artisan Jewelry, Home Decor, Wooden Crafts)
+  - Sorting engine (Price: Low to High, Price: High to Low, Highest Rated, Name A-Z, Featured)
+  - Result count indicator and graceful Empty State with filter reset button
+  - Quick Add to Cart with floating toast notification
+  - View Product buttons linking to distinct product details
+- **Comprehensive Product Details Page (`product-details.html`, `product-details.css`, `product-details.js`):**
+  - Dynamic product loading via URL parameter (`?id=X`)
+  - Large craft image showcase with artisan badges
+  - Price, stock indicator, materials, dimensions, and craft origin
+  - Interactive quantity selector with stock boundary validation
+  - Large Add to Cart button with animated cart counter update
+  - Verified local artisan maker profile box with location
+  - Contextual related crafts recommendations section
 
 ---
 

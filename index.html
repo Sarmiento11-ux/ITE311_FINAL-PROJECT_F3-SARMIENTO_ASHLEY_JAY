@@ -41,19 +41,19 @@
             </a>
 
             <!-- Search Bar -->
-            <div class="header-search">
+            <form action="products.html" method="GET" class="header-search">
                 <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" placeholder="Search handcrafted pottery, woven bags, jewelry..." aria-label="Search marketplace">
-            </div>
+                <input type="text" name="search" placeholder="Search handcrafted pottery, woven bags, jewelry..." aria-label="Search marketplace">
+            </form>
 
             <!-- Navigation Links -->
             <nav class="main-navigation" aria-label="Primary Navigation">
                 <a href="#" class="nav-link active">Home</a>
-                <a href="#categories" class="nav-link">Categories</a>
-                <a href="#featured" class="nav-link">Shop</a>
+                <a href="products.html" class="nav-link">Categories</a>
+                <a href="products.html" class="nav-link">Shop</a>
                 <a href="#how-it-works" class="nav-link">How It Works</a>
                 <a href="#about" class="nav-link">Our Story</a>
             </nav>
@@ -104,7 +104,7 @@
                     </p>
 
                     <div class="hero-cta-group">
-                        <a href="#featured" class="btn btn-primary">
+                        <a href="products.html" class="btn btn-primary">
                             Explore Collection
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -289,7 +289,7 @@
                         <h2 class="section-title">Shop by Craft Discipline</h2>
                         <p class="section-subtitle">Explore distinct traditions, textures, and handmade techniques.</p>
                     </div>
-                    <a href="#featured" class="view-all-link">
+                    <a href="products.html" class="view-all-link">
                         View All Categories
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -301,7 +301,7 @@
                 <div class="category-grid">
 
                     <!-- Category 1 -->
-                    <a href="#pottery" class="category-card">
+                    <a href="products.html?category=Ceramics+%26+Pottery" class="category-card">
                         <div class="category-media">
                             <img 
                                 src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80" 
@@ -318,7 +318,7 @@
                     </a>
 
                     <!-- Category 2 -->
-                    <a href="#woven" class="category-card">
+                    <a href="products.html?category=Woven+Goods+%26+Bags" class="category-card">
                         <div class="category-media">
                             <img 
                                 src="https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=600&q=80" 
@@ -335,7 +335,7 @@
                     </a>
 
                     <!-- Category 3 -->
-                    <a href="#jewelry" class="category-card">
+                    <a href="products.html?category=Artisan+Jewelry" class="category-card">
                         <div class="category-media">
                             <img 
                                 src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=600&q=80" 
@@ -352,7 +352,7 @@
                     </a>
 
                     <!-- Category 4 -->
-                    <a href="#home-decor" class="category-card">
+                    <a href="products.html?category=Home+Decor+%26+Candles" class="category-card">
                         <div class="category-media">
                             <img 
                                 src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?auto=format&fit=crop&w=600&q=80" 
@@ -410,7 +410,7 @@
                                 <span class="product-rating">★ 4.9 (24)</span>
                             </div>
                             <h3 class="product-name">
-                                <a href="#product-view">Earthy Terracotta Coffee Mug</a>
+                                <a href="product-details.html?id=1">Earthy Terracotta Coffee Mug</a>
                             </h3>
                             <p class="product-category">Ceramics & Pottery</p>
                             <div class="product-footer">
@@ -443,7 +443,7 @@
                                 <span class="product-rating">★ 5.0 (42)</span>
                             </div>
                             <h3 class="product-name">
-                                <a href="#product-view">Handwoven Abaca Market Tote</a>
+                                <a href="product-details.html?id=2">Handwoven Abaca Market Tote</a>
                             </h3>
                             <p class="product-category">Woven Goods & Bags</p>
                             <div class="product-footer">
@@ -476,7 +476,7 @@
                                 <span class="product-rating">★ 4.8 (18)</span>
                             </div>
                             <h3 class="product-name">
-                                <a href="#product-view">Palawan Freshwater Pearl Bracelet</a>
+                                <a href="product-details.html?id=3">Palawan Freshwater Pearl Bracelet</a>
                             </h3>
                             <p class="product-category">Artisan Jewelry</p>
                             <div class="product-footer">
@@ -509,7 +509,7 @@
                                 <span class="product-rating">★ 4.9 (31)</span>
                             </div>
                             <h3 class="product-name">
-                                <a href="#product-view">Botanical Soy Candle in Amber Jar</a>
+                                <a href="product-details.html?id=4">Botanical Soy Candle in Amber Jar</a>
                             </h3>
                             <p class="product-category">Home Decor & Candles</p>
                             <div class="product-footer">
@@ -622,11 +622,11 @@
                 <div class="footer-col">
                     <h4 class="footer-heading">Marketplace</h4>
                     <ul class="footer-links">
-                        <li><a href="#categories">All Categories</a></li>
-                        <li><a href="#featured">Featured Crafts</a></li>
-                        <li><a href="#pottery">Ceramics & Tableware</a></li>
-                        <li><a href="#woven">Woven Textiles & Bags</a></li>
-                        <li><a href="#jewelry">Handcrafted Jewelry</a></li>
+                        <li><a href="products.html">All Categories</a></li>
+                        <li><a href="products.html">Featured Crafts</a></li>
+                        <li><a href="products.html?category=Ceramics+%26+Pottery">Ceramics & Tableware</a></li>
+                        <li><a href="products.html?category=Woven+Goods+%26+Bags">Woven Textiles & Bags</a></li>
+                        <li><a href="products.html?category=Artisan+Jewelry">Handcrafted Jewelry</a></li>
                     </ul>
                 </div>
 

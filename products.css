@@ -1,0 +1,518 @@
+/* ==========================================================================
+   CRAFTMARKET - PRODUCT CATALOG STYLESHEET (products.css)
+   Complements style.css with dedicated styles for filtering, sorting & catalog grid
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BREADCRUMBS & CATALOG HERO
+   -------------------------------------------------------------------------- */
+.catalog-hero {
+    padding: 36px 0 28px 0;
+    background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-page) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.breadcrumb-trail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.breadcrumb-trail a {
+    color: var(--color-forest);
+    font-weight: 500;
+}
+
+.breadcrumb-trail a:hover {
+    color: var(--color-terracotta);
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--border-color-dark);
+}
+
+.breadcrumb-current {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.catalog-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 3.4vw, 2.75rem);
+    color: var(--color-forest);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+.catalog-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    max-width: 680px;
+    line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   2. CONTROLS BAR (SEARCH, FILTERS, SORT)
+   -------------------------------------------------------------------------- */
+.catalog-controls-section {
+    padding: 24px 0;
+    background-color: var(--bg-page);
+    position: sticky;
+    top: 76px;
+    z-index: 90;
+    box-shadow: 0 4px 12px rgba(39, 40, 34, 0.03);
+}
+
+.controls-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Search Bar */
+.catalog-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.catalog-search-wrapper .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.catalog-search-wrapper input {
+    width: 100%;
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-color);
+    padding: 12px 42px 12px 46px;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    transition: var(--transition-base);
+}
+
+.catalog-search-wrapper input:focus {
+    background-color: var(--bg-surface);
+    border-color: var(--color-forest);
+    box-shadow: 0 0 0 3px rgba(43, 62, 50, 0.1);
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
+    line-height: 1;
+}
+
+.clear-search-btn:hover {
+    color: var(--color-forest);
+}
+
+/* Category Filter Tabs */
+.category-filters-scroll {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.category-filters-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.category-filters-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: var(--radius-full);
+}
+
+.cat-filter-btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    transition: var(--transition-base);
+}
+
+.cat-filter-btn:hover {
+    border-color: var(--color-forest);
+    color: var(--color-forest);
+}
+
+.cat-filter-btn.active {
+    background-color: var(--color-forest);
+    color: #ffffff;
+    border-color: var(--color-forest);
+    box-shadow: 0 2px 8px rgba(43, 62, 50, 0.2);
+}
+
+/* Metadata Bar: Results Count & Sort Dropdown */
+.catalog-meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.results-count-text {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.results-count-text strong {
+    color: var(--color-forest);
+}
+
+.sort-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-label {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.sort-select {
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-color);
+    color: var(--color-forest);
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.sort-select:focus {
+    border-color: var(--color-forest);
+    outline: none;
+    background-color: var(--bg-surface);
+}
+
+/* --------------------------------------------------------------------------
+   3. CATALOG PRODUCT GRID
+   -------------------------------------------------------------------------- */
+.catalog-grid-section {
+    padding: 32px 0 80px 0;
+}
+
+.catalog-product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+}
+
+.catalog-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: var(--transition-base);
+    display: flex;
+    flex-direction: column;
+}
+
+.catalog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-color-dark);
+}
+
+.catalog-card-media {
+    position: relative;
+    aspect-ratio: 1 / 1.05;
+    overflow: hidden;
+    background-color: var(--bg-subtle);
+}
+
+.catalog-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.catalog-card:hover .catalog-card-media img {
+    transform: scale(1.05);
+}
+
+.card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    z-index: 2;
+}
+
+.badge-featured {
+    background-color: var(--color-forest);
+    color: #ffffff;
+}
+
+.badge-bestseller {
+    background-color: var(--color-terracotta);
+    color: #ffffff;
+}
+
+.badge-handcrafted {
+    background-color: var(--color-sage);
+    color: #ffffff;
+}
+
+.card-wishlist-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.92);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-base);
+    z-index: 2;
+}
+
+.card-wishlist-btn:hover {
+    color: #d9383a;
+    background-color: #ffffff;
+}
+
+.catalog-card-body {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-artisan-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.74rem;
+}
+
+.card-maker-name {
+    color: var(--color-terracotta);
+    font-weight: 600;
+}
+
+.card-rating {
+    font-weight: 700;
+    color: #d88924;
+}
+
+.card-product-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-forest);
+    line-height: 1.35;
+    margin-bottom: 4px;
+}
+
+.card-product-title a {
+    color: inherit;
+}
+
+.card-product-title a:hover {
+    color: var(--color-terracotta);
+}
+
+.card-category-name {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.card-pricing-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.card-price {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-forest);
+    font-family: var(--font-sans);
+}
+
+.card-stock-label {
+    font-size: 0.72rem;
+    color: var(--color-sage);
+    font-weight: 600;
+}
+
+/* Card Action Buttons */
+.card-actions-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.btn-view-product {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: var(--bg-page);
+    color: var(--color-forest);
+    border: 1px solid var(--border-color-dark);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-base);
+}
+
+.btn-view-product:hover {
+    background-color: var(--color-forest);
+    color: #ffffff;
+    border-color: var(--color-forest);
+}
+
+.btn-quick-cart {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-sage-light);
+    color: var(--color-forest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: var(--transition-base);
+}
+
+.btn-quick-cart:hover {
+    background-color: var(--color-terracotta);
+    color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   4. EMPTY STATE BOX
+   -------------------------------------------------------------------------- */
+.empty-state-box {
+    text-align: center;
+    padding: 64px 24px;
+    background-color: var(--bg-surface);
+    border: 1px dashed var(--border-color-dark);
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.empty-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-forest);
+    margin-bottom: 8px;
+}
+
+.empty-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    max-width: 460px;
+    margin: 0 auto 24px auto;
+    line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   5. RESPONSIVE DESIGN (MEDIA QUERIES)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+    .catalog-product-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .catalog-controls-section {
+        position: static;
+    }
+
+    .catalog-product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .catalog-meta-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sort-selector-wrapper {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sort-select {
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalog-product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-filters-scroll {
+        gap: 6px;
+    }
+
+    .cat-filter-btn {
+        padding: 6px 14px;
+        font-size: 0.78rem;
+    }
+}
