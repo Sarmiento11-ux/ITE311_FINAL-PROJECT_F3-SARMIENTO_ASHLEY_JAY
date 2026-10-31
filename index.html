@@ -3,375 +3,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover handmade products from local artisans at CraftMarket.">
-    <title>CraftMarket | Handmade Finds</title>
-
+    <meta name="description" content="CraftMarket - A community marketplace connecting local handmade artisans with conscious shoppers. Discover authentic pottery, textiles, jewelry, and home goods.">
+    <title>CraftMarket | Local Handmade Products Marketplace</title>
+    
+    <!-- Google Fonts for Editorial Artisan Feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Announcement Bar -->
-    <div class="announcement">
-        Discover handmade treasures. Support local makers.
-    </div>
+    <!-- 1. ANNOUNCEMENT BAR -->
+    <aside class="announcement-bar" aria-label="Marketplace Announcement">
+        <div class="container announcement-content">
+            <span class="announcement-pill">Community Notice</span>
+            <p class="announcement-text">
+                Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>
+            </p>
+            <a href="#sellers" class="announcement-link">Sell with us ↗</a>
+        </div>
+    </aside>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-content">
-
-            <a href="#" class="logo">
-                <span class="logo-icon">c</span>
-                CraftMarket<span class="logo-dot">.</span>
+    <!-- 2. NAVIGATION HEADER -->
+    <header class="site-header">
+        <div class="container header-container">
+            
+            <!-- Brand Logo -->
+            <a href="#" class="brand-logo" aria-label="CraftMarket Homepage">
+                <span class="brand-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </span>
+                <span class="brand-name">CraftMarket<span class="brand-dot">.</span></span>
             </a>
 
-            <nav class="navigation">
-                <a href="#" class="active">Home</a>
-                <a href="#categories">Categories</a>
-                <a href="#products">Shop</a>
-                <a href="#about">About Us</a>
+            <!-- Search Bar -->
+            <div class="header-search">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" placeholder="Search handcrafted pottery, woven bags, jewelry..." aria-label="Search marketplace">
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="main-navigation" aria-label="Primary Navigation">
+                <a href="#" class="nav-link active">Home</a>
+                <a href="#categories" class="nav-link">Categories</a>
+                <a href="#featured" class="nav-link">Shop</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#about" class="nav-link">Our Story</a>
             </nav>
 
-            <a href="#products" class="header-button">
-                Explore Products <span>↗</span>
-            </a>
+            <!-- User Actions (Customer / Seller / Admin entry) -->
+            <div class="header-actions">
+                <a href="#seller-join" class="btn-seller-link">
+                    <span>Become a Seller</span>
+                </a>
+                <a href="#login" class="nav-icon-link" title="User Account / Sign In">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="icon-text">Account</span>
+                </a>
+                <a href="#cart" class="nav-icon-link cart-pill" title="Shopping Cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span class="cart-count">2</span>
+                </a>
+            </div>
 
         </div>
     </header>
 
     <main>
 
-        <!-- Hero Section -->
-        <section class="hero container">
-            <div class="hero-content">
-                <p class="eyebrow">
-                    THE BEAUTY OF HANDMADE
-                </p>
-
-                <h1>
-                    Every piece has<br>
-                    a story <span>to tell.</span>
-                </h1>
-
-                <p class="hero-description">
-                    Discover unique handmade creations from local artisans.
-                    Find something meaningful while supporting the people
-                    behind every piece.
-                </p>
-
-                <div class="hero-actions">
-                    <a href="#products" class="button button-dark">
-                        Explore Collection <span>→</span>
-                    </a>
-
-                    <a href="#about" class="text-button">
-                        Our Story <span>↗</span>
-                    </a>
-                </div>
-
-                <div class="hero-note">
-                    <span class="note-line"></span>
-                    <p>Handcrafted with care, made to be loved.</p>
-                </div>
-            </div>
-
-            <div class="hero-visual">
-                <img
-                    src="https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=1000&q=85"
-                    alt="Creative workspace filled with handmade crafts"
-                >
-
-                <div class="image-caption">
-                    <span class="caption-icon">✳</span>
-                    <div>
-                        <strong>Made with purpose</strong>
-                        <p>Created by independent makers</p>
-                    </div>
-                </div>
-
-                <div class="image-number">01 / CRAFT COLLECTION</div>
-            </div>
-        </section>
-
-        <!-- Benefits -->
-        <section class="benefits">
-            <div class="container benefits-grid">
-
-                <div class="benefit-item">
-                    <span class="benefit-icon">✳</span>
-                    <div>
-                        <h3>Unique Creations</h3>
-                        <p>Find pieces with their own character.</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <span class="benefit-icon">♡</span>
-                    <div>
-                        <h3>Made with Care</h3>
-                        <p>Celebrate the work behind every item.</p>
-                    </div>
-                </div>
-
-                <div class="benefit-item">
-                    <span class="benefit-icon">⌂</span>
-                    <div>
-                        <h3>Support Local</h3>
-                        <p>Help independent artisans grow.</p>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Categories -->
-        <section class="section container" id="categories">
-            <div class="container">
-                <h2 class="section-title">Shop by Category</h2>
-                <p>Discover handmade finds for every style.</p>
-            </div>
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">EXPLORE OUR SELECTION</p>
-                    <h2>Find your kind of craft.</h2>
-                </div>
-
-                <a href="#products" class="section-link">
-                    View all products <span>→</span>
-                </a>
-            </div>
-
-            <div class="category-grid">
-
-                <a href="#products" class="category-card">
-                    <div class="category-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=600&q=80"
-                            alt="Handmade accessories"
-                            loading="lazy"
-                        >
-                        <span class="category-arrow">↗</span>
-                    </div>
-                    <h3>Accessories</h3>
-                    <p>Little details, lasting charm.</p>
-                </a>
-
-                <a href="#products" class="category-card">
-                    <div class="category-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=600&q=80"
-                            alt="Handcrafted pottery and artisan crafts"
-                            loading="lazy"
-                        >
-                        <span class="category-arrow">↗</span>
-                    </div>
-                    <h3>Handcrafted Goods</h3>
-                    <p>Thoughtfully made by hand.</p>
-                </a>
-
-                <a href="#products" class="category-card">
-                    <div class="category-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?auto=format&fit=crop&w=600&q=80"
-                            alt="Home decorations"
-                            loading="lazy"
-                        >
-                        <span class="category-arrow">↗</span>
-                    </div>
-                    <h3>Home Decor</h3>
-                    <p>Make your space feel personal.</p>
-                </a>
-
-                <a href="#products" class="category-card">
-                    <div class="category-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80"
-                            alt="Wrapped gifts and keepsakes"
-                            loading="lazy"
-                        >
-                        <span class="category-arrow">↗</span>
-                    </div>
-                    <h3>Gifts & Keepsakes</h3>
-                    <p>Small things, meaningful moments.</p>
-                </a>
-
-            </div>
-        </section>
-
-        <!-- Featured Products -->
-        <section class="products-section" id="products">
-            <div class="container">
-
-                <div class="section-heading">
-                    <div>
-                        <p class="eyebrow">A FEW GOOD FINDS</p>
-                        <h2>Featured Handmade Products.</h2>
+        <!-- 3. HERO SECTION -->
+        <section class="hero-section">
+            <div class="container hero-grid">
+                
+                <div class="hero-content">
+                    <div class="hero-tag">
+                        <span class="tag-indicator"></span>
+                        Authentic Local Craftsmanship
                     </div>
 
-                    <p class="heading-description">
-                        Handmade pieces worth discovering.
+                    <h1 class="hero-title">
+                        Every handmade piece has a <span class="highlight-serif">story to tell.</span>
+                    </h1>
+
+                    <p class="hero-description">
+                        CraftMarket connects local independent artisans, woodcarvers, weavers, and potters directly with conscious shoppers. Discover small-batch treasures crafted with patience, passion, and natural materials.
                     </p>
+
+                    <div class="hero-cta-group">
+                        <a href="#featured" class="btn btn-primary">
+                            Explore Collection
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                        <a href="#how-it-works" class="btn btn-secondary">
+                            How It Works
+                        </a>
+                    </div>
+
+                    <!-- Marketplace Proof Badges -->
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">120+</span>
+                            <span class="stat-label">Verified Artisans</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">1,800+</span>
+                            <span class="stat-label">Handcrafted Items</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">4.9 ★</span>
+                            <span class="stat-label">Community Rating</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Visual Showcase -->
+                <div class="hero-visual">
+                    <div class="hero-image-wrapper">
+                        <img 
+                            src="https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=1200&q=85" 
+                            alt="Artisan workshop with handmade pottery and ceramics"
+                            class="hero-main-img"
+                        >
+                        
+                        <!-- Floating Artisan Profile Card -->
+                        <div class="floating-artisan-card">
+                            <img 
+                                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80" 
+                                alt="Maria Santos - Featured Artisan"
+                                class="artisan-avatar"
+                            >
+                            <div class="artisan-info">
+                                <span class="badge-featured">Featured Maker</span>
+                                <h4 class="artisan-name">Maria Santos</h4>
+                                <p class="artisan-craft">Studio Clayworks • Laguna, PH</p>
+                            </div>
+                        </div>
+
+                        <!-- Floating Eco-Friendly Pill -->
+                        <div class="floating-eco-pill">
+                            <span class="eco-icon">🌿</span>
+                            <span>100% Sustainable & Handmade</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. BUSINESS OVERVIEW SECTION -->
+        <section class="business-overview" id="how-it-works">
+            <div class="container">
+                
+                <div class="section-header text-center">
+                    <span class="section-eyebrow">OUR BUSINESS MODEL</span>
+                    <h2 class="section-title">How CraftMarket Powers the Artisan Economy</h2>
+                    <p class="section-subtitle">
+                        A sustainable, fair-trade marketplace ecosystem that supports independent creators while ensuring high product authenticity for buyers.
+                    </p>
+                </div>
+
+                <div class="overview-grid">
+                    
+                    <div class="overview-card">
+                        <div class="card-step-badge">01</div>
+                        <div class="overview-icon-box">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="overview-card-title">Artisan Registration & Curation</h3>
+                        <p class="overview-card-text">
+                            Local sellers register their micro-enterprise and list products. Our team verifies handmade authenticity so buyers get true artisan goods, not mass-produced factory items.
+                        </p>
+                        <div class="overview-metric">Verified Maker Badges</div>
+                    </div>
+
+                    <div class="overview-card highlight-card">
+                        <div class="card-step-badge">02</div>
+                        <div class="overview-icon-box">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                        </div>
+                        <h3 class="overview-card-title">Transparent Orders & Payments</h3>
+                        <p class="overview-card-text">
+                            Customers browse curated catalogs and checkout seamlessly. The platform securely holds payment in escrow until the artisan ships the verified order with QR confirmation.
+                        </p>
+                        <div class="overview-metric">Integrated Payment Escrow</div>
+                    </div>
+
+                    <div class="overview-card">
+                        <div class="card-step-badge">03</div>
+                        <div class="overview-icon-box">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
+                        <h3 class="overview-card-title">Sustainable Revenue Sharing</h3>
+                        <p class="overview-card-text">
+                            CraftMarket sustains its operations via a modest 8% transaction commission and optional featured promotion slots, allowing 92% of earnings to go directly into makers' pockets.
+                        </p>
+                        <div class="overview-metric">92% Direct Maker Payout</div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 5. MARKETPLACE BENEFITS -->
+        <section class="benefits-section">
+            <div class="container">
+                <div class="benefits-grid">
+
+                    <div class="benefit-box">
+                        <div class="benefit-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="benefit-title">100% Genuine Handmade</h4>
+                            <p class="benefit-desc">Every piece is handcrafted by local creators using regional materials.</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-box">
+                        <div class="benefit-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="benefit-title">Secure Order Protection</h4>
+                            <p class="benefit-desc">Integrated payment protection and QR verification for each transaction.</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-box">
+                        <div class="benefit-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="benefit-title">Empowering Local Artisans</h4>
+                            <p class="benefit-desc">Support livelihood programs and cultural heritage preservation in rural towns.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. PRODUCT CATEGORIES -->
+        <section class="categories-section" id="categories">
+            <div class="container">
+                
+                <div class="section-header-split">
+                    <div>
+                        <span class="section-eyebrow">CURATED COLLECTIONS</span>
+                        <h2 class="section-title">Shop by Craft Discipline</h2>
+                        <p class="section-subtitle">Explore distinct traditions, textures, and handmade techniques.</p>
+                    </div>
+                    <a href="#featured" class="view-all-link">
+                        View All Categories
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="category-grid">
+
+                    <!-- Category 1 -->
+                    <a href="#pottery" class="category-card">
+                        <div class="category-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80" 
+                                alt="Handcrafted pottery ceramics" 
+                                loading="lazy"
+                            >
+                            <span class="category-badge">42 Items</span>
+                            <span class="category-action-icon">↗</span>
+                        </div>
+                        <div class="category-meta">
+                            <h3 class="category-title">Ceramics & Pottery</h3>
+                            <p class="category-subtitle">Wheel-thrown mugs, planters & dining ware</p>
+                        </div>
+                    </a>
+
+                    <!-- Category 2 -->
+                    <a href="#woven" class="category-card">
+                        <div class="category-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=600&q=80" 
+                                alt="Handwoven rattan and abaca goods" 
+                                loading="lazy"
+                            >
+                            <span class="category-badge">38 Items</span>
+                            <span class="category-action-icon">↗</span>
+                        </div>
+                        <div class="category-meta">
+                            <h3 class="category-title">Woven Goods & Bags</h3>
+                            <p class="category-subtitle">Indigenous weaves, abaca baskets & totes</p>
+                        </div>
+                    </a>
+
+                    <!-- Category 3 -->
+                    <a href="#jewelry" class="category-card">
+                        <div class="category-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=600&q=80" 
+                                alt="Artisan jewelry and accessories" 
+                                loading="lazy"
+                            >
+                            <span class="category-badge">56 Items</span>
+                            <span class="category-action-icon">↗</span>
+                        </div>
+                        <div class="category-meta">
+                            <h3 class="category-title">Artisan Jewelry</h3>
+                            <p class="category-subtitle">Beaded necklaces, brass rings & stones</p>
+                        </div>
+                    </a>
+
+                    <!-- Category 4 -->
+                    <a href="#home-decor" class="category-card">
+                        <div class="category-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?auto=format&fit=crop&w=600&q=80" 
+                                alt="Home decor and botanical crafts" 
+                                loading="lazy"
+                            >
+                            <span class="category-badge">29 Items</span>
+                            <span class="category-action-icon">↗</span>
+                        </div>
+                        <div class="category-meta">
+                            <h3 class="category-title">Home Decor & Candles</h3>
+                            <p class="category-subtitle">Soy wax candles, woodcrafts & accents</p>
+                        </div>
+                    </a>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 7. FEATURED HANDMADE PRODUCTS -->
+        <section class="products-section" id="featured">
+            <div class="container">
+                
+                <div class="section-header-split">
+                    <div>
+                        <span class="section-eyebrow">HANDPICKED THIS WEEK</span>
+                        <h2 class="section-title">Featured Artisan Creations</h2>
+                        <p class="section-subtitle">Individually produced in limited batches by registered sellers.</p>
+                    </div>
+
+                    <div class="product-filters">
+                        <button class="filter-tab active">All Pieces</button>
+                        <button class="filter-tab">Top Rated</button>
+                        <button class="filter-tab">Under ₱500</button>
+                    </div>
                 </div>
 
                 <div class="product-grid">
 
+                    <!-- Product 1 -->
                     <article class="product-card">
-                        <a href="#products" class="product-image">
-                            <img
-                                src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=600&q=80"
-                                alt="Handmade beaded accessory"
+                        <div class="product-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80" 
+                                alt="Handcrafted stoneware mug"
                                 loading="lazy"
                             >
-                            <span class="product-label">HANDMADE</span>
-                        </a>
-
-                        <div class="product-info">
-                            <p class="product-category">Accessories</p>
-                            <h3>Beaded Everyday Bracelet</h3>
-                            <div class="product-bottom">
-                                <span class="product-price">₱180.00</span>
-                                <span class="product-symbol">↗</span>
+                            <span class="product-tag tag-featured">Featured</span>
+                            <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist">♥</button>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-artisan-row">
+                                <span class="artisan-byline">By Studio Clayworks</span>
+                                <span class="product-rating">★ 4.9 (24)</span>
+                            </div>
+                            <h3 class="product-name">
+                                <a href="#product-view">Earthy Terracotta Coffee Mug</a>
+                            </h3>
+                            <p class="product-category">Ceramics & Pottery</p>
+                            <div class="product-footer">
+                                <div class="price-wrapper">
+                                    <span class="currency">₱</span>
+                                    <span class="amount">420.00</span>
+                                </div>
+                                <button class="btn-add-cart" aria-label="Add Earthy Terracotta Coffee Mug to Cart">
+                                    <span>Add to Cart</span>
+                                    <span class="plus-sign">+</span>
+                                </button>
                             </div>
                         </div>
                     </article>
 
+                    <!-- Product 2 -->
                     <article class="product-card">
-                        <a href="#products" class="product-image">
-                            <img
-                                src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80"
-                                alt="Artisan ceramic cup"
+                        <div class="product-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=600&q=80" 
+                                alt="Handwoven abaca summer tote"
                                 loading="lazy"
                             >
-                            <span class="product-label">MAKER'S PICK</span>
-                        </a>
-
-                        <div class="product-info">
-                            <p class="product-category">Home Decor</p>
-                            <h3>Artisan Ceramic Cup</h3>
-                            <div class="product-bottom">
-                                <span class="product-price">₱320.00</span>
-                                <span class="product-symbol">↗</span>
+                            <span class="product-tag tag-bestseller">Best Seller</span>
+                            <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist">♥</button>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-artisan-row">
+                                <span class="artisan-byline">By Cordillera Weaves</span>
+                                <span class="product-rating">★ 5.0 (42)</span>
+                            </div>
+                            <h3 class="product-name">
+                                <a href="#product-view">Handwoven Abaca Market Tote</a>
+                            </h3>
+                            <p class="product-category">Woven Goods & Bags</p>
+                            <div class="product-footer">
+                                <div class="price-wrapper">
+                                    <span class="currency">₱</span>
+                                    <span class="amount">780.00</span>
+                                </div>
+                                <button class="btn-add-cart" aria-label="Add Handwoven Abaca Market Tote to Cart">
+                                    <span>Add to Cart</span>
+                                    <span class="plus-sign">+</span>
+                                </button>
                             </div>
                         </div>
                     </article>
 
+                    <!-- Product 3 -->
                     <article class="product-card">
-                        <a href="#products" class="product-image">
-                            <img
-                                src="https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=600&q=80"
-                                alt="Handmade bag"
+                        <div class="product-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=600&q=80" 
+                                alt="Freshwater pearl beaded bracelet"
                                 loading="lazy"
                             >
-                            <span class="product-label">LOCAL FIND</span>
-                        </a>
-
-                        <div class="product-info">
-                            <p class="product-category">Handcrafted Goods</p>
-                            <h3>Everyday Woven Bag</h3>
-                            <div class="product-bottom">
-                                <span class="product-price">₱450.00</span>
-                                <span class="product-symbol">↗</span>
+                            <span class="product-tag tag-new">New Arrival</span>
+                            <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist">♥</button>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-artisan-row">
+                                <span class="artisan-byline">By Tala Artisan Co.</span>
+                                <span class="product-rating">★ 4.8 (18)</span>
+                            </div>
+                            <h3 class="product-name">
+                                <a href="#product-view">Palawan Freshwater Pearl Bracelet</a>
+                            </h3>
+                            <p class="product-category">Artisan Jewelry</p>
+                            <div class="product-footer">
+                                <div class="price-wrapper">
+                                    <span class="currency">₱</span>
+                                    <span class="amount">350.00</span>
+                                </div>
+                                <button class="btn-add-cart" aria-label="Add Palawan Freshwater Pearl Bracelet to Cart">
+                                    <span>Add to Cart</span>
+                                    <span class="plus-sign">+</span>
+                                </button>
                             </div>
                         </div>
                     </article>
 
+                    <!-- Product 4 -->
                     <article class="product-card">
-                        <a href="#products" class="product-image">
-                            <img
-                                src="https://images.unsplash.com/photo-1513201099705-a9746e1e201f?auto=format&fit=crop&w=600&q=80"
-                                alt="Gift wrapped with care"
+                        <div class="product-media">
+                            <img 
+                                src="https://images.unsplash.com/photo-1602874801007-bd458bb1b8b8?auto=format&fit=crop&w=600&q=80" 
+                                alt="Scented soy candle in ceramic jar"
                                 loading="lazy"
                             >
-                            <span class="product-label">GIFT IDEA</span>
-                        </a>
-
-                        <div class="product-info">
-                            <p class="product-category">Gifts & Keepsakes</p>
-                            <h3>Thoughtful Gift Set</h3>
-                            <div class="product-bottom">
-                                <span class="product-price">₱280.00</span>
-                                <span class="product-symbol">↗</span>
+                            <span class="product-tag tag-maker">Maker's Choice</span>
+                            <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist">♥</button>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-artisan-row">
+                                <span class="artisan-byline">By Habilin Apothecary</span>
+                                <span class="product-rating">★ 4.9 (31)</span>
+                            </div>
+                            <h3 class="product-name">
+                                <a href="#product-view">Botanical Soy Candle in Amber Jar</a>
+                            </h3>
+                            <p class="product-category">Home Decor & Candles</p>
+                            <div class="product-footer">
+                                <div class="price-wrapper">
+                                    <span class="currency">₱</span>
+                                    <span class="amount">295.00</span>
+                                </div>
+                                <button class="btn-add-cart" aria-label="Add Botanical Soy Candle to Cart">
+                                    <span>Add to Cart</span>
+                                    <span class="plus-sign">+</span>
+                                </button>
                             </div>
                         </div>
                     </article>
 
                 </div>
 
-                <div class="products-footer">
-                    <a href="#categories" class="button button-outline">
-                        Explore Categories <span>→</span>
-                    </a>
+                <div class="products-cta-banner">
+                    <div class="banner-text">
+                        <h3>Are you a local creator or craftsman?</h3>
+                        <p>Open your CraftMarket stall today. No setup fees, low commission, direct client reach.</p>
+                    </div>
+                    <a href="#seller-register" class="btn btn-primary" id="sellers">Start Selling on CraftMarket</a>
                 </div>
 
             </div>
         </section>
 
-        <!-- About Section -->
-        <section class="about-section container" id="about">
-            <div class="about-image">
-                <img
-                    src="https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=900&q=85"
-                    alt="A workspace for creative handmade products"
-                    loading="lazy"
-                >
-            </div>
+        <!-- 8. ABOUT SECTION -->
+        <section class="about-section" id="about">
+            <div class="container about-grid">
+                
+                <div class="about-media-stack">
+                    <img 
+                        src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80" 
+                        alt="Potter shaping clay on a wheel" 
+                        class="about-img-main"
+                        loading="lazy"
+                    >
+                    <div class="about-badge-card">
+                        <span class="badge-icon">🏛</span>
+                        <div>
+                            <strong>Preserving Heritage</strong>
+                            <p>Supporting generations of Filipino craftsmen</p>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="about-content">
-                <p class="eyebrow">THE PEOPLE BEHIND THE CRAFT</p>
+                <div class="about-text-content">
+                    <span class="section-eyebrow">ABOUT CRAFTMARKET</span>
+                    <h2 class="section-title">Rooted in community. Built for genuine makers.</h2>
+                    <p class="about-lead">
+                        In an age of fast consumerism and mechanized mass production, CraftMarket was founded to reconnect people with the warmth of real human craft.
+                    </p>
+                    <p class="about-body">
+                        We provide micro-sellers, provincial weavers, and independent artisans with the modern digital marketplace tools they need—including order tracking, fair payment security, and direct customer communication—without taking heavy corporate cuts.
+                    </p>
 
-                <h2>Good things take time. And a pair of hands.</h2>
+                    <div class="about-pillars">
+                        <div class="pillar-item">
+                            <span class="pillar-check">✓</span>
+                            <div>
+                                <strong>Fair Compensation</strong>
+                                <p>Makers set their own pricing and retain up to 92% of sales proceeds.</p>
+                            </div>
+                        </div>
+                        <div class="pillar-item">
+                            <span class="pillar-check">✓</span>
+                            <div>
+                                <strong>Traceable Origins</strong>
+                                <p>Know who made your product, where the raw materials were harvested, and their craft technique.</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <p>
-                    Every handmade item begins with an idea, a skill,
-                    and someone willing to create. CraftMarket brings
-                    these creations closer to people who appreciate
-                    the value of locally made products.
-                </p>
+                    <a href="#featured" class="btn btn-secondary">Discover Artisan Stories ↗</a>
+                </div>
 
-                <a href="#categories" class="button button-dark">
-                    Discover Handmade <span>→</span>
-                </a>
             </div>
         </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-
-                <div class="footer-main">
-                    <div class="footer-brand">
-                        <a href="#" class="logo footer-logo">
-                            <span class="logo-icon">c</span>
-                            CraftMarket<span class="footer-dot">.</span>
-                        </a>
-
-                        <p>
-                            A home for handmade goods and the people
-                            who put their hearts into making them.
-                        </p>
-                    </div>
-
-                    <div class="footer-column">
-                        <h3>Explore</h3>
-                        <a href="#categories">Categories</a>
-                        <a href="#products">Featured Products</a>
-                        <a href="#about">About CraftMarket</a>
-                    </div>
-
-                    <div class="footer-column">
-                        <h3>Our Purpose</h3>
-                        <p>Discover local talent.<br>Celebrate handmade work.</p>
-                    </div>
-                </div>
-
-                <div class="footer-bottom">
-                    <p>© 2026 CraftMarket. All rights reserved.</p>
-                    <p>Made for the love of handmade.</p>
-                </div>
-
-            </div>
-        </footer>
 
     </main>
+
+    <!-- 9. FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            
+            <div class="footer-top-grid">
+                
+                <!-- Brand Column -->
+                <div class="footer-col brand-col">
+                    <a href="#" class="brand-logo footer-logo">
+                        <span class="brand-mark">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </span>
+                        <span class="brand-name">CraftMarket<span class="brand-dot">.</span></span>
+                    </a>
+                    <p class="footer-tagline">
+                        The trusted local handmade marketplace. Connecting thoughtful shoppers with passionate artisans across the Philippines.
+                    </p>
+                    <div class="footer-badges">
+                        <span class="footer-pill">🇵🇭 Proudly Local</span>
+                        <span class="footer-pill">🛡 Escrow Protected</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Column 1: Marketplace -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">Marketplace</h4>
+                    <ul class="footer-links">
+                        <li><a href="#categories">All Categories</a></li>
+                        <li><a href="#featured">Featured Crafts</a></li>
+                        <li><a href="#pottery">Ceramics & Tableware</a></li>
+                        <li><a href="#woven">Woven Textiles & Bags</a></li>
+                        <li><a href="#jewelry">Handcrafted Jewelry</a></li>
+                    </ul>
+                </div>
+
+                <!-- Navigation Column 2: For Sellers & Admin -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">For Artisans</h4>
+                    <ul class="footer-links">
+                        <li><a href="#seller-portal">Seller Central</a></li>
+                        <li><a href="#seller-register">Open a Shop</a></li>
+                        <li><a href="#commission-policy">Fee Structure (8%)</a></li>
+                        <li><a href="#seller-guidelines">Handmade Standards</a></li>
+                        <li><a href="#admin-portal">Administrator Panel</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter / Updates Column -->
+                <div class="footer-col newsletter-col">
+                    <h4 class="footer-heading">Craft Newsletter</h4>
+                    <p class="newsletter-desc">Subscribe to discover new artisan arrivals and weekly maker highlights.</p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing to CraftMarket updates!');">
+                        <input type="email" placeholder="Enter your email address" required aria-label="Email address for newsletter">
+                        <button type="submit" class="btn-newsletter">Subscribe</button>
+                    </form>
+                    <p class="privacy-note">Zero spam. Only authentic craft news.</p>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom-bar">
+                <div class="copyright-info">
+                    <p>&copy; 2026 CraftMarket Philippines. All rights reserved.</p>
+                    <p class="student-credit">Student Project Portfolio • Enterprise Web Application Prototype</p>
+                </div>
+                <div class="footer-legal-links">
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="#terms">Terms of Service</a>
+                    <a href="#security">Payment Security</a>
+                    <a href="#sitemap">Sitemap</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
 
 </body>
 </html>
