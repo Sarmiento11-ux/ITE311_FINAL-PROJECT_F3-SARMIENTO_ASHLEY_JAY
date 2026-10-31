@@ -9,16 +9,16 @@
         </div>
 
         <h1 class="hero-title">
-          Every handmade piece has a <span class="highlight-serif">story to tell.</span>
+          {{ heroContent.title }}
         </h1>
 
         <p class="hero-description">
-          CraftMarket connects local independent artisans, woodcarvers, weavers, and potters directly with conscious shoppers. Discover small-batch treasures crafted with patience, passion, and natural materials.
+          {{ heroContent.description }}
         </p>
 
         <div class="hero-cta-group">
-          <router-link to="/products" class="btn btn-primary">
-            Explore Collection
+          <router-link :to="heroContent.ctaLink || '/products'" class="btn btn-primary">
+            {{ heroContent.ctaText || 'Explore Collection' }}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
@@ -84,5 +84,26 @@
 </template>
 
 <script setup>
-// HeroSection component logic
+import { ref, onMounted } from 'vue';
+import { cmsService } from '../services/cmsService.js';
+
+const heroContent = ref({
+  eyebrow: 'SUPPORT LOCAL ARTISANS & CULTURAL HERITAGE',
+  title: 'Every handmade piece has a story to tell.',
+  description: 'CraftMarket connects local independent artisans, woodcarvers, weavers, and potters directly with conscious shoppers. Discover small-batch treasures crafted with patience, passion, and natural materials.',
+  ctaText: 'Explore Collection',
+  ctaLink: '/products',
+  isFromCms: false,
+});
+
+onMounted(async () => {
+  try {
+    const data = await cmsService.getHeroContent();
+    if (data) {
+      heroContent.value = data;
+    }
+  } catch (err) {
+    console.warn('[HeroSection] Could not load CMS hero content:', err);
+  }
+});
 </script>

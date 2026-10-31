@@ -188,8 +188,13 @@
 
   </main>
   
+  <!-- Loading state indicator -->
+  <div v-if="isLoading" class="container" style="padding: 100px 0; text-align: center; color: #7A6F68;">
+    <p style="font-size: 1.2rem;">⏳ Loading artisan product details from CraftMarket API...</p>
+  </div>
+
   <!-- Fallback if ID is invalid -->
-  <div v-else class="container" style="padding: 100px 0; text-align: center;">
+  <div v-else-if="!product" class="container" style="padding: 100px 0; text-align: center;">
     <h2>Product Not Found</h2>
     <p>The craft piece you are looking for might have been moved or is currently sold out.</p>
     <router-link to="/products" class="btn btn-primary" style="margin-top: 20px;">Return to Catalog</router-link>
@@ -200,7 +205,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ProductCard from '../components/ProductCard.vue';
-import { sampleProducts } from '../data/products.js';
+import { productService } from '../services/productService.js';
 import { cart } from '../data/cart.js';
 
 const route = useRoute();
@@ -208,18 +213,23 @@ const route = useRoute();
 const product = ref(null);
 const relatedProducts = ref([]);
 const quantity = ref(1);
+const isLoading = ref(true);
 const cartFeedback = ref('');
 const feedbackIsError = ref(false);
 
-const loadProductData = (id) => {
-  const numId = parseInt(id, 10);
-  const found = sampleProducts.find(p => p.id === numId);
-  product.value = found || null;
+const loadProductData = async (id) => {
+  isLoading.value = true;
+  try {
+    const found = await productService.getById(id);
+    product.value = found || null;
 
-  if (found) {
-    relatedProducts.value = sampleProducts.filter(
-      p => p.id !== found.id && p.category === found.category
-    ).slice(0, 4);
+    if (found) {
+      relatedProducts.value = await productService.getRelated(found.category, found.id);
+    }
+  } catch (err) {
+    console.error('Error loading product details:', err);
+  } finally {
+    isLoading.value = false;
   }
 };
 

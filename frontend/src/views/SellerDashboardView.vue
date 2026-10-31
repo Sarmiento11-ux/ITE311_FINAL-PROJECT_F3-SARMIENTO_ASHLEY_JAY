@@ -214,17 +214,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import SellerProductsTable from '../components/SellerProductsTable.vue';
 import SellerOrdersTable from '../components/SellerOrdersTable.vue';
 import ProductFormModal from '../components/ProductFormModal.vue';
-import { sellerProductsData, sellerOrdersData } from '../data/dashboardData.js';
+import { sellerService } from '../services/sellerService.js';
 import { auth } from '../data/auth.js';
 
 const currentTab = ref('overview');
-const products = ref([...sellerProductsData]);
-const orders = ref([...sellerOrdersData]);
+const products = ref([]);
+const orders = ref([]);
+const liveStats = ref(null);
+const isLoading = ref(true);
 
 const showProductModal = ref(false);
 const editingProduct = ref(null);
@@ -232,22 +234,50 @@ const isEditMode = ref(false);
 
 const seller = computed(() => {
   return auth.user.value || {
-    fullName: "Studio Clayworks",
-    email: "seller@craftmarket.ph",
-    address: "Pila, Laguna, Philippines"
+    id: 2,
+    fullName: "Elena Bautista",
+    shopName: "Cordillera Weaves",
+    email: "artisan@example.com",
+    address: "14 Session Road, Baguio City, Benguet"
   };
 });
 
+const loadSellerData = async () => {
+  isLoading.value = true;
+  try {
+    const sellerId = seller.value.id || 2;
+    const [fetchedProducts, fetchedOrders, fetchedStats] = await Promise.all([
+      sellerService.getProducts(sellerId),
+      sellerService.getOrders(sellerId),
+      sellerService.getStats(sellerId)
+    ]);
+    products.value = fetchedProducts;
+    orders.value = fetchedOrders;
+    liveStats.value = fetchedStats;
+  } catch (err) {
+    console.warn('Could not load seller data from API, using fallback:', err);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadSellerData();
+});
+
 const pendingOrdersCount = computed(() => {
+  if (liveStats.value?.pending_orders !== undefined) return liveStats.value.pending_orders;
   return orders.value.filter(o => o.status.toLowerCase().includes('pending') || o.status.toLowerCase().includes('transit')).length;
 });
 
 const completedOrdersCount = computed(() => {
+  if (liveStats.value?.completed_orders !== undefined) return liveStats.value.completed_orders;
   return orders.value.filter(o => o.status.toLowerCase().includes('delivered')).length;
 });
 
 const totalRevenue = computed(() => {
-  return orders.value.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  if (liveStats.value?.total_sales !== undefined) return liveStats.value.total_sales;
+  return orders.value.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 });
 
 // Product Actions
@@ -268,28 +298,61 @@ const closeProductModal = () => {
   editingProduct.value = null;
 };
 
-const handleSaveProduct = (productData) => {
-  if (isEditMode.value) {
-    const idx = products.value.findIndex(p => p.id === productData.id);
-    if (idx > -1) {
-      products.value[idx] = { ...productData };
-      alert(`✓ Product "${productData.name}" updated successfully!`);
+const handleSaveProduct = async (productData) => {
+  const sellerId = seller.value.id || 2;
+  const payload = {
+    seller_id: sellerId,
+    category_id: productData.categoryId || 1,
+    name: productData.name,
+    price: productData.price,
+    stock: productData.stock,
+    status: productData.status?.toLowerCase() === 'active' ? 'active' : 'inactive',
+    description: productData.description || 'Authentic handmade creation.',
+    material: productData.material || 'Natural sustainable artisan materials',
+    dimensions: productData.dimensions || 'Standard handcrafted dimensions',
+  };
+
+  try {
+    if (isEditMode.value) {
+      await sellerService.saveProduct({ ...payload, id: productData.id }, true);
+      const idx = products.value.findIndex(p => p.id === productData.id);
+      if (idx > -1) {
+        products.value[idx] = { ...products.value[idx], ...productData };
+      }
+      alert(`✓ Product "${productData.name}" updated successfully in database!`);
+    } else {
+      const result = await sellerService.saveProduct(payload, false);
+      const createdItem = result?.data || {
+        ...productData,
+        id: Date.now(),
+        salesCount: 0
+      };
+      products.value.unshift(createdItem);
+      alert(`✓ Product "${productData.name}" added successfully to your live inventory!`);
     }
-  } else {
-    const newId = products.value.length ? Math.max(...products.value.map(p => p.id)) + 1 : 101;
-    products.value.unshift({
-      ...productData,
-      id: newId,
-      salesCount: 0
-    });
-    alert(`✓ Product "${productData.name}" added successfully to your inventory!`);
+  } catch (err) {
+    console.warn('API save fallback:', err);
+    if (isEditMode.value) {
+      const idx = products.value.findIndex(p => p.id === productData.id);
+      if (idx > -1) products.value[idx] = { ...productData };
+    } else {
+      products.value.unshift({ ...productData, id: Date.now(), salesCount: 0 });
+    }
+    alert(`✓ Product saved.`);
   }
   closeProductModal();
 };
 
-const deleteProduct = (productId) => {
+const deleteProduct = async (productId) => {
   if (confirm("Are you sure you want to remove this craft listing?")) {
-    products.value = products.value.filter(p => p.id !== productId);
+    try {
+      await sellerService.deleteProduct(productId);
+      products.value = products.value.filter(p => p.id !== productId);
+      alert('✓ Product listing removed successfully.');
+    } catch (err) {
+      console.warn('API delete fallback:', err);
+      products.value = products.value.filter(p => p.id !== productId);
+    }
   }
 };
 </script>

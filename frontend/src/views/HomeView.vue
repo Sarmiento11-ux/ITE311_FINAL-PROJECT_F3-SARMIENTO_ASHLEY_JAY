@@ -5,6 +5,7 @@
     <CategorySection />
     <FeaturedProducts />
     <AboutSection />
+    <BlogSection />
   </main>
 </template>
 
@@ -14,4 +15,5 @@ import BenefitsSection from '../components/BenefitsSection.vue';
 import CategorySection from '../components/CategorySection.vue';
 import FeaturedProducts from '../components/FeaturedProducts.vue';
 import AboutSection from '../components/AboutSection.vue';
+import BlogSection from '../components/BlogSection.vue';
 </script>

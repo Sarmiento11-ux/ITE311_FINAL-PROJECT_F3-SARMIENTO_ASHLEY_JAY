@@ -164,21 +164,39 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import CustomerOrdersTable from '../components/CustomerOrdersTable.vue';
-import { customerOrdersData } from '../data/dashboardData.js';
+import { orderService } from '../services/orderService.js';
 import { auth } from '../data/auth.js';
 
 const currentTab = ref('overview');
-const orders = ref(customerOrdersData);
+const orders = ref([]);
+const isLoading = ref(true);
 
 const customer = computed(() => {
   return auth.user.value || {
+    id: 1,
     fullName: "Maria Clara Santos",
-    email: "customer@craftmarket.ph",
-    address: "Unit 402, Katipunan Ave, Quezon City, Metro Manila"
+    email: "maria@example.com",
+    address: "Unit 402 Sunshine Towers, Pasig City, Metro Manila"
   };
+});
+
+const loadOrders = async () => {
+  isLoading.value = true;
+  try {
+    const customerId = customer.value.id || 1;
+    orders.value = await orderService.getCustomerOrders(customerId);
+  } catch (err) {
+    console.warn('Could not load orders via API, using fallback:', err);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadOrders();
 });
 
 const totalOrdersCount = computed(() => orders.value.length);

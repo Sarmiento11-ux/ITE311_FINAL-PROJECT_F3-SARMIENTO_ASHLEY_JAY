@@ -1,11 +1,9 @@
 <template>
-  <!-- 1. ANNOUNCEMENT BAR -->
+  <!-- 1. ANNOUNCEMENT BAR (Powered by WordPress CMS) -->
   <aside class="announcement-bar" aria-label="Marketplace Announcement">
     <div class="container announcement-content">
-      <span class="announcement-pill">Community Notice</span>
-      <p class="announcement-text">
-        Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>
-      </p>
+      <span class="announcement-pill">{{ isFromCms ? 'CMS Notice' : 'Community Notice' }}</span>
+      <p class="announcement-text" v-html="announcementText"></p>
       <router-link to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
     </div>
   </aside>
@@ -118,13 +116,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { cart } from '../data/cart.js';
 import { auth } from '../data/auth.js';
+import { cmsService } from '../services/cmsService.js';
 
 const router = useRouter();
 const searchQuery = ref('');
+const announcementText = ref('Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>');
+const isFromCms = ref(false);
+
+onMounted(async () => {
+  try {
+    const notice = await cmsService.getLatestAnnouncement();
+    if (notice && notice.text) {
+      announcementText.value = notice.text;
+      isFromCms.value = notice.isFromCms;
+    }
+  } catch (err) {
+    console.warn('[Navbar] Could not load CMS announcement:', err);
+  }
+});
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
