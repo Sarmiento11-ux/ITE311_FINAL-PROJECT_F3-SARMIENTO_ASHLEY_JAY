@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sign in to your CraftMarket account to manage your artisan shop, track orders, or view your saved handmade crafts.">
+    <title>Sign In | CraftMarket</title>
+
+    <!-- Google Fonts for Editorial Artisan Feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Global Styles & Login Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <!-- 1. ANNOUNCEMENT BAR -->
+    <aside class="announcement-bar" aria-label="Marketplace Announcement">
+        <div class="container announcement-content">
+            <span class="announcement-pill">Community Notice</span>
+            <p class="announcement-text">
+                Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>
+            </p>
+            <a href="register.html?role=seller" class="announcement-link">Sell with us ↗</a>
+        </div>
+    </aside>
+
+    <!-- 2. NAVIGATION HEADER -->
+    <header class="site-header">
+        <div class="container header-container">
+            
+            <!-- Brand Logo -->
+            <a href="index.html" class="brand-logo" aria-label="CraftMarket Homepage">
+                <span class="brand-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </span>
+                <span class="brand-name">CraftMarket<span class="brand-dot">.</span></span>
+            </a>
+
+            <!-- Search Bar in Header -->
+            <form action="products.html" method="GET" class="header-search">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="search" placeholder="Quick search crafts..." aria-label="Search marketplace">
+            </form>
+
+            <!-- Navigation Links -->
+            <nav class="main-navigation" aria-label="Primary Navigation">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="products.html" class="nav-link">Catalog</a>
+                <a href="index.html#how-it-works" class="nav-link">How It Works</a>
+                <a href="index.html#about" class="nav-link">Our Story</a>
+            </nav>
+
+            <!-- User Actions -->
+            <div class="header-actions">
+                <a href="register.html?role=seller" class="btn-seller-link">
+                    <span>Become a Seller</span>
+                </a>
+                <a href="login.html" class="nav-icon-link active" title="User Account / Sign In">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="icon-text">Account</span>
+                </a>
+                <a href="products.html" class="nav-icon-link cart-pill" title="Shopping Cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span class="cart-count">2</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="auth-page-wrapper">
+        <div class="container">
+            
+            <div class="auth-card-container">
+
+                <!-- Notice Banner: Simulation Disclaimer -->
+                <div class="simulation-alert-banner">
+                    <span class="alert-icon">ℹ️</span>
+                    <div>
+                        <strong>Prototype Simulation Notice:</strong>
+                        <span>This login flow is simulated for UI/UX demonstration. In the upcoming backend phase, secure session handling with PHP and MySQL password hashing (bcrypt) will replace this client-side test engine.</span>
+                    </div>
+                </div>
+
+                <div class="auth-card">
+
+                    <div class="auth-card-header">
+                        <span class="section-eyebrow">WELCOME BACK</span>
+                        <h1 class="auth-title">Sign In to CraftMarket</h1>
+                        <p class="auth-subtitle">
+                            Access your artisan storefront, order history, or profile settings.
+                        </p>
+                    </div>
+
+                    <!-- Registration Success Notice (when redirected from register) -->
+                    <div id="postRegisterNotice" class="form-alert-msg alert-success" style="display: none;">
+                        ✓ Account registered successfully! You can now log in below.
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="loginForm" novalidate>
+                        
+                        <!-- Username or Email -->
+                        <div class="form-group">
+                            <label for="loginIdentifier" class="form-label">Email Address or Username</label>
+                            <input 
+                                type="text" 
+                                id="loginIdentifier" 
+                                name="identifier" 
+                                class="form-input" 
+                                placeholder="Enter email or username" 
+                                autocomplete="username"
+                                required
+                            >
+                            <span class="field-error-msg" id="identifierError"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <div class="label-with-action">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <a href="#forgot" id="forgotPasswordLink" class="text-link-sm">Forgot password?</a>
+                            </div>
+                            <input 
+                                type="password" 
+                                id="loginPassword" 
+                                name="password" 
+                                class="form-input" 
+                                placeholder="Enter your password" 
+                                autocomplete="current-password"
+                                required
+                            >
+                            <span class="field-error-msg" id="passwordError"></span>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="form-group-inline">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="rememberMe" name="rememberMe">
+                                <span class="checkbox-label-text">Remember this device for 30 days</span>
+                            </label>
+                        </div>
+
+                        <!-- Login Status Alert Banner -->
+                        <div class="form-alert-msg" id="loginAlert" style="display: none;"></div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="submitLoginBtn" class="btn btn-primary btn-auth-submit">
+                            <span>Sign In</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+
+                    </form>
+
+                    <!-- Sample Test Credentials Box (for easy teacher/student evaluation) -->
+                    <div class="demo-accounts-box">
+                        <h4 class="demo-title">🔑 Quick Demo Accounts for Testing:</h4>
+                        <div class="demo-buttons-grid">
+                            <button type="button" class="btn-demo-fill" data-user="customer@craftmarket.ph" data-pass="password123" data-role="Customer">
+                                <strong>Customer</strong>
+                                <span>maria_buyer</span>
+                            </button>
+                            <button type="button" class="btn-demo-fill" data-user="seller@craftmarket.ph" data-pass="password123" data-role="Seller">
+                                <strong>Seller</strong>
+                                <span>artisan_laguna</span>
+                            </button>
+                            <button type="button" class="btn-demo-fill" data-user="admin@craftmarket.ph" data-pass="admin123" data-role="Administrator">
+                                <strong>Admin</strong>
+                                <span>admin_craft</span>
+                            </button>
+                        </div>
+                        <p class="demo-hint">Click any role button above to auto-fill sample credentials.</p>
+                    </div>
+
+                    <!-- Footer Link to Register -->
+                    <div class="auth-card-footer">
+                        <p>Don't have a CraftMarket account yet? <a href="register.html" class="auth-switch-link">Create one here ↗</a></p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 3. FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-bottom-bar">
+                <div class="copyright-info">
+                    <p>&copy; 2026 CraftMarket Philippines. All rights reserved.</p>
+                    <p class="student-credit">Student Project Portfolio • Enterprise Web Application Prototype</p>
+                </div>
+                <div class="footer-legal-links">
+                    <a href="index.html#privacy">Privacy Policy</a>
+                    <a href="index.html#terms">Terms of Service</a>
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Client Logic -->
+    <script src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+/* ==========================================================================
+   CRAFTMARKET - REGISTRATION STYLESHEET (register.css)
+   ========================================================================== */
+
+.auth-page-wrapper {
+    padding: 48px 0 80px 0;
+    background-color: var(--bg-page);
+    min-height: calc(100vh - 76px - 100px);
+}
+
+.auth-card-container {
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+/* Simulation Disclaimer Banner */
+.simulation-alert-banner {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background-color: #fcf6ea;
+    border: 1px solid #ebd8b5;
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 0.82rem;
+    color: #7d5b1e;
+    line-height: 1.5;
+}
+
+.simulation-alert-banner .alert-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Main Auth Card */
+.auth-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 38px 42px;
+}
+
+.auth-card-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--color-forest);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.auth-subtitle {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Role Selector Grid */
+.role-selector-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 6px;
+}
+
+.role-card-option {
+    cursor: pointer;
+}
+
+.role-card-option input[type="radio"] {
+    display: none;
+}
+
+.role-card-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background-color: var(--bg-page);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: var(--transition-base);
+}
+
+.role-card-option input[type="radio"]:checked + .role-card-content {
+    background-color: var(--color-sage-light);
+    border-color: var(--color-forest);
+    box-shadow: 0 0 0 2px rgba(43, 62, 50, 0.15);
+}
+
+.role-icon {
+    font-size: 1.4rem;
+}
+
+.role-name {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--color-forest);
+}
+
+.role-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* Form Groups & Inputs */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.form-label .required {
+    color: #c53030;
+}
+
+.form-input {
+    width: 100%;
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    transition: var(--transition-base);
+}
+
+.form-input:focus {
+    background-color: var(--bg-surface);
+    border-color: var(--color-forest);
+    box-shadow: 0 0 0 3px rgba(43, 62, 50, 0.1);
+    outline: none;
+}
+
+.form-input.is-invalid {
+    border-color: #e53e3e;
+    background-color: #fffaf0;
+}
+
+.field-error-msg {
+    display: block;
+    color: #c53030;
+    font-size: 0.74rem;
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+/* Terms Checkbox */
+.terms-group {
+    margin-top: 10px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.checkbox-container input {
+    margin-top: 2px;
+    accent-color: var(--color-forest);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.legal-link {
+    color: var(--color-forest);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.legal-link:hover {
+    color: var(--color-terracotta);
+}
+
+/* Submit Button */
+.btn-auth-submit {
+    width: 100%;
+    height: 48px;
+    font-size: 0.98rem;
+    margin-top: 10px;
+}
+
+.btn-arrow {
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.btn-auth-submit:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+/* Form Alert Banner (Success/Error) */
+.form-alert-msg {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.86rem;
+    margin-bottom: 16px;
+    line-height: 1.45;
+}
+
+.form-alert-msg.alert-success {
+    background-color: #e6f4ea;
+    color: #137333;
+    border: 1px solid #ceead6;
+}
+
+.form-alert-msg.alert-error {
+    background-color: #fce8e6;
+    color: #c5221f;
+    border: 1px solid #fad2cf;
+}
+
+/* Card Footer */
+.auth-card-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+}
+
+.auth-switch-link {
+    color: var(--color-forest);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.auth-switch-link:hover {
+    color: var(--color-terracotta);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .auth-card {
+        padding: 28px 20px;
+    }
+
+    .form-row-2col {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .role-selector-grid {
+        grid-template-columns: 1fr;
+    }
+}

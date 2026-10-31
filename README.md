@@ -49,6 +49,25 @@
   - Verified local artisan maker profile box with location
   - Contextual related crafts recommendations section
 
+### Step 3: User Registration, Login, and Profile Management (`register.*`, `login.*`, `profile.*`)
+- **User Registration (`register.html`, `register.css`, `register.js`):**
+  - Full Name, Email, Username, Password, Confirm Password, and Terms agreement
+  - Role selection (Customer / Shopper vs Artisan / Seller) with visual cards
+  - Live client validation (email pattern, username characters, password match)
+  - Simulated account registration stored in `sessionStorage`
+- **User Login (`login.html`, `login.css`, `login.js`):**
+  - Identifier (email/username) and password input with Remember Me option
+  - One-click demo test account buttons (Customer, Seller, Administrator)
+  - Simulated authentication engine checking credentials against built-in roles & registered accounts
+  - Automatic redirect to profile with session persistence
+- **User Profile & Account Settings (`profile.html`, `profile.css`, `profile.js`):**
+  - Avatar placeholder with one-click photo switcher
+  - Dynamic role badge display (`role-badge-customer`, `role-badge-seller`, `role-badge-administrator`)
+  - Role Capabilities & Module Matrix preview (Administrator, Seller, Customer scopes)
+  - In-place Edit Profile toggle with validation and session update
+  - Change Password form simulation
+  - Secure Logout action clearing the current session and returning to Login
+
 ---
 
 ## 🚀 How to Run Locally
