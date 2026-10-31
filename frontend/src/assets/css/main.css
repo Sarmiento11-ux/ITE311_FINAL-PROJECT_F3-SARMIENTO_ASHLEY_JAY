@@ -1,0 +1,10 @@
+/* ========================================================
+   CraftMarket - Main Global Stylesheet Entry
+   Aggregates core design tokens, reset, typography, and module styles
+   ======================================================== */
+
+@import './style.css';
+@import './products.css';
+@import './product-details.css';
+@import './auth.css';
+@import './profile.css';

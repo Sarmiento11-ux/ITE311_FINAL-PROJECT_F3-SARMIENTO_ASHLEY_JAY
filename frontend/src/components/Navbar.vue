@@ -40,8 +40,9 @@
 
       <!-- Navigation Links -->
       <nav class="main-navigation" aria-label="Primary Navigation">
-        <router-link to="/" class="nav-link" active-class="active">Home</router-link>
-        <router-link to="/products" class="nav-link" active-class="active">Shop Catalog</router-link>
+        <router-link to="/" class="nav-link" exact-active-class="active">Home</router-link>
+        <a href="/#categories" class="nav-link">Categories</a>
+        <router-link to="/products" class="nav-link" active-class="active">Shop</router-link>
         <a href="/#how-it-works" class="nav-link">How It Works</a>
         <a href="/#about" class="nav-link">Our Story</a>
       </nav>
