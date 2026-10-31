@@ -14,8 +14,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Customer Demo User
-        $customer = User::updateOrCreate(
+        // 1. Customer Demo User 1
+        $customer1 = User::updateOrCreate(
             ['email' => 'maria@example.com'],
             [
                 'name'     => 'Maria Clara Santos',
@@ -27,7 +27,20 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 2. Seller Demo User
+        // 2. Customer Demo User 2
+        $customer2 = User::updateOrCreate(
+            ['email' => 'juan@example.com'],
+            [
+                'name'     => 'Juan Dela Cruz',
+                'password' => Hash::make('password'),
+                'role'     => 'customer',
+                'phone'    => '+63 915 234 5678',
+                'address'  => 'Block 12 Lot 5 Greenview Subdivision, Quezon City',
+                'avatar'   => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+            ]
+        );
+
+        // 3. Seller Demo User 1
         $seller = User::updateOrCreate(
             ['email' => 'artisan@example.com'],
             [

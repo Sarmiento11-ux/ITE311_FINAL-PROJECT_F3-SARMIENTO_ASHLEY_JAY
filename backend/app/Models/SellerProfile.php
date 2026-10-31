@@ -14,6 +14,7 @@ class SellerProfile extends Model
         'shop_logo',
         'shop_banner',
         'location',
+        'address',
         'contact_number',
         'is_verified',
         'is_active',
