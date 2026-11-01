@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',        // 'customer', 'seller', 'admin'
+        'is_active',   // boolean active/deactivated flag
         'phone',
         'address',
         'avatar',
@@ -48,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 

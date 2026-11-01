@@ -19,7 +19,21 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $user  = $request->user();
-        $query = Order::with(['user:id,name,email', 'items.product']);
+        $query = Order::with(['user:id,name,email,phone', 'items.product', 'items.seller:id,name', 'latestPayment']);
+
+        // Search by order number, customer name, email, or contact number
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('contact_number', 'like', "%{$search}%")
+                  ->orWhere('shipping_address', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
 
         // If customer: restrict to own orders only (prevents peeking at other users)
         if ($user->role === 'customer') {
@@ -31,6 +45,10 @@ class OrderController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->query('status'));
+        }
+
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->query('payment_status'));
         }
 
         $orders = $query->orderBy('created_at', 'desc')->get();

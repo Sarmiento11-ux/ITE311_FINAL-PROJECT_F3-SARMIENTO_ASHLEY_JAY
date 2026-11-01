@@ -42,7 +42,15 @@
         <a href="/#categories" class="nav-link">Categories</a>
         <router-link to="/products" class="nav-link" active-class="active">Shop</router-link>
         <router-link 
-          v-if="auth.isAuthenticated && (auth.user.value?.role === 'Seller' || auth.user.value?.role === 'Administrator')" 
+          v-if="auth.isAuthenticated && (auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin')" 
+          to="/dashboard/admin" 
+          class="nav-link"
+          active-class="active"
+        >
+          Admin Panel 🛡️
+        </router-link>
+        <router-link 
+          v-else-if="auth.isAuthenticated && (auth.user.value?.role === 'Seller' || auth.user.value?.rawRole === 'seller')" 
           to="/dashboard/seller" 
           class="nav-link"
           active-class="active"
@@ -64,7 +72,16 @@
       <!-- User Actions -->
       <div class="header-actions">
         <router-link 
-          v-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
+          v-if="auth.isAuthenticated && (auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin')" 
+          to="/dashboard/admin" 
+          class="btn-seller-link"
+          style="background-color: var(--cm-terracotta, #c25e3e); color: #ffffff;"
+        >
+          <span>Admin Control 🛡️</span>
+        </router-link>
+
+        <router-link 
+          v-else-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
           to="/register?role=seller" 
           class="btn-seller-link"
         >

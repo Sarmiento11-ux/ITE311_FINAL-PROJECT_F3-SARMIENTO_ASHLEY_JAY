@@ -167,7 +167,7 @@ const handleLogin = async () => {
       } else if (user.role === 'seller') {
         router.push('/dashboard/seller');
       } else if (user.role === 'admin') {
-        router.push('/dashboard/seller'); // admin can use seller dashboard
+        router.push('/dashboard/admin');
       } else {
         router.push('/dashboard/customer');
       }

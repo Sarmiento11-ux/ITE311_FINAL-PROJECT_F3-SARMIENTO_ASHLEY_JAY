@@ -37,6 +37,11 @@ class ProductController extends Controller
             }
         }
 
+        // Filter by seller id
+        if ($request->filled('seller_id')) {
+            $query->where('seller_id', $request->query('seller_id'));
+        }
+
         // Filter by status (default to active for public catalog unless requested)
         if ($request->filled('status')) {
             $query->where('status', $request->query('status'));

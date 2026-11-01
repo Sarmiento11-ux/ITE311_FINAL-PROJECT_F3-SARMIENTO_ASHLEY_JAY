@@ -84,6 +84,14 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (!$user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been deactivated by an administrator. Please contact CraftMarket support.',
+                'data'    => null,
+            ], 403);
+        }
+
         // Revoke existing tokens for this device (clean session)
         $user->tokens()->where('name', 'craftmarket-auth')->delete();
 

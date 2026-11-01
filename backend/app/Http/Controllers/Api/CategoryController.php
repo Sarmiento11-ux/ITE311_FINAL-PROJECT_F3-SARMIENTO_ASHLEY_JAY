@@ -11,11 +11,16 @@ class CategoryController extends Controller
     /**
      * Display a listing of categories.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount('products')
-            ->where('is_active', true)
-            ->get();
+        $query = Category::withCount('products');
+
+        // Only filter by is_active for public catalog unless 'all' is requested
+        if (!$request->boolean('all')) {
+            $query->where('is_active', true);
+        }
+
+        $categories = $query->orderBy('name', 'asc')->get();
 
         return response()->json([
             'success' => true,
@@ -102,6 +107,7 @@ class CategoryController extends Controller
 
     /**
      * Remove the specified category.
+     * Prevents deletion when products are still associated with the category.
      */
     public function destroy($id)
     {
@@ -113,6 +119,17 @@ class CategoryController extends Controller
                 'message' => 'Category not found.',
                 'data'    => null,
             ], 404);
+        }
+
+        $productCount = $category->products()->count();
+        if ($productCount > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot delete category '{$category->name}'. It is currently linked to {$productCount} product(s). Please reassign or delete those products first.",
+                'data'    => [
+                    'product_count' => $productCount,
+                ],
+            ], 422);
         }
 
         $category->delete();

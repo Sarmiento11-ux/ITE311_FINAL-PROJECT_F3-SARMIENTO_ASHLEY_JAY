@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
@@ -34,7 +35,7 @@ Route::post('/webhooks/paymongo', [WebhookController::class, 'handlePayMongo']);
 // ─── Public Auth Routes ───────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/login',    [AuthController::class, 'login'])->name('login');
 });
 
 // ─── Public Read-Only Routes (Products / Categories) ─────────────────────────
@@ -93,15 +94,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/order-items/{id}/status', [SellerController::class, 'updateItemStatus']);
     });
 
-    // ─── Admin: Order status update, category management, user management ─
+    // ─── Admin: Full administrative endpoints (strictly role:admin) ──────
     Route::middleware('role:admin')->group(function () {
-        Route::patch('/orders/{id}/status',  [OrderController::class, 'updateStatus']);
-        Route::post('/categories',           [CategoryController::class, 'store']);
-        Route::put('/categories/{id}',       [CategoryController::class, 'update']);
-        Route::delete('/categories/{id}',    [CategoryController::class, 'destroy']);
-        Route::get('/users',                 [UserController::class, 'index']);
-        Route::get('/users/{id}',            [UserController::class, 'show']);
-        Route::put('/users/{id}',            [UserController::class, 'update']);
+        // Dedicated admin overview, reports & seller oversight
+        Route::prefix('admin')->group(function () {
+            Route::get('/stats',                   [AdminController::class, 'stats']);
+            Route::get('/recent-activity',         [AdminController::class, 'recentActivity']);
+            Route::get('/reports',                 [AdminController::class, 'reports']);
+            Route::get('/sellers',                 [AdminController::class, 'sellers']);
+            Route::get('/sellers/{id}',            [AdminController::class, 'sellerDetails']);
+        });
+
+        // Admin order management & status updates
+        Route::patch('/orders/{id}/status',       [OrderController::class, 'updateStatus']);
+
+        // Admin category CRUD
+        Route::post('/categories',                [CategoryController::class, 'store']);
+        Route::put('/categories/{id}',            [CategoryController::class, 'update']);
+        Route::delete('/categories/{id}',         [CategoryController::class, 'destroy']);
+
+        // Admin user management & activation
+        Route::get('/users',                      [UserController::class, 'index']);
+        Route::get('/users/{id}',                 [UserController::class, 'show']);
+        Route::put('/users/{id}',                 [UserController::class, 'update']);
+        Route::patch('/users/{id}/toggle-active',  [UserController::class, 'toggleActive']);
     });
 
 });

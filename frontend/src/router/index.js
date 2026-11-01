@@ -12,6 +12,7 @@ import CartView from '../views/CartView.vue';
 import CheckoutView from '../views/CheckoutView.vue';
 import OrdersView from '../views/OrdersView.vue';
 import PaymentStatusView from '../views/PaymentStatusView.vue';
+import AdminDashboardView from '../views/AdminDashboardView.vue';
 
 // Route meta fields:
 //   requiresAuth: true  — must be logged in
@@ -63,6 +64,16 @@ const routes = [
     name: 'seller-dashboard',
     component: SellerDashboardView,
     meta: { requiresAuth: true, roles: ['seller', 'admin'] }
+  },
+  {
+    path: '/dashboard/admin',
+    name: 'admin-dashboard',
+    component: AdminDashboardView,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
+  {
+    path: '/admin',
+    redirect: '/dashboard/admin'
   },
   {
     path: '/cart',
@@ -121,7 +132,8 @@ router.beforeEach((to, from, next) => {
   // 3. Route has role restriction and user's role is not allowed → send to home
   if (to.meta.roles && to.meta.roles.length > 0 && isAuth) {
     if (!to.meta.roles.includes(role)) {
-      // Redirect sellers away from customer dashboard and vice versa
+      // Redirect users away from unauthorized dashboards
+      if (role === 'admin') return next({ name: 'admin-dashboard' });
       if (role === 'seller') return next({ name: 'seller-dashboard' });
       if (role === 'customer') return next({ name: 'customer-dashboard' });
       return next({ name: 'home' });
