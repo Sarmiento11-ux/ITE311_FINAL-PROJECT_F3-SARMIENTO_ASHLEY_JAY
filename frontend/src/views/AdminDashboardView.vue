@@ -131,7 +131,14 @@
             <!-- 6 Key Performance Metric Cards -->
             <div class="admin-metrics-grid">
               <div class="metric-card metric-primary">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Total Users</span>
                   <strong class="metric-value">{{ stats?.total_users ?? 0 }}</strong>
@@ -140,7 +147,12 @@
               </div>
 
               <div class="metric-card metric-forest">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Registered Artisans</span>
                   <strong class="metric-value">{{ stats?.total_sellers ?? 0 }}</strong>
@@ -149,7 +161,13 @@
               </div>
 
               <div class="metric-card metric-terracotta">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Active Customers</span>
                   <strong class="metric-value">{{ stats?.total_customers ?? 0 }}</strong>
@@ -158,7 +176,13 @@
               </div>
 
               <div class="metric-card metric-sand">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Catalog Products</span>
                   <strong class="metric-value">{{ stats?.total_products ?? 0 }}</strong>
@@ -167,7 +191,12 @@
               </div>
 
               <div class="metric-card metric-amber">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Total Orders</span>
                   <strong class="metric-value">{{ stats?.total_orders ?? 0 }}</strong>
@@ -176,7 +205,12 @@
               </div>
 
               <div class="metric-card metric-gold">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Total Sales Volume</span>
                   <strong class="metric-value">₱{{ formatMoney(stats?.total_sales ?? 0) }}</strong>
@@ -269,7 +303,17 @@
               <div class="activities-timeline">
                 <div v-for="act in recentActivity?.activities || []" :key="act.id" class="activity-timeline-row">
                   <span class="activity-icon-badge" :class="'act-' + act.type">
-                    {{ act.type.toUpperCase() }}
+                    <svg v-if="act.type === 'order'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <svg v-else-if="act.type === 'user'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
                   </span>
                   <div class="activity-details">
                     <strong class="activity-title">{{ act.title }}</strong>
@@ -759,7 +803,12 @@
             <!-- Reports KPI Header -->
             <div class="admin-metrics-grid">
               <div class="metric-card metric-gold">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Total Realized Revenue</span>
                   <strong class="metric-value">₱{{ formatMoney(reports?.total_sales ?? 0) }}</strong>
@@ -768,7 +817,12 @@
               </div>
 
               <div class="metric-card metric-primary">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">All-time Orders</span>
                   <strong class="metric-value">{{ reports?.total_orders ?? 0 }}</strong>
@@ -777,7 +831,12 @@
               </div>
 
               <div class="metric-card metric-forest">
-                <div class="metric-icon"></div>
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                  </svg>
+                </div>
                 <div class="metric-info">
                   <span class="metric-label">Average Order Value</span>
                   <strong class="metric-value">
@@ -1780,7 +1839,14 @@ const handleLogout = async () => {
   justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
+  color: #7a6f68;
 }
+.metric-primary    .metric-icon { background: #f0f4ff; color: #4a6fa5; }
+.metric-forest     .metric-icon { background: #f0faf3; color: #3a7a56; }
+.metric-terracotta .metric-icon { background: #fff4f0; color: #b05535; }
+.metric-sand       .metric-icon { background: #fdf8f0; color: #9a7a45; }
+.metric-amber      .metric-icon { background: #fff9ec; color: #b07800; }
+.metric-gold       .metric-icon { background: #f0fdf6; color: #059669; }
 
 .metric-info {
   display: flex;
@@ -2093,7 +2159,12 @@ const handleLogout = async () => {
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
+  flex-shrink: 0;
+  color: #7a6f68;
 }
+.act-order   { background: #f0f4ff; border-color: #c7d4f5; color: #4a6fa5; }
+.act-user    { background: #f0faf3; border-color: #b8e4c6; color: #3a7a56; }
+.act-product { background: #fff7f0; border-color: #f5d8bb; color: #b06030; }
 .activity-details {
   flex: 1;
 }
