@@ -125,7 +125,8 @@ const saveStatus = async () => {
     if (res && res.success) {
       activeOrder.value.status = selectedStatus.value.charAt(0).toUpperCase() + selectedStatus.value.slice(1);
       activeOrder.value.rawStatus = selectedStatus.value;
-      statusFeedback.value = ' Fulfillment status updated successfully!';
+      statusFeedback.value = 'Fulfillment status updated! Email notification sent.';
+
       feedbackIsError.value = false;
       emit('order-updated');
       setTimeout(() => {

@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\SellerProfile;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class SellerController extends Controller
@@ -145,9 +146,13 @@ class SellerController extends Controller
 
         $item->update(['status' => $newStatus]);
 
+        // Send fulfillment update notification
+        NotificationService::sendSellerItemFulfillment($item);
+
         // Evaluate parent order status across all multi-seller items
         $order = $item->order;
         if ($order) {
+            $prevOrderStatus = $order->status;
             $allItems = $order->items;
             $allDelivered = $allItems->every(fn($i) => $i->status === 'delivered');
             $anyCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
@@ -158,10 +163,13 @@ class SellerController extends Controller
                     'delivered_at'   => now(),
                     'payment_status' => 'paid',
                 ]);
+                NotificationService::sendOrderStatusUpdate($order, 'delivered');
             } elseif ($anyCancelled) {
                 $order->update(['status' => 'cancelled']);
+                NotificationService::sendOrderStatusUpdate($order, 'cancelled');
             } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {
                 $order->update(['status' => 'processing']);
+                NotificationService::sendOrderStatusUpdate($order, 'processing');
             }
         }
 

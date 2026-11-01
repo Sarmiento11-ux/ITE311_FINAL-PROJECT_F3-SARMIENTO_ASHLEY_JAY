@@ -298,7 +298,7 @@ const handleRegister = async () => {
 
     const user = await register(payload);
 
-    statusMsg.value = `Account registered successfully! Welcome, ${user.name}!`;
+    statusMsg.value = `Account created successfully! A welcome email has been sent to ${user.email}.`;
     statusClass.value = 'alert-success';
 
     setTimeout(() => {

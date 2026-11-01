@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -150,6 +151,9 @@ class OrderController extends Controller
 
             $order->load(['user:id,name,email', 'items.product', 'items.seller:id,name']);
 
+            // Automated Email Notifications: Customer confirmation, Seller alerts & Admin notice
+            NotificationService::sendOrderPlacedNotifications($order);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order placed successfully! Thank you for supporting local artisans.',
@@ -232,6 +236,9 @@ class OrderController extends Controller
         }
 
         $order->update($updateData);
+
+        // Notify customer about order status change
+        NotificationService::sendOrderStatusUpdate($order, $validated['status']);
 
         return response()->json([
             'success' => true,

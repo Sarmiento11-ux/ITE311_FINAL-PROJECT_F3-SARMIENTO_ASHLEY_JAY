@@ -38,6 +38,14 @@
           </div>
         </div>
 
+        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
+        </div>
+
         <div class="status-actions">
           <router-link to="/orders" class="btn btn-primary">
             View My Orders →
@@ -57,6 +65,14 @@
           Your payment for order <strong class="order-tag">{{ orderNumber }}</strong> was cancelled or you left the payment page.
           Your order is still saved — you can retry payment or choose Cash on Delivery.
         </p>
+        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
+        </div>
+
         <div class="status-actions">
           <router-link to="/orders" class="btn btn-primary">
             View My Orders →
@@ -76,6 +92,14 @@
           Your payment attempt for order <strong class="order-tag">{{ orderNumber }}</strong> was unsuccessful.
           Please try again or choose a different payment method.
         </p>
+        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
+        </div>
+
         <div class="status-actions">
           <router-link to="/orders" class="btn btn-primary">
             View My Orders →
@@ -95,6 +119,14 @@
           Your payment for order <strong class="order-tag">{{ orderNumber }}</strong> is still being verified.
           This may take a few moments. Please check your Orders page for updates.
         </p>
+        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
+        </div>
+
         <div class="status-actions">
           <router-link to="/orders" class="btn btn-primary">
             Check My Orders →
@@ -114,6 +146,14 @@
           We could not verify your payment status at this time. Please check your Orders page for the latest order and payment information.
         </p>
         <p v-if="errorMsg" class="error-detail">{{ errorMsg }}</p>
+        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
+        </div>
+
         <div class="status-actions">
           <router-link to="/orders" class="btn btn-primary">
             View My Orders →
@@ -127,10 +167,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useAuth } from '../composables/useAuth.js';
 import { useRoute } from 'vue-router';
 import { paymentService } from '../services/paymentService.js';
 
 const route        = useRoute();
+const { user: authUser } = useAuth();
 const isLoading    = ref(true);
 const isRechecking = ref(false);
 const paymentStatus = ref(null);

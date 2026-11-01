@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -132,6 +133,9 @@ class WebhookController extends Controller
             ]);
 
             Log::info('[Webhook] Order ' . ($order->order_number ?? $order->id) . ' marked as PAID via ' . $paymentMethodType);
+
+            // Send payment confirmation email receipt
+            NotificationService::sendPaymentSuccess($order, (float) $payment->amount, $paymentMethodType, $paymentIntentId);
         });
     }
 
@@ -158,6 +162,9 @@ class WebhookController extends Controller
                 'status'         => 'confirmed',
                 'confirmed_at'   => now(),
             ]);
+
+            // Send payment confirmation email receipt
+            NotificationService::sendPaymentSuccess($payment->order, (float) $payment->amount, $payment->payment_method ?? 'online', $paymentIntentId);
         });
     }
 

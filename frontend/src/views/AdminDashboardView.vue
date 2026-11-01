@@ -1579,7 +1579,7 @@ const handleUpdateOrderStatus = async (order, newStatus) => {
     const res = await adminService.updateOrderStatus(order.id, newStatus);
     if (res && res.success) {
       order.status = newStatus;
-      showToast(` Order ${order.order_number} status updated to ${newStatus}.`, 'alert-success');
+      showToast(`Order ${order.order_number} status updated to ${newStatus}. Customer notification email sent.`, 'alert-success');
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to update order status.', 'alert-danger');

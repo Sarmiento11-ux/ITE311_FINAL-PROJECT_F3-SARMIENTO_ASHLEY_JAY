@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -41,8 +42,11 @@ class AuthController extends Controller
 
         // If registering as seller, create seller profile
         if ($role === 'seller') {
+            $shopName = $validated['shop_name'] ?? $validated['name'] . "'s Shop";
+            $shopSlug = \Illuminate\Support\Str::slug($shopName) . '-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(5));
             $user->sellerProfile()->create([
-                'shop_name'        => $validated['shop_name'] ?? $validated['name'] . "'s Shop",
+                'shop_name'        => $shopName,
+                'shop_slug'        => $shopSlug,
                 'shop_description' => $validated['shop_description'] ?? '',
                 'contact_number'   => $validated['contact_number'] ?? '',
                 'address'          => $validated['address'] ?? '',
@@ -51,6 +55,12 @@ class AuthController extends Controller
 
         // Issue Sanctum token
         $token = $user->createToken('craftmarket-auth')->plainTextToken;
+
+        // Automated Email Notifications
+        NotificationService::sendCustomerWelcome($user);
+        if ($role === 'seller') {
+            NotificationService::sendAdminNewSeller($user);
+        }
 
         return response()->json([
             'success' => true,

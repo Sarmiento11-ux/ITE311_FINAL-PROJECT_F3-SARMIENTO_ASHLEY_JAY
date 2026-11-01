@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -237,6 +238,9 @@ class PaymentController extends Controller
                 $payment->markAsPaid($paymentIntentId);
                 // Confirm the order
                 $payment->order()->update(['status' => 'confirmed', 'confirmed_at' => now()]);
+
+                // Send payment success email receipt to customer
+                NotificationService::sendPaymentSuccess($payment->order, (float) $payment->amount, $payment->payment_method ?? 'PayMongo', $paymentIntentId);
 
             } elseif (in_array($pmStatus, ['cancelled', 'expired'])) {
                 $payment->markAsCancelled();
