@@ -24,7 +24,7 @@
       </div>
 
       <!-- Empty Cart Redirection â€” only shown after loading is done -->
-      <div v-if="!cartIsLoading && cart.items.length === 0 && !orderSuccess" class="empty-checkout-card">
+      <div v-if="!cart.isLoading && cart.items.length === 0 && !orderSuccess" class="empty-checkout-card">
         <div class="empty-icon">ðŸ›’</div>
         <h2>Your Cart is Empty</h2>
         <p>Please add handmade artisan crafts to your cart before proceeding to checkout.</p>
@@ -34,7 +34,7 @@
       </div>
 
       <!-- Cart Loading Spinner -->
-      <div v-if="cartIsLoading" class="cart-loading-state">
+      <div v-if="cart.isLoading" class="cart-loading-state">
         <div class="loading-spinner"></div>
         <p>Loading your cartâ€¦</p>
       </div>
@@ -320,12 +320,12 @@ const errors = reactive({
   shippingAddress: ''
 });
 
-const cartIsLoading = ref(true);
+// cart.isLoading is now reactive from cart.js
 
 onMounted(async () => {
-  cartIsLoading.value = true;
-  await cart.loadCart();
-  cartIsLoading.value = false;
+  
+  await cart.loadCart(true);
+  
 
   // Pre-populate with authenticated customer details
   // auth.js normalizeUser() already provides safe defaults for phone/address

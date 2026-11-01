@@ -1,4 +1,5 @@
-import { reactive, computed } from 'vue';
+﻿import { reactive, computed } from 'vue';
+import { cart } from '../data/cart.js';
 import { authService } from '../services/authService.js';
 
 // ─── Reactive global auth state ───────────────────────────────────────────────
@@ -75,6 +76,7 @@ export const useAuth = () => {
       state.user    = null;
       state.error   = null;
       state.loading = false;
+      cart.reset();
     }
   }
 

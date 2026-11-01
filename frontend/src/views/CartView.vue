@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <main class="cart-page-wrapper">
     <div class="container">
 
@@ -32,8 +32,14 @@
         {{ alertMsg }}
       </div>
 
-      <!-- Empty Cart State -->
-      <div v-if="cart.items.length === 0" class="empty-cart-card">
+      <!-- Loading State -->
+      <div v-if="cart.isLoading" class="cart-loading-state">
+        <div class="cart-spinner"></div>
+        <p>Loading your cart...</p>
+      </div>
+
+      <!-- Empty Cart State (only shown after loading is done) -->
+      <div v-else-if="cart.items.length === 0" class="empty-cart-card">
         <div class="empty-icon">🛍️</div>
         <h2>Your Shopping Cart is Empty</h2>
         <p>Discover unique handcrafted pottery, weaves, and accessories made by authentic Filipino artisans.</p>
@@ -222,12 +228,13 @@ import { ref, onMounted } from 'vue';
 import { cart } from '../data/cart.js';
 import { auth } from '../data/auth.js';
 
-const alertMsg = ref('');
-const alertClass = ref('');
+const alertMsg    = ref('');
+const alertClass  = ref('');
 const fallbackImg = 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=400&q=80';
 
 onMounted(async () => {
-  await cart.loadCart();
+  // force=true so CartView always gets a fresh fetch when the page is visited
+  await cart.loadCart(true);
 });
 
 const handleImgError = (event) => {
@@ -259,6 +266,21 @@ const clearAll = async () => {
 </script>
 
 <style scoped>
+.cart-loading-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #7A6F68;
+}
+.cart-spinner {
+  width: 46px;
+  height: 46px;
+  border: 5px solid #e8d5b8;
+  border-top-color: #8b5e3c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .checkout-login-prompt {
   display: flex;
   flex-direction: column;
