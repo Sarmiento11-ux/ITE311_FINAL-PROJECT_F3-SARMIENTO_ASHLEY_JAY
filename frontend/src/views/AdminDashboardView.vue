@@ -94,6 +94,15 @@
             <span class="nav-icon">📈</span><span>Reports</span>
           </button>
 
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'reviews' }"
+            @click="setTab('reviews')"
+          >
+            <span class="nav-icon">★</span><span>Reviews</span>
+          </button>
+
           <hr class="sidebar-divider" />
 
           <router-link to="/" class="dashboard-nav-item">
@@ -938,6 +947,55 @@
             </div>
           </div>
 
+          <!-- TAB 8: REVIEWS MODERATION -->
+          <div v-else-if="currentTab === 'reviews'" class="tab-pane">
+            <div class="panel-header-row">
+              <div>
+                <h3 class="panel-heading">Product Reviews & Content Moderation</h3>
+                <p class="panel-subheading">Oversee customer feedback across all artisan products. Remove inappropriate or violating reviews following marketplace policy.</p>
+              </div>
+            </div>
+
+            <div v-if="reviews.length === 0" class="empty-state-card" style="padding: 40px; text-align: center; color: #9e8f85; background: #faf6f0; border-radius: 12px; margin-top: 16px;">
+              <p>No customer reviews currently exist in the database.</p>
+            </div>
+
+            <div v-else class="admin-table-wrapper" style="margin-top: 16px;">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Rating</th>
+                    <th>Date</th>
+                    <th>Feedback / Comment</th>
+                    <th>Moderation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="r in reviews" :key="r.id">
+                    <td class="font-medium text-charcoal">{{ r.product_name || `Product #${r.product_id}` }}</td>
+                    <td>{{ r.user_name || 'Anonymous' }}</td>
+                    <td>
+                      <span style="color: #c97d3a; font-weight: 700;">★ {{ r.rating }}/5</span>
+                    </td>
+                    <td class="text-muted">{{ r.created_at }}</td>
+                    <td style="max-width: 320px; color: #4a3f38;">{{ r.comment || '—' }}</td>
+                    <td>
+                      <button
+                        class="btn-table-action btn-danger-soft"
+                        @click="handleAdminDeleteReview(r)"
+                        title="Remove violating review"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </section>
       </div>
 
@@ -1266,6 +1324,7 @@ const sellers = ref([]);
 const products = ref([]);
 const categories = ref([]);
 const orders = ref([]);
+const reviews = ref([]);
 
 // Filter States
 const userFilter = reactive({ search: '', role: '', is_active: '' });
@@ -1339,6 +1398,8 @@ const loadCurrentTabData = async () => {
       await fetchOrders();
     } else if (currentTab.value === 'reports') {
       reports.value = await adminService.getReports();
+    } else if (currentTab.value === 'reviews') {
+      reviews.value = await adminService.getReviews();
     }
   } catch (err) {
     showToast(err.message || 'Failed to retrieve data from API.', 'alert-danger');
@@ -1613,6 +1674,20 @@ const handleLogout = async () => {
   if (confirm('Are you sure you want to log out from the Admin Panel?')) {
     await logout();
     router.push('/login');
+  }
+};
+const handleAdminDeleteReview = async (review) => {
+  if (!confirm(`Are you sure you want to moderate and remove this review from ${review.user_name} on product "${review.product_name}"? This action cannot be undone.`)) {
+    return;
+  }
+  try {
+    await adminService.deleteReview(review.id);
+    feedbackMsg.value = 'Review removed successfully by administrator moderation.';
+    feedbackClass.value = 'alert-success';
+    reviews.value = await adminService.getReviews();
+  } catch (err) {
+    feedbackMsg.value = err?.response?.data?.message || 'Failed to remove review.';
+    feedbackClass.value = 'alert-danger';
   }
 };
 </script>

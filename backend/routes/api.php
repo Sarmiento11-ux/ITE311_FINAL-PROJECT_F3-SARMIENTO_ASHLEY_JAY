@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SellerController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\Api\ProductReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,9 @@ Route::get('/categories',      [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 Route::get('/products',        [ProductController::class, 'index']);
 Route::get('/products/{id}',   [ProductController::class, 'show']);
+
+// Product reviews: publicly readable, auth required to write
+Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
 
 // ─── Authenticated Routes (any logged-in user) ───────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -78,6 +82,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
     Route::get('/payments/status/{orderId}',  [PaymentController::class, 'getPaymentStatus']);
 
+    // ─── Customer: Product Reviews ───────────────────────────────────────────────
+    Route::get('/products/{productId}/reviews/eligibility', [ProductReviewController::class, 'checkEligibility']);
+    Route::get('/products/{productId}/reviews/my',          [ProductReviewController::class, 'myReview']);
+    Route::post('/products/{productId}/reviews',            [ProductReviewController::class, 'store']);
+    Route::put('/products/{productId}/reviews/{reviewId}',  [ProductReviewController::class, 'update']);
+    Route::delete('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'destroy']);
+
     // ─── Seller / Admin: Product management ──────────────────────────────
     Route::middleware('role:seller,admin')->group(function () {
         Route::post('/products',         [ProductController::class, 'store']);
@@ -92,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/products',                 [SellerController::class, 'products']);
         Route::get('/orders',                   [SellerController::class, 'orders']);
         Route::get('/stats',                    [SellerController::class, 'stats']);
+        Route::get('/reviews',                  [ProductReviewController::class, 'sellerReviews']);
         Route::get('/profile/{id}',             [SellerController::class, 'profile']);
         Route::patch('/order-items/{id}/status', [SellerController::class, 'updateItemStatus']);
     });
@@ -105,6 +117,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/reports',                 [AdminController::class, 'reports']);
             Route::get('/sellers',                 [AdminController::class, 'sellers']);
             Route::get('/sellers/{id}',            [AdminController::class, 'sellerDetails']);
+            Route::get('/reviews',                 [ProductReviewController::class, 'adminIndex']);
+            Route::delete('/reviews/{reviewId}',   [ProductReviewController::class, 'destroy'])
+                ->defaults('productId', 0);
         });
 
         // Admin order management & status updates

@@ -31,6 +31,8 @@ class Product extends Model
     protected $appends = [
         'image_url',
         'raw_image_path',
+        'avg_rating',
+        'review_count',
     ];
 
     // ─── Accessors & Mutators ──────────────────────────────────────
@@ -92,5 +94,29 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Average star rating for this product.
+     */
+    public function getAvgRatingAttribute(): float
+    {
+        return round($this->reviews()->avg('rating') ?? 0, 1);
+    }
+
+    /**
+     * Total number of reviews for this product.
+     */
+    public function getReviewCountAttribute(): int
+    {
+        return $this->reviews()->count();
+    }
+
+    /**
+     * A product can have many reviews.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
     }
 }

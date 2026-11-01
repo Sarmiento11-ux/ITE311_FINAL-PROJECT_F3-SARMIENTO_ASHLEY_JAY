@@ -50,6 +50,15 @@
             <span>Manage Orders ({{ orders.length }})</span>
           </button>
 
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'reviews' }"
+            @click="currentTab = 'reviews'"
+          >
+            <span>Customer Reviews ({{ reviews.length }})</span>
+          </button>
+
           <router-link to="/profile" class="dashboard-nav-item">
             
             <span>My Profile</span>
@@ -195,6 +204,47 @@
             </div>
           </div>
 
+          <!-- Tab 4: Customer Reviews (Read-only) -->
+          <div v-else-if="currentTab === 'reviews'">
+            <div class="dashboard-panel-card">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Customer Reviews & Ratings</h3>
+                  <p class="panel-subheading">View ratings and authentic customer feedback on your craft listings. Sellers cannot modify customer reviews.</p>
+                </div>
+              </div>
+
+              <div v-if="reviews.length === 0" style="padding: 40px; text-align: center; color: #9e8f85; background: #faf6f0; border-radius: 12px; margin-top: 16px;">
+                <p>No customer reviews have been submitted for your products yet.</p>
+              </div>
+
+              <div v-else style="margin-top: 20px; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                  <thead>
+                    <tr style="border-bottom: 2px solid #efe8de; font-size: 0.78rem; color: #7a6a60; text-transform: uppercase;">
+                      <th style="padding: 12px 16px;">Product</th>
+                      <th style="padding: 12px 16px;">Rating</th>
+                      <th style="padding: 12px 16px;">Customer</th>
+                      <th style="padding: 12px 16px;">Date</th>
+                      <th style="padding: 12px 16px;">Review Comment</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="r in reviews" :key="r.id" style="border-bottom: 1px solid #efe8de; font-size: 0.88rem;">
+                      <td style="padding: 14px 16px; font-weight: 600; color: #2d2420;">{{ r.product_name }}</td>
+                      <td style="padding: 14px 16px;">
+                        <ProductRating :rating="r.rating" :count="0" :show-count="false" size="sm" />
+                      </td>
+                      <td style="padding: 14px 16px; color: #5a4f48;">{{ r.user_name }}</td>
+                      <td style="padding: 14px 16px; color: #9e8f85; font-size: 0.82rem;">{{ r.created_at }}</td>
+                      <td style="padding: 14px 16px; color: #4a3f38; max-width: 320px;">{{ r.comment || '—' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </section>
 
       </div>
@@ -220,13 +270,16 @@ import DashboardStatCard from '../components/DashboardStatCard.vue';
 import SellerProductsTable from '../components/SellerProductsTable.vue';
 import SellerOrdersTable from '../components/SellerOrdersTable.vue';
 import ProductFormModal from '../components/ProductFormModal.vue';
+import ProductRating from '../components/ProductRating.vue';
 import { sellerService } from '../services/sellerService.js';
+import { getSellerReviews } from '../services/reviewService.js';
 import { auth } from '../data/auth.js';
 
 const currentTab = ref('overview');
 const products = ref([]);
 const orders = ref([]);
 const liveStats = ref(null);
+const reviews = ref([]);
 const isLoading = ref(true);
 
 const showProductModal = ref(false);
@@ -255,6 +308,13 @@ const loadSellerData = async () => {
     products.value = fetchedProducts;
     orders.value = fetchedOrders;
     liveStats.value = fetchedStats;
+
+    try {
+      const revRes = await getSellerReviews();
+      reviews.value = revRes?.data || [];
+    } catch {
+      reviews.value = [];
+    }
   } catch (err) {
     console.warn('Could not load seller data from API, using fallback:', err);
   } finally {

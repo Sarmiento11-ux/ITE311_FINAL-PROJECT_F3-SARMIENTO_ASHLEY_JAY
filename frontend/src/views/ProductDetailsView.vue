@@ -55,9 +55,8 @@
             <!-- Category & Rating -->
             <div class="info-top-meta">
               <span class="category-pill">{{ product.category }}</span>
-              <div class="rating-badge">
-                <span class="stars">★★★★★</span>
-                <span class="rating-text">{{ product.rating }} ({{ product.reviewsCount || 24 }} customer reviews)</span>
+              <div class="rating-badge rating-badge-interactive" @click="scrollToReviews" title="Click to view customer reviews">
+                <ProductRating :rating="displayRating" :count="displayReviewsCount" :show-count="true" size="sm" />
               </div>
             </div>
 
@@ -163,6 +162,61 @@
       </div>
     </section>
 
+    <!-- 2.5 PRODUCT REVIEWS & RATINGS SECTION -->
+    <section class="product-reviews-section" id="reviews-section">
+      <div class="container">
+        <div class="section-header-split reviews-section-header">
+          <div>
+            <span class="section-eyebrow">AUTHENTIC FEEDBACK</span>
+            <h2 class="section-title">Customer Reviews & Ratings</h2>
+            <p class="reviews-section-subtitle">Real experiences shared by verified CraftMarket patrons.</p>
+          </div>
+          <div class="reviews-summary-overview" v-if="displayReviewsCount > 0">
+            <div class="rating-large-score">{{ displayRating.toFixed(1) }}</div>
+            <div class="rating-large-details">
+              <ProductRating :rating="displayRating" :count="0" :show-count="false" size="md" />
+              <span class="rating-large-subtext">Based on {{ displayReviewsCount }} verified {{ displayReviewsCount === 1 ? 'review' : 'reviews' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reviews-split-grid">
+          <!-- Column 1: Reviews List -->
+          <div class="reviews-column-list">
+            <div class="reviews-column-header">
+              <h3 class="reviews-column-title">Reviews ({{ displayReviewsCount }})</h3>
+            </div>
+            <ReviewList
+              :reviews="reviews"
+              :current-user-id="currentUserId"
+              :is-admin="isAdmin"
+              :product-id="Number(product.id)"
+              @edit="handleEditReview"
+              @delete="handleDeleteReview"
+            />
+          </div>
+
+          <!-- Column 2: Review Form / Eligibility -->
+          <div class="reviews-column-form">
+            <div v-if="!isSeller" class="review-form-wrapper">
+              <ReviewForm
+                :product-id="Number(product.id)"
+                :is-eligible="reviewEligibility.eligible"
+                :ineligible-message="reviewEligibility.reason"
+                :existing-review="editingReview"
+                @submitted="onReviewSubmitted"
+                @cancel="editingReview = null"
+              />
+            </div>
+            <div v-else class="seller-review-restricted-card">
+              <h4>Artisan / Seller Account</h4>
+              <p>Reviews can only be submitted by verified customers who purchased this item in a completed order.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 3. RELATED PRODUCTS SECTION -->
     <section class="related-products-section">
       <div class="container">
@@ -205,8 +259,14 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ProductCard from '../components/ProductCard.vue';
+import ProductRating from '../components/ProductRating.vue';
+import ReviewList from '../components/ReviewList.vue';
+import ReviewForm from '../components/ReviewForm.vue';
 import { productService } from '../services/productService.js';
+import { authService } from '../services/authService.js';
+import { getProductReviews, checkReviewEligibility, deleteReview } from '../services/reviewService.js';
 import { cart } from '../data/cart.js';
+import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
 
 const route = useRoute();
 
@@ -217,6 +277,119 @@ const isLoading = ref(true);
 const cartFeedback = ref('');
 const feedbackIsError = ref(false);
 
+// ─── Review State ─────────────────────────────────────────────────────────────
+const reviews = ref([]);
+const reviewsAvg = ref(0);
+const reviewsCountFromApi = ref(0);
+const reviewEligibility = ref({ eligible: false, reason: 'Sign in to review.' });
+const editingReview = ref(null);
+
+const currentUserId = computed(() => authService.getUser()?.id || null);
+const isAdmin = computed(() => authService.isAdmin());
+const isSeller = computed(() => authService.isSeller());
+
+const displayReviewsCount = computed(() => {
+  if (reviews.value.length > 0) return reviews.value.length;
+  if (reviewsCountFromApi.value > 0) return reviewsCountFromApi.value;
+  return product.value?.reviewsCount || 0;
+});
+
+const displayRating = computed(() => {
+  if (reviews.value.length > 0 && reviewsAvg.value > 0) return reviewsAvg.value;
+  return Number(product.value?.rating) || 0;
+});
+
+const handleImgError = (e) => {
+  e.target.src = defaultPlaceholder;
+};
+
+const scrollToReviews = () => {
+  const el = document.getElementById('reviews-section');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+const loadReviews = async (productId) => {
+  try {
+    const res = await getProductReviews(productId);
+    if (res && res.success) {
+      reviews.value = res.data || [];
+      reviewsAvg.value = Number(res.avg_rating) || 0;
+      reviewsCountFromApi.value = Number(res.review_count) || 0;
+    }
+  } catch (err) {
+    console.warn('[Review] Could not fetch reviews:', err);
+    reviews.value = [];
+  }
+};
+
+const checkEligibility = async (productId) => {
+  if (!authService.isAuthenticated()) {
+    reviewEligibility.value = {
+      eligible: false,
+      reason: 'Sign in to your customer account to leave a review for purchased items.',
+    };
+    return;
+  }
+
+  if (authService.isSeller()) {
+    reviewEligibility.value = {
+      eligible: false,
+      reason: 'Artisans and sellers cannot review products.',
+    };
+    return;
+  }
+
+  try {
+    const res = await checkReviewEligibility(productId);
+    if (res) {
+      if (res.reason === 'already_reviewed') {
+        reviewEligibility.value = {
+          eligible: false,
+          reason: 'You have already submitted a review for this product. You may edit your existing review.',
+        };
+      } else {
+        reviewEligibility.value = {
+          eligible: Boolean(res.eligible),
+          reason: res.reason || 'Only customers who purchased this item with a completed order can leave a review.',
+        };
+      }
+    }
+  } catch (err) {
+    reviewEligibility.value = {
+      eligible: false,
+      reason: 'Could not verify purchase eligibility.',
+    };
+  }
+};
+
+const handleEditReview = (review) => {
+  editingReview.value = review;
+  scrollToReviews();
+};
+
+const handleDeleteReview = async (review) => {
+  try {
+    await deleteReview(product.value.id, review.id);
+    if (editingReview.value?.id === review.id) {
+      editingReview.value = null;
+    }
+    await loadReviews(product.value.id);
+    await checkEligibility(product.value.id);
+  } catch (err) {
+    alert(err?.response?.data?.message || 'Failed to remove review.');
+  }
+};
+
+const onReviewSubmitted = async () => {
+  editingReview.value = null;
+  if (product.value) {
+    await loadReviews(product.value.id);
+    await checkEligibility(product.value.id);
+  }
+};
+
 const loadProductData = async (id) => {
   isLoading.value = true;
   try {
@@ -225,6 +398,8 @@ const loadProductData = async (id) => {
 
     if (found) {
       relatedProducts.value = await productService.getRelated(found.category, found.id);
+      await loadReviews(found.id);
+      await checkEligibility(found.id);
     }
   } catch (err) {
     console.error('Error loading product details:', err);
@@ -241,6 +416,7 @@ watch(() => route.params.id, (newId) => {
   if (newId) {
     quantity.value = 1;
     cartFeedback.value = '';
+    editingReview.value = null;
     loadProductData(newId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -292,6 +468,109 @@ const addToCart = () => {
 </script>
 
 <style scoped>
+.rating-badge-interactive {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.rating-badge-interactive:hover {
+  opacity: 0.85;
+}
+
+/* ── Reviews Section ── */
+.product-reviews-section {
+  padding: 60px 0;
+  border-top: 1px solid #efe8de;
+  background: #fdfbf7;
+}
+
+.reviews-section-header {
+  margin-bottom: 36px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.reviews-section-subtitle {
+  color: #7a6a60;
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.reviews-summary-overview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #efe8de;
+  border-radius: 12px;
+  padding: 14px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.rating-large-score {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2d2420;
+  line-height: 1;
+}
+
+.rating-large-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rating-large-subtext {
+  font-size: 0.78rem;
+  color: #9e8f85;
+}
+
+.reviews-split-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .reviews-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reviews-column-header {
+  margin-bottom: 16px;
+}
+
+.reviews-column-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d2420;
+}
+
+.seller-review-restricted-card {
+  background: #ffffff;
+  border: 1px dashed #d6ccc2;
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  color: #7a6a60;
+}
+
+.seller-review-restricted-card h4 {
+  font-size: 1rem;
+  color: #3e5943;
+  margin-bottom: 8px;
+}
+
+.seller-review-restricted-card p {
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* Purchase section styling */
 .purchase-top-row {
   display: flex;
   justify-content: space-between;

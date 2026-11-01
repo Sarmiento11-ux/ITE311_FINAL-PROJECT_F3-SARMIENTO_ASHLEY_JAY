@@ -100,5 +100,16 @@ export const adminService = {
   async updateOrderStatus(id, status) {
     const response = await apiClient.patch(`/orders/${id}/status`, { status });
     return response.data;
+  },
+
+  // ─── Reviews Oversight & Moderation ─────────────────────────────────────
+  async getReviews() {
+    const response = await apiClient.get('/admin/reviews');
+    return response.data?.data || [];
+  },
+
+  async deleteReview(reviewId) {
+    const response = await apiClient.delete(`/admin/reviews/${reviewId}`);
+    return response.data;
   }
 };
