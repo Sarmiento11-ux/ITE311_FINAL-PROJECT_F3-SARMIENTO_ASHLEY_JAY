@@ -13,7 +13,7 @@
         <polyline points="12 6 12 12 16 14"></polyline>
       </svg>
 
-      <!-- Completed / Check -->
+      <!-- Completed / Check circle -->
       <svg v-else-if="iconKey === 'completed'" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
@@ -77,3 +77,59 @@ const iconKey = computed(() => {
   return 'default';
 });
 </script>
+
+<style scoped>
+.stat-card-box {
+  background: #ffffff;
+  border: 1px solid #efe8de;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.2s ease;
+}
+
+.stat-card-box:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+}
+
+/* Icon container */
+.stat-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #f5ede4;
+  color: #8b6f5e;
+}
+
+/* Background / colour variants passed via bgClass prop */
+.forest-bg   { background: #edf4ee; color: #3e6b4a; }
+.amber-bg    { background: #fef7ec; color: #b07a2a; }
+.terracotta-bg { background: #fceee9; color: #b84f33; }
+.sand-bg     { background: #f5f0ea; color: #7a6255; }
+.sage-bg     { background: #eef4f0; color: #4e7c5f; }
+.rose-bg     { background: #fdeef0; color: #b54a5e; }
+
+/* Text */
+.stat-card-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9e8f85;
+  margin-bottom: 4px;
+}
+
+.stat-card-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #2d2420;
+  line-height: 1.1;
+}
+</style>
