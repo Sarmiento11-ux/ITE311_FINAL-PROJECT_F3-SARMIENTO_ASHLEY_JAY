@@ -2,7 +2,7 @@
   <article class="product-card">
     <div class="product-media">
       <img 
-        :src="product.image" 
+        :src="product.image || defaultPlaceholder" @error="handleImgError" 
         :alt="product.title"
         loading="lazy"
       >

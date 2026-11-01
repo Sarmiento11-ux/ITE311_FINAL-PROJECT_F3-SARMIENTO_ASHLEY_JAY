@@ -32,7 +32,7 @@
           <!-- Visual Column: Large Image & Trust Banner -->
           <div class="details-gallery-col">
             <div class="main-image-frame">
-              <img :src="product.image" :alt="product.title" class="main-product-img">
+              <img :src="product.image || defaultPlaceholder" :alt="product.title" class="main-product-img" @error="handleImgError">
               <span v-if="product.badge" class="product-tag-float">{{ product.badge }}</span>
               <div class="eco-badge-corner">
                 <span>🌱 100% Genuine Craft</span>

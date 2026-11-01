@@ -82,7 +82,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:seller,admin')->group(function () {
         Route::post('/products',         [ProductController::class, 'store']);
         Route::put('/products/{id}',     [ProductController::class, 'update']);
-        Route::delete('/products/{id}',  [ProductController::class, 'destroy']);
+        Route::delete('/products/{id}',        [ProductController::class, 'destroy']);
+        Route::post('/products/{id}/image',    [ProductController::class, 'uploadImage']);
+        Route::delete('/products/{id}/image',  [ProductController::class, 'deleteImage']);
     });
 
     // ─── Seller: Seller dashboard endpoints ──────────────────────────────

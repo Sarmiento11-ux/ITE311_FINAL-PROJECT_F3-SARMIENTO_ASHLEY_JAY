@@ -28,6 +28,46 @@ class Product extends Model
         'is_featured' => 'boolean',
     ];
 
+    protected $appends = [
+        'image_url',
+        'raw_image_path',
+    ];
+
+    // ─── Accessors & Mutators ──────────────────────────────────────
+
+    /**
+     * Get the accessible public URL for the product image.
+     * Handles external URLs (e.g. Unsplash), local storage paths (products/...), and null values.
+     */
+    public function getImageAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        return url('storage/' . $value);
+    }
+
+    /**
+     * Get the fallback-safe image URL (defaults to CraftMarket craft placeholder).
+     */
+    public function getImageUrlAttribute(): string
+    {
+        return $this->image ?? url('images/craft-placeholder.svg');
+    }
+
+    /**
+     * Get the raw storage path as stored in MySQL (e.g. "products/abc.jpg" or external URL).
+     */
+    public function getRawImagePathAttribute(): ?string
+    {
+        return $this->attributes['image'] ?? null;
+    }
+
     // ─── Relationships ─────────────────────────────────────────────
 
     /**

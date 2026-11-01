@@ -1,3 +1,4 @@
+import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
 import apiClient from './api.js';
 import { sampleProducts } from '../data/products.js';
 
@@ -38,7 +39,7 @@ export function normalizeProduct(p) {
     stock: p.stock !== undefined ? p.stock : 10,
     isAvailable: p.status === 'active' && p.stock > 0,
     status: p.status || 'active',
-    image: p.image || 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=800&q=80',
+    image: p.image || defaultPlaceholder,
     images: Array.isArray(p.images) ? p.images : [],
     shortDesc: p.shortDesc || (p.description ? p.description.slice(0, 110) + '...' : ''),
     description: p.description || '',

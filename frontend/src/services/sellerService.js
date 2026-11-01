@@ -109,6 +109,30 @@ export const sellerService = {
   },
 
   /**
+   * Upload an image file for a product.
+   * POST /api/products/:id/image
+   */
+  async uploadProductImage(productId, file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await apiClient.post(`/products/${productId}/image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Delete/remove the product image.
+   * DELETE /api/products/:id/image
+   */
+  async deleteProductImage(productId) {
+    const response = await apiClient.delete(`/products/${productId}/image`);
+    return response.data;
+  },
+
+  /**
    * Delete product by ID.
    */
   async deleteProduct(productId) {

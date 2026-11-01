@@ -206,6 +206,7 @@
       v-if="showProductModal" 
       :initialData="editingProduct" 
       :isEdit="isEditMode"
+      :isUploading="isUploadingProduct"
       @save="handleSaveProduct" 
       @close="closeProductModal" 
     />
@@ -298,49 +299,56 @@ const closeProductModal = () => {
   editingProduct.value = null;
 };
 
+const isUploadingProduct = ref(false);
+
 const handleSaveProduct = async (productData) => {
+  isUploadingProduct.value = true;
   const sellerId = seller.value.id || 2;
+  const statusStr = (productData.status || '').toLowerCase();
+  const dbStatus = (statusStr.includes('published') || statusStr.includes('active')) 
+    ? 'active' 
+    : (statusStr.includes('out') ? 'out_of_stock' : 'inactive');
+
   const payload = {
     seller_id: sellerId,
     category_id: productData.categoryId || 1,
     name: productData.name,
     price: productData.price,
     stock: productData.stock,
-    status: productData.status?.toLowerCase() === 'active' ? 'active' : 'inactive',
+    status: dbStatus,
     description: productData.description || 'Authentic handmade creation.',
     material: productData.material || 'Natural sustainable artisan materials',
     dimensions: productData.dimensions || 'Standard handcrafted dimensions',
   };
 
   try {
+    let savedProductId = productData.id;
+
     if (isEditMode.value) {
-      await sellerService.saveProduct({ ...payload, id: productData.id }, true);
-      const idx = products.value.findIndex(p => p.id === productData.id);
-      if (idx > -1) {
-        products.value[idx] = { ...products.value[idx], ...productData };
-      }
-      alert(` Product "${productData.name}" updated successfully in database!`);
+      const res = await sellerService.saveProduct({ ...payload, id: productData.id }, true);
+      savedProductId = res?.data?.id || productData.id;
     } else {
       const result = await sellerService.saveProduct(payload, false);
-      const createdItem = result?.data || {
-        ...productData,
-        id: Date.now(),
-        salesCount: 0
-      };
-      products.value.unshift(createdItem);
-      alert(` Product "${productData.name}" added successfully to your live inventory!`);
+      savedProductId = result?.data?.id;
     }
+
+    // Handle image upload if a new file was selected
+    if (productData.imageFile && savedProductId) {
+      await sellerService.uploadProductImage(savedProductId, productData.imageFile);
+    } else if (productData.removeImage && savedProductId) {
+      await sellerService.deleteProductImage(savedProductId);
+    }
+
+    // Refresh seller products list from API to reflect new image and data
+    await loadSellerData();
+    alert(`Product "${productData.name}" saved successfully!`);
+    closeProductModal();
   } catch (err) {
-    console.warn('API save fallback:', err);
-    if (isEditMode.value) {
-      const idx = products.value.findIndex(p => p.id === productData.id);
-      if (idx > -1) products.value[idx] = { ...productData };
-    } else {
-      products.value.unshift({ ...productData, id: Date.now(), salesCount: 0 });
-    }
-    alert(` Product saved.`);
+    console.error('API save error:', err);
+    alert(err.response?.data?.message || err.message || 'Error saving product.');
+  } finally {
+    isUploadingProduct.value = false;
   }
-  closeProductModal();
 };
 
 const deleteProduct = async (productId) => {

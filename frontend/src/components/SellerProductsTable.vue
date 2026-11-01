@@ -16,7 +16,7 @@
           <tr v-for="product in products" :key="product.id">
             <td>
               <div class="table-product-cell">
-                <img :src="product.image" :alt="product.name" class="table-product-thumb">
+                <img :src="product.image || defaultPlaceholder" :alt="product.name" class="table-product-thumb" @error="handleImgError">
                 <div>
                   <strong>{{ product.name }}</strong>
                   <div style="font-size: 0.75rem; color: #7A6F68;">{{ product.salesCount || 0 }} units sold</div>
