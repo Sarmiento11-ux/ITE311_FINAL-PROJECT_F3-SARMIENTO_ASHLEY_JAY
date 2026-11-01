@@ -41,7 +41,8 @@ apiClient.interceptors.response.use(
     }
 
     console.warn('[CraftMarket API]', message, error);
-    return Promise.reject({ ...error, userFriendlyMessage: message });
+    error.userFriendlyMessage = message;
+    return Promise.reject(error);
   }
 );
 
