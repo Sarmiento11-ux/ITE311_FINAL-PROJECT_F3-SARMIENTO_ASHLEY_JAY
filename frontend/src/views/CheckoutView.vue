@@ -23,8 +23,8 @@
         {{ alertMsg }}
       </div>
 
-      <!-- Empty Cart Redirection -->
-      <div v-if="cart.items.length === 0 && !orderSuccess" class="empty-checkout-card">
+      <!-- Empty Cart Redirection — only shown after loading is done -->
+      <div v-if="!cartIsLoading && cart.items.length === 0 && !orderSuccess" class="empty-checkout-card">
         <div class="empty-icon">🛒</div>
         <h2>Your Cart is Empty</h2>
         <p>Please add handmade artisan crafts to your cart before proceeding to checkout.</p>
@@ -33,8 +33,14 @@
         </router-link>
       </div>
 
+      <!-- Cart Loading Spinner -->
+      <div v-if="cartIsLoading" class="cart-loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading your cart…</p>
+      </div>
+
       <!-- Checkout Form Grid -->
-      <form v-else-if="!orderSuccess" @submit.prevent="handlePlaceOrder" class="checkout-layout-grid" novalidate>
+      <form v-else-if="!orderSuccess && cart.items.length > 0" @submit.prevent="handlePlaceOrder" class="checkout-layout-grid" novalidate>
 
         <!-- Left Column: Shipping & Contact Form -->
         <div class="checkout-form-card">
@@ -240,10 +246,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { cart } from '../data/cart.js';
 import { auth } from '../data/auth.js';
+import { authService } from '../services/authService.js';
 import { orderService } from '../services/orderService.js';
 
 const router = useRouter();
@@ -270,16 +277,21 @@ const errors = reactive({
   shippingAddress: ''
 });
 
+const cartIsLoading = ref(true);
+
 onMounted(async () => {
+  cartIsLoading.value = true;
   await cart.loadCart();
+  cartIsLoading.value = false;
 
   // Pre-populate with authenticated customer details
-  const user = auth.user.value;
+  // auth.js normalizeUser() already provides safe defaults for phone/address
+  const user = auth.user.value || authService.getUser();
   if (user) {
-    form.fullName = user.fullName || user.name || '';
-    form.email = user.email || '';
-    form.contactNumber = user.phone || user.contact_number || '';
-    form.shippingAddress = user.address || '';
+    form.fullName      = user.fullName || user.name || '';
+    form.email         = user.email || '';
+    form.contactNumber = user.phone || user.contact_number || '+63 917 123 4567';
+    form.shippingAddress = user.address || 'Metro Manila, Philippines';
   }
 });
 
@@ -314,12 +326,25 @@ const validateForm = () => {
     isValid = false;
   }
 
+  if (!isValid) {
+    alertMsg.value = '⚠️ Please complete all required fields marked with (*) before placing your order.';
+    alertClass.value = 'alert-danger';
+    // Scroll the alert into view
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   return isValid;
 };
 
 const handlePlaceOrder = async () => {
   alertMsg.value = '';
-  if (!validateForm()) return;
+  alertClass.value = '';
+
+  if (!validateForm()) {
+    // validateForm() already sets alertMsg — just scroll to the alert
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
 
   if (cart.items.length === 0) {
     alertMsg.value = 'Your basket is empty. Please select products to order.';
@@ -367,6 +392,25 @@ const handlePlaceOrder = async () => {
 </script>
 
 <style scoped>
+.cart-loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #7A6F68;
+  font-size: 1rem;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e8d5b8;
+  border-top-color: #8b5e3c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .checkout-page-wrapper {
   padding: 3rem 0 5rem;
   background-color: var(--cm-cream, #FAF6F0);

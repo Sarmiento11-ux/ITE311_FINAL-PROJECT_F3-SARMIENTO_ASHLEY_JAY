@@ -175,7 +175,28 @@
             </div>
           </div>
 
-          <router-link to="/checkout" class="btn btn-primary btn-checkout-main">
+          <!-- Auth-aware checkout button -->
+          <div v-if="!auth.isAuthenticated.value" class="checkout-login-prompt">
+            <p class="login-prompt-msg">
+              🔒 <strong>Sign in required</strong> to place an order.
+            </p>
+            <router-link
+              :to="`/login?redirect=/checkout`"
+              class="btn btn-primary btn-checkout-main"
+            >
+              <span>Sign In to Checkout</span>
+              <span class="btn-arrow">→</span>
+            </router-link>
+            <router-link to="/register" class="btn-create-account-link">
+              New here? Create a free account ↗
+            </router-link>
+          </div>
+
+          <router-link
+            v-else
+            to="/checkout"
+            class="btn btn-primary btn-checkout-main"
+          >
             <span>Proceed to Checkout</span>
             <span class="btn-arrow">→</span>
           </router-link>
@@ -199,6 +220,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { cart } from '../data/cart.js';
+import { auth } from '../data/auth.js';
 
 const alertMsg = ref('');
 const alertClass = ref('');
@@ -237,6 +259,32 @@ const clearAll = async () => {
 </script>
 
 <style scoped>
+.checkout-login-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #fffaf5;
+  border: 1px solid #e8d5b8;
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
+.login-prompt-msg {
+  font-size: 0.93rem;
+  color: #7c5c3a;
+  margin: 0;
+  text-align: center;
+}
+.btn-create-account-link {
+  font-size: 0.85rem;
+  color: #8b5e3c;
+  text-align: center;
+  text-decoration: underline;
+}
+.btn-create-account-link:hover {
+  color: #5c3d1e;
+}
+
 .cart-page-wrapper {
   padding: 3rem 0 5rem;
   background-color: var(--cm-cream, #FAF6F0);
