@@ -40,7 +40,7 @@
 
       <!-- Empty Cart State (only shown after loading is done) -->
       <div v-else-if="cart.items.length === 0" class="empty-cart-card">
-        <div class="empty-icon-text">Notice</div>
+        <div class="empty-icon">🛍️</div>
         <h2>Your Shopping Cart is Empty</h2>
         <p>Discover unique handcrafted pottery, weaves, and accessories made by authentic Filipino artisans.</p>
         <router-link to="/products" class="btn btn-primary" style="margin-top: 20px;">

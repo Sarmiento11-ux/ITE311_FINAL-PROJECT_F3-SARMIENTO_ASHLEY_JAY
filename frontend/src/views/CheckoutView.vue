@@ -23,20 +23,20 @@
         {{ alertMsg }}
       </div>
 
-      <!-- Empty Cart Redirection â€” only shown after loading is done -->
+      <!-- Empty Cart Redirection — only shown after loading is done -->
       <div v-if="!cart.isLoading && cart.items.length === 0 && !orderSuccess" class="empty-checkout-card">
-        <div class="empty-icon">ðŸ›’</div>
+        <div class="empty-icon">🛒</div>
         <h2>Your Cart is Empty</h2>
         <p>Please add handmade artisan crafts to your cart before proceeding to checkout.</p>
         <router-link to="/products" class="btn btn-primary" style="margin-top: 20px;">
-          Explore Products â†’
+          Explore Products →
         </router-link>
       </div>
 
       <!-- Cart Loading Spinner -->
       <div v-if="cart.isLoading" class="cart-loading-state">
         <div class="loading-spinner"></div>
-        <p>Loading your cartâ€¦</p>
+        <p>Loading your cart…</p>
       </div>
 
       <!-- Checkout Form Grid -->
@@ -128,10 +128,10 @@
             :aria-checked="selectedPayment === 'cod'"
           >
             <div class="payment-selection-header">
-              <span class="payment-radio-bullet">{{ selectedPayment === 'cod' ? 'â—' : 'â—‹' }}</span>
+              <span class="payment-radio-bullet">{{ selectedPayment === 'cod' ? 'â—' : '○' }}</span>
               <div class="payment-details">
                 <div class="payment-name-row">
-                  <strong class="payment-title">ðŸšš Cash on Delivery (COD)</strong>
+                  <strong class="payment-title">🚚 Cash on Delivery (COD)</strong>
                   <span class="status-pill status-cod">Available</span>
                 </div>
                 <p class="payment-desc">
@@ -151,10 +151,10 @@
             style="margin-top: 12px;"
           >
             <div class="payment-selection-header">
-              <span class="payment-radio-bullet">{{ selectedPayment === 'paymongo' ? 'â—' : 'â—‹' }}</span>
+              <span class="payment-radio-bullet">{{ selectedPayment === 'paymongo' ? 'â—' : '○' }}</span>
               <div class="payment-details">
                 <div class="payment-name-row">
-                  <strong class="payment-title">ðŸ’³ Online Payment via PayMongo</strong>
+                  <strong class="payment-title">💳 Online Payment via PayMongo</strong>
                   <span class="status-pill status-online">Secure</span>
                 </div>
                 <p class="payment-desc">
@@ -187,8 +187,8 @@
                 <h4 class="mini-title">{{ item.title }}</h4>
                 <p class="mini-seller">Maker: {{ item.seller || 'Artisan' }}</p>
                 <div class="mini-price-row">
-                  <span>{{ item.quantity }} Ã— â‚±{{ Number(item.price).toFixed(2) }}</span>
-                  <strong>â‚±{{ (Number(item.price) * Number(item.quantity)).toFixed(2) }}</strong>
+                  <span>{{ item.quantity }} Ã— ₱{{ Number(item.price).toFixed(2) }}</span>
+                  <strong>₱{{ (Number(item.price) * Number(item.quantity)).toFixed(2) }}</strong>
                 </div>
               </div>
             </div>
@@ -198,19 +198,19 @@
           <div class="checkout-breakdown">
             <div class="breakdown-row">
               <span>Items Subtotal</span>
-              <span>â‚±{{ Number(cart.subtotal).toFixed(2) }}</span>
+              <span>₱{{ Number(cart.subtotal).toFixed(2) }}</span>
             </div>
 
             <div class="breakdown-row">
               <span>Shipping & Handling</span>
-              <span v-if="cart.subtotal >= 1500" class="free-shipping-tag">FREE (â‚±0.00)</span>
-              <span v-else>â‚±150.00</span>
+              <span v-if="cart.subtotal >= 1500" class="free-shipping-tag">FREE (₱0.00)</span>
+              <span v-else>₱150.00</span>
             </div>
 
             <div class="breakdown-total-row">
               <span>Grand Total</span>
               <span class="total-amount-highlight">
-                â‚±{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}
+                ₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}
               </span>
             </div>
           </div>          <!-- Submit Order Button -->
@@ -260,7 +260,7 @@
           </div>
           <div class="detail-line">
             <span>Amount Due on Delivery:</span>
-            <strong>â‚±{{ Number(placedOrder?.total_amount).toFixed(2) }}</strong>
+            <strong>₱{{ Number(placedOrder?.total_amount).toFixed(2) }}</strong>
           </div>
           <div class="detail-line">
             <span>Delivery Destination:</span>
@@ -274,7 +274,7 @@
 
         <div class="success-actions-row">
           <router-link to="/orders" class="btn btn-primary">
-            View My Orders â†’
+            View My Orders →
           </router-link>
           <router-link to="/products" class="btn btn-secondary">
             Continue Shopping

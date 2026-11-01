@@ -31,7 +31,7 @@
             @click="setTab('dashboard')"
           >
             
-            <span>Dashboard</span>
+            <span class="nav-icon">📊</span><span>Dashboard</span>
           </button>
 
           <button 
@@ -41,7 +41,7 @@
             @click="setTab('users')"
           >
             
-            <span>Users ({{ stats?.total_users ?? users.length }})</span>
+            <span class="nav-icon">👥</span><span>Users ({{ stats?.total_users ?? users.length }})</span>
           </button>
 
           <button 
@@ -51,7 +51,7 @@
             @click="setTab('sellers')"
           >
             
-            <span>Sellers ({{ stats?.total_sellers ?? sellers.length }})</span>
+            <span class="nav-icon">🏪</span><span>Sellers ({{ stats?.total_sellers ?? sellers.length }})</span>
           </button>
 
           <button 
@@ -61,7 +61,7 @@
             @click="setTab('products')"
           >
             
-            <span>Products ({{ stats?.total_products ?? products.length }})</span>
+            <span class="nav-icon">🎨</span><span>Products ({{ stats?.total_products ?? products.length }})</span>
           </button>
 
           <button 
@@ -71,7 +71,7 @@
             @click="setTab('categories')"
           >
             
-            <span>Categories ({{ categories.length }})</span>
+            <span class="nav-icon">🏷️</span><span>Categories ({{ categories.length }})</span>
           </button>
 
           <button 
@@ -81,7 +81,7 @@
             @click="setTab('orders')"
           >
             
-            <span>Orders ({{ stats?.total_orders ?? orders.length }})</span>
+            <span class="nav-icon">📦</span><span>Orders ({{ stats?.total_orders ?? orders.length }})</span>
           </button>
 
           <button 
@@ -91,7 +91,7 @@
             @click="setTab('reports')"
           >
             
-            <span>Reports</span>
+            <span class="nav-icon">📈</span><span>Reports</span>
           </button>
 
           <hr class="sidebar-divider" />

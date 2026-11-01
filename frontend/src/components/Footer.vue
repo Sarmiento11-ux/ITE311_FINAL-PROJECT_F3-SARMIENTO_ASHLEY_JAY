@@ -18,8 +18,8 @@
             The trusted local handmade marketplace. Connecting thoughtful shoppers with passionate artisans across the Philippines.
           </p>
           <div class="footer-badges">
-            <span class="footer-pill">Proudly Local</span>
-            <span class="footer-pill"> Escrow Protected</span>
+            <span class="footer-pill">🇵🇭 Proudly Local</span>
+            <span class="footer-pill">🛡️ Escrow Protected</span>
           </div>
         </div>
 
