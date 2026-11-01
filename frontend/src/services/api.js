@@ -10,19 +10,16 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor: attach auth token if available (sessionStorage)
+// Request interceptor: attach Sanctum Bearer token if available
 apiClient.interceptors.request.use(
   (config) => {
     try {
-      const authUser = sessionStorage.getItem('craftmarket_user');
-      if (authUser) {
-        const user = JSON.parse(authUser);
-        if (user && user.token) {
-          config.headers.Authorization = `Bearer ${user.token}`;
-        }
+      const token = localStorage.getItem('craftmarket_token') || sessionStorage.getItem('craftmarket_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
     } catch {
-      // Ignore JSON parse errors
+      // Ignore storage errors
     }
     return config;
   },

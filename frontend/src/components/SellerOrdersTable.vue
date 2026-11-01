@@ -57,19 +57,28 @@
 
           <div style="margin-top: 16px; padding: 12px; background-color: #FAF6F0; border-radius: 8px;">
             <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">
-              Update Delivery Status:
+              Update Artisan Fulfillment Status:
             </label>
-            <select v-model="activeOrder.status" class="form-input" style="padding: 8px; font-size: 0.88rem;">
-              <option value="Pending Dispatch">Pending Dispatch</option>
-              <option value="In Transit">In Transit</option>
-              <option value="Delivered">Delivered</option>
+            <select v-model="selectedStatus" class="form-input" style="padding: 8px; font-size: 0.88rem;">
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">In Transit / Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
             </select>
+          </div>
+
+          <div v-if="statusFeedback" style="margin-top: 10px; font-size: 0.84rem;" :style="{ color: feedbackIsError ? '#c25e3e' : '#2e7d32' }">
+            {{ statusFeedback }}
           </div>
         </div>
 
         <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: flex-end; gap: 10px;">
           <button type="button" class="btn btn-secondary btn-sm" @click="activeOrder = null">Close</button>
-          <button type="button" class="btn btn-primary btn-sm" @click="saveStatus">Save Update</button>
+          <button type="button" class="btn btn-primary btn-sm" @click="saveStatus" :disabled="isSaving">
+            {{ isSaving ? 'Saving…' : 'Save Status' }}
+          </button>
         </div>
       </div>
     </div>
@@ -78,29 +87,67 @@
 
 <script setup>
 import { ref } from 'vue';
+import { sellerService } from '../services/sellerService.js';
 
-defineProps({
+const props = defineProps({
   orders: {
     type: Array,
     required: true
   }
 });
 
+const emit = defineEmits(['order-updated']);
+
 const activeOrder = ref(null);
+const selectedStatus = ref('pending');
+const isSaving = ref(false);
+const statusFeedback = ref('');
+const feedbackIsError = ref(false);
 
 const openOrderModal = (order) => {
   activeOrder.value = order;
+  selectedStatus.value = (order.rawStatus || order.status || 'pending').toLowerCase();
+  statusFeedback.value = '';
+  feedbackIsError.value = false;
 };
 
-const saveStatus = () => {
-  alert(`Order ${activeOrder.value.id} updated to status: "${activeOrder.value.status}"`);
-  activeOrder.value = null;
+const saveStatus = async () => {
+  if (!activeOrder.value) return;
+
+  isSaving.value = true;
+  statusFeedback.value = '';
+  feedbackIsError.value = false;
+
+  try {
+    const itemId = activeOrder.value.orderItemId || activeOrder.value.id;
+    const res = await sellerService.updateOrderItemStatus(itemId, selectedStatus.value);
+
+    if (res && res.success) {
+      activeOrder.value.status = selectedStatus.value.charAt(0).toUpperCase() + selectedStatus.value.slice(1);
+      activeOrder.value.rawStatus = selectedStatus.value;
+      statusFeedback.value = '✓ Fulfillment status updated successfully!';
+      feedbackIsError.value = false;
+      emit('order-updated');
+      setTimeout(() => {
+        activeOrder.value = null;
+      }, 1200);
+    } else {
+      statusFeedback.value = res.message || 'Failed to update status.';
+      feedbackIsError.value = true;
+    }
+  } catch (err) {
+    statusFeedback.value = err.response?.data?.message || 'Failed to update order fulfillment status.';
+    feedbackIsError.value = true;
+  } finally {
+    isSaving.value = false;
+  }
 };
 
 const getStatusClass = (status) => {
-  const s = status.toLowerCase();
+  const s = (status || '').toLowerCase();
   if (s.includes('delivered')) return 'status-delivered';
-  if (s.includes('transit')) return 'status-transit';
+  if (s.includes('transit') || s.includes('shipped') || s.includes('process')) return 'status-transit';
+  if (s.includes('cancel')) return 'status-cancelled';
   return 'status-pending';
 };
 </script>

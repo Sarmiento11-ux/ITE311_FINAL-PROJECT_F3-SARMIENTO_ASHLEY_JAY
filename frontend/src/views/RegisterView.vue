@@ -3,15 +3,6 @@
     <div class="container">
       
       <div class="auth-card-container">
-        
-        <!-- Simulation Notice Banner -->
-        <div class="simulation-alert-banner">
-          <span class="alert-icon">ℹ️</span>
-          <div>
-            <strong>Frontend Prototype Notice:</strong>
-            <span>This registration form implements reactive client-side validation and session modeling. Real password encryption (bcrypt) and database persistence will be integrated via the upcoming Laravel REST API.</span>
-          </div>
-        </div>
 
         <div class="auth-card">
           <div class="auth-card-header">
@@ -83,7 +74,7 @@
                 <span v-if="errors.email" class="field-error-msg">{{ errors.email }}</span>
               </div>
 
-              <!-- Username -->
+              <!-- Username (optional display identifier) -->
               <div class="form-group">
                 <label for="username" class="form-label">Username <span class="required">*</span></label>
                 <input 
@@ -97,6 +88,20 @@
                 >
                 <span v-if="errors.username" class="field-error-msg">{{ errors.username }}</span>
               </div>
+            </div>
+
+            <!-- Seller Shop Name (if seller role selected) -->
+            <div v-if="form.accountType === 'seller'" class="form-group">
+              <label for="shopName" class="form-label">Storefront / Shop Name <span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="shopName" 
+                v-model="form.shopName" 
+                class="form-input" 
+                :class="{ 'input-error': errors.shopName }"
+                placeholder="e.g. Cordillera Weaves Studio"
+              >
+              <span v-if="errors.shopName" class="field-error-msg">{{ errors.shopName }}</span>
             </div>
 
             <div class="form-row-2col">
@@ -149,9 +154,10 @@
             </div>
 
             <!-- Create Account Button -->
-            <button type="submit" class="btn btn-primary btn-auth-submit">
-              <span>Create Account</span>
-              <span class="btn-arrow">→</span>
+            <button type="submit" class="btn btn-primary btn-auth-submit" :disabled="loading">
+              <span v-if="loading">Creating Account…</span>
+              <span v-else>Create Account</span>
+              <span v-if="!loading" class="btn-arrow">→</span>
             </button>
 
           </form>
@@ -172,15 +178,18 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useAuth } from '../composables/useAuth.js';
 
 const route = useRoute();
 const router = useRouter();
+const { register, loading } = useAuth();
 
 const form = reactive({
   accountType: 'customer',
   fullName: '',
   email: '',
   username: '',
+  shopName: '',
   password: '',
   confirmPassword: '',
   terms: false
@@ -190,6 +199,7 @@ const errors = reactive({
   fullName: '',
   email: '',
   username: '',
+  shopName: '',
   password: '',
   confirmPassword: '',
   terms: ''
@@ -209,6 +219,7 @@ const validate = () => {
   errors.fullName = '';
   errors.email = '';
   errors.username = '';
+  errors.shopName = '';
   errors.password = '';
   errors.confirmPassword = '';
   errors.terms = '';
@@ -238,7 +249,13 @@ const validate = () => {
     isValid = false;
   }
 
-  // 4. Password length validation
+  // 4. Shop name for sellers
+  if (form.accountType === 'seller' && !form.shopName.trim()) {
+    errors.shopName = 'Storefront name is required for artisans.';
+    isValid = false;
+  }
+
+  // 5. Password length validation
   if (!form.password) {
     errors.password = 'Password is required.';
     isValid = false;
@@ -247,7 +264,7 @@ const validate = () => {
     isValid = false;
   }
 
-  // 5. Password confirmation match
+  // 6. Password confirmation match
   if (!form.confirmPassword) {
     errors.confirmPassword = 'Please confirm your password.';
     isValid = false;
@@ -256,7 +273,7 @@ const validate = () => {
     isValid = false;
   }
 
-  // 6. Terms validation
+  // 7. Terms validation
   if (!form.terms) {
     errors.terms = 'You must accept the Terms and Conditions to proceed.';
     isValid = false;
@@ -265,33 +282,36 @@ const validate = () => {
   return isValid;
 };
 
-const handleRegister = () => {
+const handleRegister = async () => {
+  statusMsg.value = '';
   if (!validate()) return;
 
-  const newUser = {
-    fullName: form.fullName.trim(),
-    email: form.email.trim().toLowerCase(),
-    username: form.username.trim(),
-    role: form.accountType === 'seller' ? 'Seller' : 'Customer',
-    phone: '+63 917 555 0192',
-    address: 'Metro Manila, Philippines',
-    bio: form.accountType === 'seller' 
-      ? 'Independent craftmaker and local handmade artisan.' 
-      : 'Conscious supporter of local handmade crafts.'
-  };
+  try {
+    const payload = {
+      name: form.fullName.trim(),
+      email: form.email.trim().toLowerCase(),
+      password: form.password,
+      password_confirmation: form.confirmPassword,
+      role: form.accountType,
+      shop_name: form.accountType === 'seller' ? form.shopName.trim() : undefined
+    };
 
-  // Persist simulated user in sessionStorage
-  sessionStorage.setItem('craftMarketRegisteredUser', JSON.stringify(newUser));
-  
-  statusMsg.value = '✓ Account registered successfully! Redirecting to login...';
-  statusClass.value = 'alert-success';
+    const user = await register(payload);
 
-  setTimeout(() => {
-    router.push({
-      path: '/login',
-      query: { registered: 'true', user: form.username.trim() }
-    });
-  }, 1200);
+    statusMsg.value = `✔ Account registered successfully! Welcome, ${user.name}!`;
+    statusClass.value = 'alert-success';
+
+    setTimeout(() => {
+      if (user.role === 'seller') {
+        router.push('/dashboard/seller');
+      } else {
+        router.push('/dashboard/customer');
+      }
+    }, 1000);
+  } catch (err) {
+    statusMsg.value = err.message || 'Registration failed. Please check inputs and try again.';
+    statusClass.value = 'alert-danger';
+  }
 };
 </script>
 

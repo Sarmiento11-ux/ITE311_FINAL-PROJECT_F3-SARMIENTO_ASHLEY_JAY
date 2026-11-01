@@ -273,6 +273,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth } from '../data/auth.js';
+import { authService } from '../services/authService.js';
 
 const router = useRouter();
 const isEditing = ref(false);
@@ -329,9 +330,9 @@ const cancelEdit = () => {
   Object.assign(editForm, currentUser.value);
 };
 
-const saveProfile = () => {
-  if (!editForm.fullName.trim() || !editForm.email.trim() || !editForm.username.trim()) {
-    alertMsg.value = 'Full Name, Username, and Email are required.';
+const saveProfile = async () => {
+  if (!editForm.fullName?.trim() || !editForm.email?.trim()) {
+    alertMsg.value = 'Full Name and Email are required.';
     alertClass.value = 'alert-danger';
     return;
   }
@@ -343,10 +344,15 @@ const saveProfile = () => {
     return;
   }
 
-  auth.updateProfile({ ...editForm });
-  isEditing.value = false;
-  alertMsg.value = '✓ Profile details updated successfully!';
-  alertClass.value = 'alert-success';
+  try {
+    await auth.updateProfile({ ...editForm });
+    isEditing.value = false;
+    alertMsg.value = '✓ Profile details updated successfully in database!';
+    alertClass.value = 'alert-success';
+  } catch (err) {
+    alertMsg.value = err.message || 'Failed to update profile. Please try again.';
+    alertClass.value = 'alert-danger';
+  }
   setTimeout(() => { alertMsg.value = ''; }, 3200);
 };
 
@@ -356,7 +362,7 @@ const passwords = reactive({
   confirmPass: ''
 });
 
-const updatePassword = () => {
+const updatePassword = async () => {
   alertMsg.value = '';
 
   if (!passwords.current) {
@@ -377,16 +383,34 @@ const updatePassword = () => {
     return;
   }
 
-  passwords.current = '';
-  passwords.newPass = '';
-  passwords.confirmPass = '';
-  alertMsg.value = '✓ Password updated successfully in session!';
-  alertClass.value = 'alert-success';
-  setTimeout(() => { alertMsg.value = ''; }, 3200);
+  try {
+    await authService.changePassword({
+      current_password: passwords.current,
+      password: passwords.newPass,
+      password_confirmation: passwords.confirmPass
+    });
+
+    passwords.current = '';
+    passwords.newPass = '';
+    passwords.confirmPass = '';
+    alertMsg.value = '✓ Password changed successfully! Please log in again with your new password.';
+    alertClass.value = 'alert-success';
+    
+    setTimeout(() => {
+      auth.logout();
+      router.push('/login');
+    }, 1800);
+  } catch (err) {
+    const errorMsg = err.response?.data?.message 
+      || (err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join(' ') : null)
+      || 'Password update failed. Please verify your current password.';
+    alertMsg.value = errorMsg;
+    alertClass.value = 'alert-danger';
+  }
 };
 
-const handleLogout = () => {
-  auth.logout();
+const handleLogout = async () => {
+  await auth.logout();
   router.push('/login');
 };
 </script>

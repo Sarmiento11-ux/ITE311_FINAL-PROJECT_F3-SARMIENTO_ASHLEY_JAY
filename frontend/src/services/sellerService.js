@@ -44,17 +44,20 @@ export const sellerService = {
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         return response.data.data.map(item => ({
           id: item.order?.id || item.id,
+          orderItemId: item.id, // ID of the specific order_item for multi-seller tracking
           orderNumber: item.order?.order_number || `CM-${item.id}`,
           customerName: item.order?.user?.name || 'Valued Customer',
           productName: item.product_name,
           quantity: item.quantity,
           totalAmount: parseFloat(item.subtotal),
-          status: (item.order?.status || 'pending').charAt(0).toUpperCase() + (item.order?.status || 'pending').slice(1),
+          status: (item.status || item.order?.status || 'pending').charAt(0).toUpperCase() + (item.status || item.order?.status || 'pending').slice(1),
+          rawStatus: item.status || 'pending',
           orderDate: new Date(item.created_at).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
           }),
+          shippingAddress: item.order?.shipping_address || 'Registered Delivery Address',
           isFromApi: true,
         }));
       }
@@ -62,6 +65,17 @@ export const sellerService = {
       console.warn('[SellerService] Could not fetch seller orders from API, using fallback.', err.message);
     }
     return [...sellerOrdersData];
+  },
+
+  /**
+   * Update the fulfillment status of a specific order item.
+   * PATCH /api/seller/order-items/{id}/status
+   */
+  async updateOrderItemStatus(orderItemId, status) {
+    const response = await apiClient.patch(`/seller/order-items/${orderItemId}/status`, {
+      status: status.toLowerCase()
+    });
+    return response.data;
   },
 
   /**

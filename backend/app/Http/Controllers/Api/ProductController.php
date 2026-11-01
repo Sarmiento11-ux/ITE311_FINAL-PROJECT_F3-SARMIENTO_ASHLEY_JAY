@@ -74,11 +74,11 @@ class ProductController extends Controller
 
     /**
      * Store a newly created product.
+     * Seller is always the authenticated user (not from request body).
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'seller_id'   => 'required|exists:users,id',
             'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:255',
             'slug'        => 'nullable|string|max:255|unique:products,slug',
@@ -96,6 +96,9 @@ class ProductController extends Controller
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']) . '-' . Str::random(5);
         }
+
+        // Seller ID is always the authenticated user (security: never trust client-supplied seller_id)
+        $validated['seller_id'] = $request->user()->id;
 
         $product = Product::create($validated);
         $product->load(['category', 'seller:id,name,email']);
@@ -131,9 +134,11 @@ class ProductController extends Controller
 
     /**
      * Update the specified product.
+     * Sellers may only update their own products. Admins can update any.
      */
     public function update(Request $request, $id)
     {
+        $user    = $request->user();
         $product = Product::find($id);
 
         if (!$product) {
@@ -142,6 +147,15 @@ class ProductController extends Controller
                 'message' => 'Product not found.',
                 'data'    => null,
             ], 404);
+        }
+
+        // Sellers can only edit their own products
+        if ($user->role === 'seller' && $product->seller_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You can only edit your own products.',
+                'data'    => null,
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -171,9 +185,11 @@ class ProductController extends Controller
 
     /**
      * Remove the specified product.
+     * Sellers may only delete their own products. Admins can delete any.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        $user    = $request->user();
         $product = Product::find($id);
 
         if (!$product) {
@@ -182,6 +198,15 @@ class ProductController extends Controller
                 'message' => 'Product not found.',
                 'data'    => null,
             ], 404);
+        }
+
+        // Sellers can only delete their own products
+        if ($user->role === 'seller' && $product->seller_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You can only delete your own products.',
+                'data'    => null,
+            ], 403);
         }
 
         $product->delete();

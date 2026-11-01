@@ -13,17 +13,17 @@ class SellerController extends Controller
 {
     /**
      * Get products belonging to a seller.
+     * Sellers may only see their own products. Admins see any seller's products.
      */
     public function products(Request $request)
     {
-        $sellerId = $request->query('seller_id', $request->user()?->id);
+        $user = $request->user();
 
-        if (!$sellerId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Seller ID is required.',
-                'data'    => null,
-            ], 400);
+        // Admin can query any seller_id; seller is locked to own id
+        if ($user->role === 'admin') {
+            $sellerId = $request->query('seller_id', $user->id);
+        } else {
+            $sellerId = $user->id; // seller always scoped to self
         }
 
         $products = Product::with('category')
@@ -43,15 +43,10 @@ class SellerController extends Controller
      */
     public function orders(Request $request)
     {
-        $sellerId = $request->query('seller_id', $request->user()?->id);
-
-        if (!$sellerId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Seller ID is required.',
-                'data'    => null,
-            ], 400);
-        }
+        $user = $request->user();
+        $sellerId = $user->role === 'admin' 
+            ? $request->query('seller_id', $user->id) 
+            : $user->id;
 
         $items = OrderItem::with(['order.user:id,name,email', 'product'])
             ->where('seller_id', $sellerId)
@@ -70,15 +65,10 @@ class SellerController extends Controller
      */
     public function stats(Request $request)
     {
-        $sellerId = $request->query('seller_id', $request->user()?->id);
-
-        if (!$sellerId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Seller ID is required.',
-                'data'    => null,
-            ], 400);
-        }
+        $user = $request->user();
+        $sellerId = $user->role === 'admin' 
+            ? $request->query('seller_id', $user->id) 
+            : $user->id;
 
         $totalProducts = Product::where('seller_id', $sellerId)->count();
         $activeProducts = Product::where('seller_id', $sellerId)->where('status', 'active')->count();
@@ -87,8 +77,8 @@ class SellerController extends Controller
         $totalOrders = $orderItems->pluck('order_id')->unique()->count();
         $totalSales = $orderItems->sum('subtotal');
 
-        $pendingOrders = $orderItems->filter(fn($item) => $item->order && $item->order->status === 'pending')->pluck('order_id')->unique()->count();
-        $completedOrders = $orderItems->filter(fn($item) => $item->order && $item->order->status === 'delivered')->pluck('order_id')->unique()->count();
+        $pendingOrders = $orderItems->filter(fn($item) => $item->status === 'pending' || ($item->order && $item->order->status === 'pending'))->pluck('order_id')->unique()->count();
+        $completedOrders = $orderItems->filter(fn($item) => $item->status === 'delivered')->pluck('order_id')->unique()->count();
 
         return response()->json([
             'success' => true,
@@ -101,6 +91,84 @@ class SellerController extends Controller
                 'pending_orders'    => $pendingOrders,
                 'completed_orders'  => $completedOrders,
             ],
+        ]);
+    }
+
+    /**
+     * Update the fulfillment status of an individual seller order item.
+     * Supports multi-seller orders where each artisan fulfills their own items.
+     *
+     * PATCH /api/seller/order-items/{id}/status
+     */
+    public function updateItemStatus(Request $request, $id)
+    {
+        $user = $request->user();
+        $item = OrderItem::with('order.items')->find($id);
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order item not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        // Authorization: Only the artisan who owns this product or an admin may update fulfillment
+        if ($user->role !== 'admin' && $item->seller_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You can only update fulfillment for your own craft items.',
+                'data'    => null,
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
+        ]);
+
+        $newStatus = $validated['status'];
+        $currentStatus = $item->status ?? 'pending';
+
+        // Validate state transitions
+        $invalidTransitions = [
+            'delivered' => ['pending', 'confirmed', 'processing'],
+            'cancelled' => ['pending', 'confirmed', 'processing', 'shipped', 'delivered'],
+        ];
+
+        if (isset($invalidTransitions[$currentStatus]) && in_array($newStatus, $invalidTransitions[$currentStatus])) {
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot transition order item from '{$currentStatus}' to '{$newStatus}'.",
+                'data'    => null,
+            ], 422);
+        }
+
+        $item->update(['status' => $newStatus]);
+
+        // Evaluate parent order status across all multi-seller items
+        $order = $item->order;
+        if ($order) {
+            $allItems = $order->items;
+            $allDelivered = $allItems->every(fn($i) => $i->status === 'delivered');
+            $anyCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
+
+            if ($allDelivered) {
+                $order->update([
+                    'status'         => 'delivered',
+                    'delivered_at'   => now(),
+                    'payment_status' => 'paid',
+                ]);
+            } elseif ($anyCancelled) {
+                $order->update(['status' => 'cancelled']);
+            } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {
+                $order->update(['status' => 'processing']);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Order item fulfillment updated to '{$newStatus}'.",
+            'data'    => $item->fresh(['order.user:id,name', 'product']),
         ]);
     }
 

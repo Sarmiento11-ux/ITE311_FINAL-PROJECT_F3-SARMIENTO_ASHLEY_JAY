@@ -64,7 +64,7 @@
       <!-- User Actions -->
       <div class="header-actions">
         <router-link 
-          v-if="!auth.isAuthenticated || auth.user.value?.role !== 'Seller'" 
+          v-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
           to="/register?role=seller" 
           class="btn-seller-link"
         >
@@ -93,8 +93,22 @@
           <span class="icon-text">{{ auth.isAuthenticated ? 'Profile' : 'Account' }}</span>
         </router-link>
         
+        <!-- Customer Orders Link -->
+        <router-link 
+          v-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
+          to="/orders" 
+          class="nav-icon-link" 
+          title="My Orders"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <span class="icon-text">Orders</span>
+        </router-link>
+
         <!-- Cart Link -->
-        <router-link to="/products" class="nav-icon-link cart-pill" title="Shopping Cart">
+        <router-link to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>

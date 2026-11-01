@@ -137,7 +137,7 @@
                 </button>
               </div>
 
-              <SellerOrdersTable :orders="orders.slice(0, 3)" />
+              <SellerOrdersTable :orders="orders.slice(0, 3)" @order-updated="loadSellerData" />
             </div>
 
             <!-- Products Quick View -->
@@ -191,7 +191,7 @@
                 </div>
               </div>
 
-              <SellerOrdersTable :orders="orders" />
+              <SellerOrdersTable :orders="orders" @order-updated="loadSellerData" />
             </div>
           </div>
 

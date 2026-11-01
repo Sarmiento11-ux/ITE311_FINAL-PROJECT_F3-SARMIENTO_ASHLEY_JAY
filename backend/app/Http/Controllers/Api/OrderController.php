@@ -14,12 +14,18 @@ class OrderController extends Controller
 {
     /**
      * Display a listing of orders.
+     * Customers see only their own orders. Admins see all.
      */
     public function index(Request $request)
     {
+        $user  = $request->user();
         $query = Order::with(['user:id,name,email', 'items.product']);
 
-        if ($request->filled('user_id')) {
+        // If customer: restrict to own orders only (prevents peeking at other users)
+        if ($user->role === 'customer') {
+            $query->where('user_id', $user->id);
+        } elseif ($request->filled('user_id')) {
+            // Admin/seller can filter by user_id
             $query->where('user_id', $request->query('user_id'));
         }
 
@@ -38,82 +44,116 @@ class OrderController extends Controller
 
     /**
      * Store a newly created order with items.
+     * Enforces backend price calculation, strict stock checking, and cart clearing.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id'          => 'required|exists:users,id',
-            'items'            => 'required|array|min:1',
+            'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
-            'shipping_fee'     => 'nullable|numeric|min:0',
-            'payment_method'   => 'nullable|string|max:50',
-            'shipping_address' => 'required|string',
-            'contact_number'   => 'required|string|max:50',
-            'notes'            => 'nullable|string',
+            'payment_method'     => 'nullable|string|max:50',
+            'shipping_address'   => 'required|string',
+            'contact_number'     => 'required|string|max:50',
+            'notes'              => 'nullable|string',
+            'user_id'            => 'nullable|exists:users,id',
         ]);
 
-        return DB::transaction(function () use ($validated) {
-            $subtotal = 0;
-            $itemsData = [];
+        // Security: Always use the authenticated user's ID
+        $userId = $request->user()?->id ?? $validated['user_id'] ?? null;
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required to place an order.',
+                'data'    => null,
+            ], 401);
+        }
 
-            foreach ($validated['items'] as $item) {
-                $product = Product::findOrFail($item['product_id']);
-                $itemSubtotal = $product->price * $item['quantity'];
-                $subtotal += $itemSubtotal;
+        try {
+            $order = DB::transaction(function () use ($validated, $userId) {
+                $subtotal = 0;
+                $itemsData = [];
 
-                $itemsData[] = [
-                    'product_id'   => $product->id,
-                    'seller_id'    => $product->seller_id,
-                    'product_name' => $product->name,
-                    'unit_price'   => $product->price,
-                    'price'        => $product->price,
-                    'quantity'     => $item['quantity'],
-                    'subtotal'     => $itemSubtotal,
-                ];
+                foreach ($validated['items'] as $item) {
+                    // Lock product row for update to prevent race conditions during checkout
+                    $product = Product::lockForUpdate()->findOrFail($item['product_id']);
 
-                // Deduct stock if sufficient
-                if ($product->stock >= $item['quantity']) {
+                    // Verify availability
+                    if ($product->stock < $item['quantity']) {
+                        throw new \Exception("Product '{$product->name}' has insufficient stock. Only {$product->stock} available in inventory.");
+                    }
+
+                    $unitPrice = (float) $product->price;
+                    $itemSubtotal = $unitPrice * $item['quantity'];
+                    $subtotal += $itemSubtotal;
+
+                    $itemsData[] = [
+                        'product_id'   => $product->id,
+                        'seller_id'    => $product->seller_id,
+                        'product_name' => $product->name,
+                        'unit_price'   => $unitPrice,
+                        'price'        => $unitPrice,
+                        'quantity'     => $item['quantity'],
+                        'subtotal'     => $itemSubtotal,
+                        'status'       => 'pending',
+                    ];
+
+                    // Deduct stock immediately in transaction
                     $product->decrement('stock', $item['quantity']);
                 }
-            }
 
-            $shippingFee = $validated['shipping_fee'] ?? 0;
-            $totalAmount = $subtotal + $shippingFee;
+                // Shipping fee policy: Free shipping on orders ₱1,500 and above; otherwise ₱150.00
+                $shippingFee = $subtotal >= 1500 ? 0 : 150;
+                $totalAmount = $subtotal + $shippingFee;
 
-            $order = Order::create([
-                'user_id'          => $validated['user_id'],
-                'order_number'     => 'CM-' . strtoupper(Str::random(8)),
-                'subtotal'         => $subtotal,
-                'shipping_fee'     => $shippingFee,
-                'total_amount'     => $totalAmount,
-                'status'           => 'pending',
-                'payment_method'   => $validated['payment_method'] ?? 'Cash on Delivery',
-                'payment_status'   => 'unpaid',
-                'shipping_address' => $validated['shipping_address'],
-                'contact_number'   => $validated['contact_number'],
-                'notes'            => $validated['notes'] ?? null,
-            ]);
+                $order = Order::create([
+                    'user_id'          => $userId,
+                    'order_number'     => 'CM-' . strtoupper(Str::random(8)),
+                    'subtotal'         => $subtotal,
+                    'shipping_fee'     => $shippingFee,
+                    'total_amount'     => $totalAmount,
+                    'status'           => 'pending',
+                    'payment_method'   => $validated['payment_method'] ?? 'Cash on Delivery',
+                    'payment_status'   => 'unpaid',
+                    'shipping_address' => $validated['shipping_address'],
+                    'contact_number'   => $validated['contact_number'],
+                    'notes'            => $validated['notes'] ?? null,
+                ]);
 
-            foreach ($itemsData as $itemData) {
-                $order->items()->create($itemData);
-            }
+                foreach ($itemsData as $itemData) {
+                    $order->items()->create($itemData);
+                }
 
-            $order->load(['user:id,name,email', 'items.product']);
+                // Clear customer's persistent cart items upon successful order placement
+                \App\Models\CartItem::where('user_id', $userId)->delete();
+
+                return $order;
+            });
+
+            $order->load(['user:id,name,email', 'items.product', 'items.seller:id,name']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Order created successfully.',
+                'message' => 'Order placed successfully! Thank you for supporting local artisans.',
                 'data'    => $order,
             ], 201);
-        });
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data'    => null,
+            ], 422);
+        }
     }
 
     /**
      * Display the specified order.
+     * Customers can only view their own orders.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $user  = $request->user();
         $order = Order::with(['user:id,name,email', 'items.product', 'items.seller:id,name,email'])->find($id);
 
         if (!$order) {
@@ -122,6 +162,18 @@ class OrderController extends Controller
                 'message' => 'Order not found.',
                 'data'    => null,
             ], 404);
+        }
+
+        // Authorization: Non-admins can only view the order if they are the buyer or an involved seller
+        $isBuyer = $order->user_id === $user->id;
+        $isItemSeller = $order->items->contains('seller_id', $user->id);
+
+        if ($user->role !== 'admin' && !$isBuyer && !$isItemSeller) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You do not have access to this order.',
+                'data'    => null,
+            ], 403);
         }
 
         return response()->json([
