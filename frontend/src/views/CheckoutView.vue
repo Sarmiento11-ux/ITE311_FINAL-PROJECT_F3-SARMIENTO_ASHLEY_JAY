@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <main class="checkout-page-wrapper">
     <div class="container">
 
@@ -23,20 +23,20 @@
         {{ alertMsg }}
       </div>
 
-      <!-- Empty Cart Redirection — only shown after loading is done -->
+      <!-- Empty Cart Redirection â€” only shown after loading is done -->
       <div v-if="!cartIsLoading && cart.items.length === 0 && !orderSuccess" class="empty-checkout-card">
-        <div class="empty-icon">🛒</div>
+        <div class="empty-icon">ðŸ›’</div>
         <h2>Your Cart is Empty</h2>
         <p>Please add handmade artisan crafts to your cart before proceeding to checkout.</p>
         <router-link to="/products" class="btn btn-primary" style="margin-top: 20px;">
-          Explore Products →
+          Explore Products â†’
         </router-link>
       </div>
 
       <!-- Cart Loading Spinner -->
       <div v-if="cartIsLoading" class="cart-loading-state">
         <div class="loading-spinner"></div>
-        <p>Loading your cart…</p>
+        <p>Loading your cartâ€¦</p>
       </div>
 
       <!-- Checkout Form Grid -->
@@ -119,17 +119,53 @@
           <!-- Payment Section -->
           <h2 class="form-section-title" style="margin-top: 32px;">2. Payment Method</h2>
 
-          <div class="payment-selection-box selected">
+          <!-- COD Option -->
+          <div
+            class="payment-selection-box"
+            :class="{ selected: selectedPayment === 'cod' }"
+            @click="selectedPayment = 'cod'"
+            role="radio"
+            :aria-checked="selectedPayment === 'cod'"
+          >
             <div class="payment-selection-header">
-              <span class="payment-radio-bullet">●</span>
+              <span class="payment-radio-bullet">{{ selectedPayment === 'cod' ? 'â—' : 'â—‹' }}</span>
               <div class="payment-details">
                 <div class="payment-name-row">
-                  <strong class="payment-title">Cash on Delivery (COD)</strong>
-                  <span class="status-pill status-cod">Active Option</span>
+                  <strong class="payment-title">ðŸšš Cash on Delivery (COD)</strong>
+                  <span class="status-pill status-cod">Available</span>
                 </div>
                 <p class="payment-desc">
                   Pay with exact cash directly to the courier upon receiving and inspecting your handcrafted packages.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PayMongo Online Payment Option -->
+          <div
+            class="payment-selection-box paymongo-box"
+            :class="{ selected: selectedPayment === 'paymongo' }"
+            @click="selectedPayment = 'paymongo'"
+            role="radio"
+            :aria-checked="selectedPayment === 'paymongo'"
+            style="margin-top: 12px;"
+          >
+            <div class="payment-selection-header">
+              <span class="payment-radio-bullet">{{ selectedPayment === 'paymongo' ? 'â—' : 'â—‹' }}</span>
+              <div class="payment-details">
+                <div class="payment-name-row">
+                  <strong class="payment-title">ðŸ’³ Online Payment via PayMongo</strong>
+                  <span class="status-pill status-online">Secure</span>
+                </div>
+                <p class="payment-desc">
+                  Pay securely online using GCash, Maya, credit/debit card, or GrabPay. You will be redirected to PayMongo's secure hosted checkout page.
+                </p>
+                <div class="paymongo-badges">
+                  <span class="pm-badge">GCash</span>
+                  <span class="pm-badge">Maya</span>
+                  <span class="pm-badge">Visa/MC</span>
+                  <span class="pm-badge">GrabPay</span>
+                </div>
               </div>
             </div>
           </div>
@@ -151,8 +187,8 @@
                 <h4 class="mini-title">{{ item.title }}</h4>
                 <p class="mini-seller">Maker: {{ item.seller || 'Artisan' }}</p>
                 <div class="mini-price-row">
-                  <span>{{ item.quantity }} × ₱{{ Number(item.price).toFixed(2) }}</span>
-                  <strong>₱{{ (Number(item.price) * Number(item.quantity)).toFixed(2) }}</strong>
+                  <span>{{ item.quantity }} Ã— â‚±{{ Number(item.price).toFixed(2) }}</span>
+                  <strong>â‚±{{ (Number(item.price) * Number(item.quantity)).toFixed(2) }}</strong>
                 </div>
               </div>
             </div>
@@ -162,40 +198,45 @@
           <div class="checkout-breakdown">
             <div class="breakdown-row">
               <span>Items Subtotal</span>
-              <span>₱{{ Number(cart.subtotal).toFixed(2) }}</span>
+              <span>â‚±{{ Number(cart.subtotal).toFixed(2) }}</span>
             </div>
 
             <div class="breakdown-row">
               <span>Shipping & Handling</span>
-              <span v-if="cart.subtotal >= 1500" class="free-shipping-tag">FREE (₱0.00)</span>
-              <span v-else>₱150.00</span>
+              <span v-if="cart.subtotal >= 1500" class="free-shipping-tag">FREE (â‚±0.00)</span>
+              <span v-else>â‚±150.00</span>
             </div>
 
             <div class="breakdown-total-row">
               <span>Grand Total</span>
               <span class="total-amount-highlight">
-                ₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}
+                â‚±{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}
               </span>
             </div>
-          </div>
-
-          <!-- Submit Order Button -->
+          </div>          <!-- Submit Order Button -->
           <button
             type="submit"
             class="btn btn-primary btn-submit-order"
+            :class="{ 'btn-paymongo': selectedPayment === 'paymongo' }"
             :disabled="isSubmitting"
           >
-            <span v-if="isSubmitting">Processing Order…</span>
-            <span v-else>Confirm & Place Order (COD)</span>
+            <span v-if="isSubmitting">Processing…</span>
+            <span v-else-if="selectedPayment === 'paymongo'">Proceed to Secure Payment</span>
+            <span v-else>Confirm &amp; Place Order (COD)</span>
             <span v-if="!isSubmitting" class="btn-arrow">→</span>
           </button>
 
+          <!-- PayMongo note -->
+          <p v-if="selectedPayment === 'paymongo'" class="paymongo-redirect-note">
+            🔒 You will be redirected to PayMongo secure checkout to complete payment.
+          </p>
+
           <router-link to="/cart" class="btn-back-to-cart">
-            ← Return to Basket
+            â† Return to Basket
           </router-link>
 
           <div class="checkout-security-card">
-            <span>🔒</span>
+            <span>ðŸ”’</span>
             <p><strong>Safe & Transparent:</strong> Total is calculated verified on the server. No hidden fees.</p>
           </div>
         </div>
@@ -204,7 +245,7 @@
 
       <!-- Order Success Modal / Screen -->
       <div v-if="orderSuccess" class="order-success-card">
-        <div class="success-icon-badge">✓</div>
+        <div class="success-icon-badge">âœ“</div>
         <span class="success-eyebrow">ORDER CONFIRMED</span>
         <h2 class="success-title">Salamat! Your Order is Placed.</h2>
         <p class="success-subtitle">
@@ -219,7 +260,7 @@
           </div>
           <div class="detail-line">
             <span>Amount Due on Delivery:</span>
-            <strong>₱{{ Number(placedOrder?.total_amount).toFixed(2) }}</strong>
+            <strong>â‚±{{ Number(placedOrder?.total_amount).toFixed(2) }}</strong>
           </div>
           <div class="detail-line">
             <span>Delivery Destination:</span>
@@ -233,7 +274,7 @@
 
         <div class="success-actions-row">
           <router-link to="/orders" class="btn btn-primary">
-            View My Orders →
+            View My Orders â†’
           </router-link>
           <router-link to="/products" class="btn btn-secondary">
             Continue Shopping
@@ -252,13 +293,15 @@ import { cart } from '../data/cart.js';
 import { auth } from '../data/auth.js';
 import { authService } from '../services/authService.js';
 import { orderService } from '../services/orderService.js';
+import { paymentService } from '../services/paymentService.js';
 
 const router = useRouter();
-const isSubmitting = ref(false);
-const alertMsg = ref('');
-const alertClass = ref('');
-const orderSuccess = ref(false);
-const placedOrder = ref(null);
+const isSubmitting  = ref(false);
+const alertMsg      = ref('');
+const alertClass    = ref('');
+const orderSuccess  = ref(false);
+const placedOrder   = ref(null);
+const selectedPayment = ref('cod'); // 'cod' | 'paymongo'
 
 const fallbackImg = 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=400&q=80';
 
@@ -327,7 +370,7 @@ const validateForm = () => {
   }
 
   if (!isValid) {
-    alertMsg.value = '⚠️ Please complete all required fields marked with (*) before placing your order.';
+    alertMsg.value = 'âš ï¸ Please complete all required fields marked with (*) before placing your order.';
     alertClass.value = 'alert-danger';
     // Scroll the alert into view
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -337,17 +380,16 @@ const validateForm = () => {
 };
 
 const handlePlaceOrder = async () => {
-  alertMsg.value = '';
+  alertMsg.value   = '';
   alertClass.value = '';
 
   if (!validateForm()) {
-    // validateForm() already sets alertMsg — just scroll to the alert
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
   if (cart.items.length === 0) {
-    alertMsg.value = 'Your basket is empty. Please select products to order.';
+    alertMsg.value   = 'Your basket is empty. Please select products to order.';
     alertClass.value = 'alert-danger';
     return;
   }
@@ -355,35 +397,66 @@ const handlePlaceOrder = async () => {
   isSubmitting.value = true;
 
   try {
+    // Step 1: Always create the order first regardless of payment method
     const payload = {
       items: cart.items.map(i => ({
         product_id: i.productId || i.id,
         quantity: i.quantity
       })),
       shipping_address: form.shippingAddress.trim(),
-      contact_number: form.contactNumber.trim(),
-      notes: form.notes.trim() || undefined,
-      payment_method: 'Cash on Delivery'
+      contact_number:   form.contactNumber.trim(),
+      notes:            form.notes.trim() || undefined,
+      payment_method:   selectedPayment.value === 'paymongo'
+        ? 'PayMongo Online Payment'
+        : 'Cash on Delivery',
     };
 
     const res = await orderService.createOrder(payload);
 
-    if (res && res.success) {
-      placedOrder.value = res.data;
+    if (!res || !res.success) {
+      alertMsg.value   = res?.message || 'Failed to place order. Please review your cart.';
+      alertClass.value = 'alert-danger';
+      return;
+    }
+
+    const order = res.data;
+
+    // Step 2: Branch on payment method
+    if (selectedPayment.value === 'paymongo') {
+      alertMsg.value   = 'Creating secure payment session...';
+      alertClass.value = 'alert-info';
+
+      try {
+        const pmRes = await paymentService.createCheckoutSession(order.id);
+
+        if (pmRes && pmRes.success && pmRes.data?.checkout_url) {
+          // Clear cart — order is saved, server cleared persistent cart
+          cart.items.splice(0, cart.items.length);
+          localStorage.removeItem('craftmarket_local_cart');
+          // Redirect to PayMongo hosted checkout
+          window.location.href = pmRes.data.checkout_url;
+        } else {
+          alertMsg.value   = pmRes?.message || 'Could not create payment session. Your order was saved — retry from My Orders.';
+          alertClass.value = 'alert-danger';
+        }
+      } catch (pmErr) {
+        const pmMsg = pmErr.response?.data?.message || pmErr.message || 'Payment session failed.';
+        alertMsg.value   = pmMsg + ' Your order was saved. Try again from My Orders.';
+        alertClass.value = 'alert-danger';
+      }
+    } else {
+      // COD — order is complete
+      placedOrder.value  = order;
       orderSuccess.value = true;
-      // Clear cart locally as server already cleared persistent cart
       cart.items.splice(0, cart.items.length);
       localStorage.removeItem('craftmarket_local_cart');
-    } else {
-      alertMsg.value = res.message || 'Failed to place order. Please review your cart.';
-      alertClass.value = 'alert-danger';
     }
   } catch (err) {
-    const backendMsg = err.response?.data?.message 
+    const backendMsg = err.response?.data?.message
       || (err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join(' ') : null)
-      || err.message 
+      || err.message
       || 'Failed to place order. Please try again.';
-    alertMsg.value = backendMsg;
+    alertMsg.value   = backendMsg;
     alertClass.value = 'alert-danger';
   } finally {
     isSubmitting.value = false;
@@ -844,5 +917,70 @@ const handlePlaceOrder = async () => {
   justify-content: center;
   gap: 14px;
   margin-top: 10px;
+}
+
+/* ─── Payment Method Selector ─────────────────────────────────────────────── */
+.payment-selection-box {
+  border: 2px solid #e8d5b8;
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fff;
+}
+.payment-selection-box:hover {
+  border-color: #c8a97a;
+  background: #fffaf5;
+}
+.payment-selection-box.selected {
+  border-color: #8b5e3c;
+  background: #fffaf5;
+}
+.payment-radio-bullet {
+  font-size: 1.2rem;
+  color: #8b5e3c;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.payment-selection-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.status-pill.status-online {
+  background: #e3f2fd;
+  color: #1565c0;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.paymongo-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.pm-badge {
+  background: #f0f4ff;
+  color: #3d5afe;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #c5cae9;
+}
+.btn-paymongo {
+  background: linear-gradient(135deg, #0070f3 0%, #0050c9 100%) !important;
+}
+.paymongo-redirect-note {
+  font-size: 0.82rem;
+  color: #7A6F68;
+  text-align: center;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border: 1px solid #c5cae9;
 }
 </style>

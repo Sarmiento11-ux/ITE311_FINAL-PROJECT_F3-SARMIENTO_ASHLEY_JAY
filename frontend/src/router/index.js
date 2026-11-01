@@ -11,6 +11,7 @@ import SellerDashboardView from '../views/SellerDashboardView.vue';
 import CartView from '../views/CartView.vue';
 import CheckoutView from '../views/CheckoutView.vue';
 import OrdersView from '../views/OrdersView.vue';
+import PaymentStatusView from '../views/PaymentStatusView.vue';
 
 // Route meta fields:
 //   requiresAuth: true  — must be logged in
@@ -79,6 +80,12 @@ const routes = [
     name: 'orders',
     component: OrdersView,
     meta: { requiresAuth: true, roles: ['customer', 'admin'] }
+  },
+  {
+    path: '/payment/status',
+    name: 'payment-status',
+    component: PaymentStatusView,
+    meta: { requiresAuth: true }
   }
 ];
 

@@ -5,10 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SellerController;
+use App\Http\Controllers\Api\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +26,10 @@ Route::get('/', function () {
         'status'  => 'healthy',
     ]);
 });
+
+// ─── PayMongo Webhook (NO auth middleware — PayMongo calls this directly) ─────
+// Must be outside the auth:sanctum group. Signature is verified inside the controller.
+Route::post('/webhooks/paymongo', [WebhookController::class, 'handlePayMongo']);
 
 // ─── Public Auth Routes ───────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
@@ -66,6 +72,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders',              [OrderController::class, 'index']);
     Route::get('/orders/{id}',         [OrderController::class, 'show']);
     Route::post('/orders',             [OrderController::class, 'store']);
+
+    // ─── Customer: Payments (PayMongo checkout sessions) ─────────────────
+    Route::post('/payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
+    Route::get('/payments/status/{orderId}',  [PaymentController::class, 'getPaymentStatus']);
 
     // ─── Seller / Admin: Product management ──────────────────────────────
     Route::middleware('role:seller,admin')->group(function () {

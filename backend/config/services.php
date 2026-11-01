@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    // ─── PayMongo Payment Gateway ─────────────────────────────────────────────
+    'paymongo' => [
+        'secret_key'      => env('PAYMONGO_SECRET_KEY'),
+        'public_key'      => env('PAYMONGO_PUBLIC_KEY'),
+        'base_url'        => env('PAYMONGO_BASE_URL', 'https://api.paymongo.com/v1'),
+        'webhook_secret'  => env('PAYMONGO_WEBHOOK_SECRET'),
+        // Redirect URLs for hosted checkout (PayMongo sends customer back here)
+        'success_url'     => env('APP_FRONTEND_URL', 'http://localhost:5173') . '/payment/status?status=success',
+        'cancel_url'      => env('APP_FRONTEND_URL', 'http://localhost:5173') . '/payment/status?status=cancelled',
+    ],
+
 ];
