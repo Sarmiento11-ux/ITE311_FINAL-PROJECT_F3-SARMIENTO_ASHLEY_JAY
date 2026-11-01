@@ -6,12 +6,12 @@
       <div class="dashboard-header-banner">
         <div class="dashboard-welcome">
           <span class="section-eyebrow">ARTISAN MERCHANT PORTAL</span>
-          <h1>Welcome to {{ seller.fullName }}! 🎨</h1>
+          <h1>Welcome to {{ seller.fullName }}!</h1>
           <p>Manage your handmade craft listings, review customer orders, and track your escrow payouts.</p>
         </div>
 
         <div class="dashboard-user-badge" style="background-color: #E8F0EA; color: #2F4533;">
-          <span>✓ Verified Local Artisan Maker</span>
+          <span>Verified Local Artisan Maker</span>
         </div>
       </div>
 
@@ -26,7 +26,7 @@
             :class="{ active: currentTab === 'overview' }"
             @click="currentTab = 'overview'"
           >
-            <span class="nav-item-icon">📊</span>
+            
             <span>Dashboard</span>
           </button>
 
@@ -36,7 +36,7 @@
             :class="{ active: currentTab === 'products' }"
             @click="currentTab = 'products'"
           >
-            <span class="nav-item-icon">🏺</span>
+            
             <span>My Products ({{ products.length }})</span>
           </button>
 
@@ -46,12 +46,12 @@
             :class="{ active: currentTab === 'orders' }"
             @click="currentTab = 'orders'"
           >
-            <span class="nav-item-icon">📋</span>
+            
             <span>Manage Orders ({{ orders.length }})</span>
           </button>
 
           <router-link to="/profile" class="dashboard-nav-item">
-            <span class="nav-item-icon">👤</span>
+            
             <span>My Profile</span>
           </router-link>
         </aside>
@@ -64,31 +64,31 @@
             <DashboardStatCard 
               title="Total Products" 
               :value="products.length" 
-              icon="🏺" 
+              icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Orders Received" 
               :value="orders.length" 
-              icon="📦" 
+              icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
               :value="pendingOrdersCount" 
-              icon="⏳" 
+              icon="" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
               :value="completedOrdersCount" 
-              icon="✓" 
+              icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Revenue" 
               :value="`₱${totalRevenue.toFixed(2)}`" 
-              icon="💰" 
+              icon="" 
               bgClass="terracotta-bg" 
             />
           </div>
@@ -319,7 +319,7 @@ const handleSaveProduct = async (productData) => {
       if (idx > -1) {
         products.value[idx] = { ...products.value[idx], ...productData };
       }
-      alert(`✓ Product "${productData.name}" updated successfully in database!`);
+      alert(` Product "${productData.name}" updated successfully in database!`);
     } else {
       const result = await sellerService.saveProduct(payload, false);
       const createdItem = result?.data || {
@@ -328,7 +328,7 @@ const handleSaveProduct = async (productData) => {
         salesCount: 0
       };
       products.value.unshift(createdItem);
-      alert(`✓ Product "${productData.name}" added successfully to your live inventory!`);
+      alert(` Product "${productData.name}" added successfully to your live inventory!`);
     }
   } catch (err) {
     console.warn('API save fallback:', err);
@@ -338,7 +338,7 @@ const handleSaveProduct = async (productData) => {
     } else {
       products.value.unshift({ ...productData, id: Date.now(), salesCount: 0 });
     }
-    alert(`✓ Product saved.`);
+    alert(` Product saved.`);
   }
   closeProductModal();
 };
@@ -348,7 +348,7 @@ const deleteProduct = async (productId) => {
     try {
       await sellerService.deleteProduct(productId);
       products.value = products.value.filter(p => p.id !== productId);
-      alert('✓ Product listing removed successfully.');
+      alert(' Product listing removed successfully.');
     } catch (err) {
       console.warn('API delete fallback:', err);
       products.value = products.value.filter(p => p.id !== productId);

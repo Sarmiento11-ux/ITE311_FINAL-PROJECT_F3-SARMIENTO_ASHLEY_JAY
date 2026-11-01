@@ -50,7 +50,7 @@
 
     <!-- Loading State Indicator -->
     <div v-if="isLoading" class="container" style="padding: 60px 0; text-align: center; color: #7A6F68;">
-      <p style="font-size: 1.1rem;">⏳ Loading artisan products from CraftMarket API...</p>
+      <p style="font-size: 1.1rem;">Loading artisan products from CraftMarket API...</p>
     </div>
 
     <!-- 3. REUSABLE PRODUCT GRID & EMPTY STATE -->

@@ -42,7 +42,7 @@
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <span class="stat-number">4.9 ★</span>
+            <span class="stat-number">4.9 / 5.0</span>
             <span class="stat-label">Community Rating</span>
           </div>
         </div>
@@ -73,7 +73,7 @@
 
           <!-- Floating Eco-Friendly Pill -->
           <div class="floating-eco-pill">
-            <span class="eco-icon">🌿</span>
+            
             <span>100% Sustainable & Handmade</span>
           </div>
         </div>

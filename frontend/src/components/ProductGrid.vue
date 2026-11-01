@@ -13,7 +13,7 @@
 
       <!-- Empty State Message (shown when no matches) -->
       <div v-else class="empty-state-box" id="emptyState">
-        <div class="empty-icon">🍂</div>
+        <div class="empty-icon"></div>
         <h3 class="empty-title">No handmade products found</h3>
         <p class="empty-desc">
           We couldn't find any crafts matching your search terms or selected filters. Try searching for something else or reset your filters.

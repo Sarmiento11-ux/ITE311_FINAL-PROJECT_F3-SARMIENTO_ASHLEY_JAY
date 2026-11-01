@@ -228,7 +228,7 @@
 
           <!-- PayMongo note -->
           <p v-if="selectedPayment === 'paymongo'" class="paymongo-redirect-note">
-            🔒 You will be redirected to PayMongo secure checkout to complete payment.
+            You will be redirected to PayMongo secure checkout to complete payment.
           </p>
 
           <router-link to="/cart" class="btn-back-to-cart">

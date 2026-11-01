@@ -23,7 +23,7 @@
           class="btn-text-danger"
           title="Remove all items from your basket"
         >
-          🗑️ Clear Cart
+          Clear Cart
         </button>
       </div>
 
@@ -40,7 +40,7 @@
 
       <!-- Empty Cart State (only shown after loading is done) -->
       <div v-else-if="cart.items.length === 0" class="empty-cart-card">
-        <div class="empty-icon">🛍️</div>
+        <div class="empty-icon-text">Notice</div>
         <h2>Your Shopping Cart is Empty</h2>
         <p>Discover unique handcrafted pottery, weaves, and accessories made by authentic Filipino artisans.</p>
         <router-link to="/products" class="btn btn-primary" style="margin-top: 20px;">
@@ -131,7 +131,7 @@
                   @click="removeItem(item.id || item.productId)"
                   title="Remove this item"
                 >
-                  ✕ Remove
+                  Remove
                 </button>
               </div>
 
@@ -174,7 +174,7 @@
           </div>
 
           <div class="payment-method-pill">
-            <span class="pill-icon">🚚</span>
+            
             <div>
               <strong>Payment Option: Cash on Delivery</strong>
               <p>Pay upon safe arrival at your doorstep</p>
@@ -184,7 +184,7 @@
           <!-- Auth-aware checkout button -->
           <div v-if="!auth.isAuthenticated.value" class="checkout-login-prompt">
             <p class="login-prompt-msg">
-              🔒 <strong>Sign in required</strong> to place an order.
+               <strong>Sign in required</strong> to place an order.
             </p>
             <router-link
               :to="`/login?redirect=/checkout`"
@@ -212,7 +212,7 @@
           </router-link>
 
           <div class="escrow-guarantee-note">
-            <span>🛡️</span>
+            <span></span>
             <p><strong>Artisan Escrow Guarantee:</strong> Payment is securely held and only disbursed to the artisan maker after confirmed package delivery.</p>
           </div>
         </div>

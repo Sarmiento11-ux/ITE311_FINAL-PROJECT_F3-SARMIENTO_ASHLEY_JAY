@@ -45,8 +45,8 @@
 
           <div class="card-body">
             <div class="card-meta">
-              <span class="card-date">📅 {{ post.date }}</span>
-              <span v-if="post.readTime" class="card-read-time">⏱ {{ post.readTime }}</span>
+              <span class="card-date">{{ post.date }}</span>
+              <span v-if="post.readTime" class="card-read-time"> {{ post.readTime }}</span>
             </div>
             <h3 class="card-title">{{ post.title }}</h3>
             <p class="card-excerpt">{{ post.excerpt }}</p>
@@ -64,7 +64,7 @@
 
       <!-- Error / empty state -->
       <div v-else class="blog-empty">
-        <span class="empty-icon">📖</span>
+        <span class="empty-icon"></span>
         <p>Artisan stories are being gathered. Check back soon!</p>
       </div>
 

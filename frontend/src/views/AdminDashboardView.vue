@@ -6,7 +6,7 @@
       <div class="dashboard-header-banner admin-header-banner">
         <div class="dashboard-welcome">
           <span class="section-eyebrow">CENTRAL CONTROL PANEL</span>
-          <h1>Marketplace Administration 🛡️</h1>
+          <h1>Marketplace Administration</h1>
           <p>Oversee registered artisans, catalog listings, customer transactions, categories, and system reports.</p>
         </div>
 
@@ -30,7 +30,7 @@
             :class="{ active: currentTab === 'dashboard' }"
             @click="setTab('dashboard')"
           >
-            <span class="nav-item-icon">📊</span>
+            
             <span>Dashboard</span>
           </button>
 
@@ -40,7 +40,7 @@
             :class="{ active: currentTab === 'users' }"
             @click="setTab('users')"
           >
-            <span class="nav-item-icon">👥</span>
+            
             <span>Users ({{ stats?.total_users ?? users.length }})</span>
           </button>
 
@@ -50,7 +50,7 @@
             :class="{ active: currentTab === 'sellers' }"
             @click="setTab('sellers')"
           >
-            <span class="nav-item-icon">🏪</span>
+            
             <span>Sellers ({{ stats?.total_sellers ?? sellers.length }})</span>
           </button>
 
@@ -60,7 +60,7 @@
             :class="{ active: currentTab === 'products' }"
             @click="setTab('products')"
           >
-            <span class="nav-item-icon">🎨</span>
+            
             <span>Products ({{ stats?.total_products ?? products.length }})</span>
           </button>
 
@@ -70,7 +70,7 @@
             :class="{ active: currentTab === 'categories' }"
             @click="setTab('categories')"
           >
-            <span class="nav-item-icon">🏷️</span>
+            
             <span>Categories ({{ categories.length }})</span>
           </button>
 
@@ -80,7 +80,7 @@
             :class="{ active: currentTab === 'orders' }"
             @click="setTab('orders')"
           >
-            <span class="nav-item-icon">📦</span>
+            
             <span>Orders ({{ stats?.total_orders ?? orders.length }})</span>
           </button>
 
@@ -90,14 +90,14 @@
             :class="{ active: currentTab === 'reports' }"
             @click="setTab('reports')"
           >
-            <span class="nav-item-icon">📈</span>
+            
             <span>Reports</span>
           </button>
 
           <hr class="sidebar-divider" />
 
           <router-link to="/" class="dashboard-nav-item">
-            <span class="nav-item-icon">🛍️</span>
+            
             <span>Marketplace Storefront</span>
           </router-link>
 
@@ -106,7 +106,7 @@
             class="dashboard-nav-item btn-logout" 
             @click="handleLogout"
           >
-            <span class="nav-item-icon">🚪</span>
+            
             <span>Sign Out</span>
           </button>
         </aside>
@@ -117,7 +117,7 @@
           <!-- Global Feedback Message -->
           <div v-if="feedbackMsg" class="admin-alert" :class="feedbackClass">
             <span>{{ feedbackMsg }}</span>
-            <button type="button" class="btn-close-alert" @click="feedbackMsg = ''">✕</button>
+            <button type="button" class="btn-close-alert" @click="feedbackMsg = ''"></button>
           </div>
 
           <!-- Loading State Spinner -->
@@ -131,7 +131,7 @@
             <!-- 6 Key Performance Metric Cards -->
             <div class="admin-metrics-grid">
               <div class="metric-card metric-primary">
-                <div class="metric-icon">👥</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Total Users</span>
                   <strong class="metric-value">{{ stats?.total_users ?? 0 }}</strong>
@@ -140,7 +140,7 @@
               </div>
 
               <div class="metric-card metric-forest">
-                <div class="metric-icon">🏪</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Registered Artisans</span>
                   <strong class="metric-value">{{ stats?.total_sellers ?? 0 }}</strong>
@@ -149,7 +149,7 @@
               </div>
 
               <div class="metric-card metric-terracotta">
-                <div class="metric-icon">🛍️</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Active Customers</span>
                   <strong class="metric-value">{{ stats?.total_customers ?? 0 }}</strong>
@@ -158,7 +158,7 @@
               </div>
 
               <div class="metric-card metric-sand">
-                <div class="metric-icon">🎨</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Catalog Products</span>
                   <strong class="metric-value">{{ stats?.total_products ?? 0 }}</strong>
@@ -167,7 +167,7 @@
               </div>
 
               <div class="metric-card metric-amber">
-                <div class="metric-icon">📦</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Total Orders</span>
                   <strong class="metric-value">{{ stats?.total_orders ?? 0 }}</strong>
@@ -176,7 +176,7 @@
               </div>
 
               <div class="metric-card metric-gold">
-                <div class="metric-icon">💰</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Total Sales Volume</span>
                   <strong class="metric-value">₱{{ formatMoney(stats?.total_sales ?? 0) }}</strong>
@@ -269,7 +269,7 @@
               <div class="activities-timeline">
                 <div v-for="act in recentActivity?.activities || []" :key="act.id" class="activity-timeline-row">
                   <span class="activity-icon-badge" :class="'act-' + act.type">
-                    {{ act.type === 'order' ? '📦' : act.type === 'user' ? '👤' : '🎨' }}
+                    {{ act.type.toUpperCase() }}
                   </span>
                   <div class="activity-details">
                     <strong class="activity-title">{{ act.title }}</strong>
@@ -297,7 +297,7 @@
               <!-- Filter Toolbar -->
               <div class="admin-toolbar">
                 <div class="search-input-box">
-                  <span class="search-icon">🔍</span>
+                  
                   <input 
                     type="text" 
                     v-model="userFilter.search" 
@@ -364,7 +364,7 @@
                       <td>
                         <div class="action-buttons-group">
                           <button type="button" class="btn-action btn-edit" @click="openEditUserModal(u)" title="Edit User Details">
-                            ✏️ Edit
+                            Edit
                           </button>
                           <button 
                             type="button" 
@@ -373,7 +373,7 @@
                             @click="toggleUserActive(u)"
                             :title="u.is_active ? 'Deactivate account' : 'Reactivate account'"
                           >
-                            {{ u.is_active ? '🚫 Deactivate' : '✓ Activate' }}
+                            {{ u.is_active ? 'Deactivate' : 'Activate' }}
                           </button>
                         </div>
                       </td>
@@ -400,7 +400,7 @@
               <!-- Search Bar -->
               <div class="admin-toolbar">
                 <div class="search-input-box">
-                  <span class="search-icon">🔍</span>
+                  
                   <input 
                     type="text" 
                     v-model="sellerFilter.search" 
@@ -453,7 +453,7 @@
                       <td>
                         <div class="action-buttons-group">
                           <button type="button" class="btn-action btn-view" @click="viewSellerDetails(s.id)">
-                            👁️ View Shop
+                            View Shop
                           </button>
                           <button 
                             type="button" 
@@ -461,7 +461,7 @@
                             :class="s.is_active ? 'btn-deactivate' : 'btn-activate'"
                             @click="toggleSellerActive(s)"
                           >
-                            {{ s.is_active ? '🚫 Deactivate' : '✓ Activate' }}
+                            {{ s.is_active ? 'Deactivate' : 'Activate' }}
                           </button>
                         </div>
                       </td>
@@ -488,7 +488,7 @@
               <!-- Product Toolbar -->
               <div class="admin-toolbar">
                 <div class="search-input-box">
-                  <span class="search-icon">🔍</span>
+                  
                   <input 
                     type="text" 
                     v-model="productFilter.search" 
@@ -564,7 +564,7 @@
                             ↗ View
                           </router-link>
                           <button type="button" class="btn-action btn-delete" @click="handleDeleteProduct(p)" title="Remove product listing from marketplace">
-                            🗑️ Remove
+                            Remove
                           </button>
                         </div>
                       </td>
@@ -624,7 +624,7 @@
                       <td>
                         <div class="action-buttons-group">
                           <button type="button" class="btn-action btn-edit" @click="openEditCategoryModal(c)">
-                            ✏️ Edit
+                            Edit
                           </button>
                           <button 
                             type="button" 
@@ -632,7 +632,7 @@
                             @click="handleDeleteCategory(c)"
                             :title="c.products_count > 0 ? 'Cannot delete: Category has active products' : 'Delete category'"
                           >
-                            🗑️ Delete
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -659,7 +659,7 @@
               <!-- Orders Toolbar -->
               <div class="admin-toolbar">
                 <div class="search-input-box">
-                  <span class="search-icon">🔍</span>
+                  
                   <input 
                     type="text" 
                     v-model="orderFilter.search" 
@@ -720,7 +720,7 @@
                       </td>
                       <td>
                         <span class="status-badge" :class="o.payment_status === 'paid' ? 'badge-paid' : 'badge-unpaid'">
-                          {{ o.payment_status === 'paid' ? '✓ Paid' : '⏳ Unpaid' }}
+                          {{ o.payment_status === 'paid' ? ' Paid' : ' Unpaid' }}
                         </span>
                       </td>
                       <td>
@@ -741,7 +741,7 @@
                       <td class="text-muted">{{ formatDate(o.created_at) }}</td>
                       <td>
                         <button type="button" class="btn-action btn-view" @click="openOrderDetailsModal(o)">
-                          👁️ Details
+                          Details
                         </button>
                       </td>
                     </tr>
@@ -759,7 +759,7 @@
             <!-- Reports KPI Header -->
             <div class="admin-metrics-grid">
               <div class="metric-card metric-gold">
-                <div class="metric-icon">💵</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Total Realized Revenue</span>
                   <strong class="metric-value">₱{{ formatMoney(reports?.total_sales ?? 0) }}</strong>
@@ -768,7 +768,7 @@
               </div>
 
               <div class="metric-card metric-primary">
-                <div class="metric-icon">📊</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">All-time Orders</span>
                   <strong class="metric-value">{{ reports?.total_orders ?? 0 }}</strong>
@@ -777,7 +777,7 @@
               </div>
 
               <div class="metric-card metric-forest">
-                <div class="metric-icon">📦</div>
+                <div class="metric-icon"></div>
                 <div class="metric-info">
                   <span class="metric-label">Average Order Value</span>
                   <strong class="metric-value">
@@ -889,7 +889,7 @@
       <div class="admin-modal-box">
         <div class="modal-header">
           <h3>Edit User Account</h3>
-          <button type="button" class="btn-modal-close" @click="showEditUserModal = false">✕</button>
+          <button type="button" class="btn-modal-close" @click="showEditUserModal = false"></button>
         </div>
         <form @submit.prevent="saveUserEdit" class="modal-body">
           <div class="form-group">
@@ -949,7 +949,7 @@
             <h3>Artisan Workshop: {{ activeSeller?.shop_name }}</h3>
             <p class="modal-sub">Maker: {{ activeSeller?.name }} ({{ activeSeller?.email }})</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showSellerDetailsModal = false">✕</button>
+          <button type="button" class="btn-modal-close" @click="showSellerDetailsModal = false"></button>
         </div>
 
         <div class="modal-body">
@@ -957,7 +957,7 @@
             <div class="detail-stat">
               <span>Status</span>
               <strong :class="activeSeller?.is_active ? 'text-success' : 'text-danger'">
-                {{ activeSeller?.is_active ? '✓ Active Maker' : '🚫 Deactivated' }}
+                {{ activeSeller?.is_active ? 'Active Maker' : 'Deactivated' }}
               </strong>
             </div>
             <div class="detail-stat">
@@ -1020,7 +1020,7 @@
       <div class="admin-modal-box">
         <div class="modal-header">
           <h3>{{ isEditingCategory ? 'Edit Category' : 'Add New Category' }}</h3>
-          <button type="button" class="btn-modal-close" @click="showCategoryModal = false">✕</button>
+          <button type="button" class="btn-modal-close" @click="showCategoryModal = false"></button>
         </div>
         <form @submit.prevent="saveCategory" class="modal-body">
           <div class="form-group">
@@ -1092,7 +1092,7 @@
             <h3>Order Details: {{ activeOrder?.order_number }}</h3>
             <p class="modal-sub">Placed on {{ formatDate(activeOrder?.created_at) }}</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showOrderModal = false">✕</button>
+          <button type="button" class="btn-modal-close" @click="showOrderModal = false"></button>
         </div>
 
         <div class="modal-body">
@@ -1360,7 +1360,7 @@ const saveUserEdit = async () => {
     });
 
     if (res && res.success) {
-      showToast(`✓ User account "${res.data.name}" updated successfully!`, 'alert-success');
+      showToast(` User account "${res.data.name}" updated successfully!`, 'alert-success');
       showEditUserModal.value = false;
       await fetchUsers();
     }
@@ -1407,7 +1407,7 @@ const updateProductStatus = async (product, newStatus) => {
     const res = await adminService.updateProduct(product.id, { status: newStatus });
     if (res && res.success) {
       product.status = newStatus;
-      showToast(`✓ Listing status for "${product.name}" set to ${newStatus}.`, 'alert-success');
+      showToast(` Listing status for "${product.name}" set to ${newStatus}.`, 'alert-success');
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to update product status.', 'alert-danger');
@@ -1421,7 +1421,7 @@ const handleDeleteProduct = async (product) => {
     const res = await adminService.deleteProduct(product.id);
     if (res && res.success) {
       products.value = products.value.filter(p => p.id !== product.id);
-      showToast(`✓ Product listing "${product.name}" removed successfully.`, 'alert-success');
+      showToast(` Product listing "${product.name}" removed successfully.`, 'alert-success');
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to remove product.', 'alert-danger');
@@ -1475,10 +1475,10 @@ const saveCategory = async () => {
     let res;
     if (isEditingCategory.value) {
       res = await adminService.updateCategory(categoryForm.id, payload);
-      showToast(`✓ Category "${res.data.name}" updated successfully.`, 'alert-success');
+      showToast(` Category "${res.data.name}" updated successfully.`, 'alert-success');
     } else {
       res = await adminService.createCategory(payload);
-      showToast(`✓ New category "${res.data.name}" added to catalog taxonomy.`, 'alert-success');
+      showToast(` New category "${res.data.name}" added to catalog taxonomy.`, 'alert-success');
     }
 
     showCategoryModal.value = false;
@@ -1492,7 +1492,7 @@ const saveCategory = async () => {
 
 const handleDeleteCategory = async (cat) => {
   if (cat.products_count > 0) {
-    alert(`⚠️ Cannot Delete Category:\n\n"${cat.name}" is currently associated with ${cat.products_count} active product listing(s).\n\nPlease reassign or delete these products first to prevent orphaned listings.`);
+    alert(`Cannot Delete Category:\n\n"${cat.name}" is currently associated with ${cat.products_count} active product listing(s).\n\nPlease reassign or delete these products first to prevent orphaned listings.`);
     return;
   }
 
@@ -1502,7 +1502,7 @@ const handleDeleteCategory = async (cat) => {
     const res = await adminService.deleteCategory(cat.id);
     if (res && res.success) {
       categories.value = categories.value.filter(c => c.id !== cat.id);
-      showToast(`✓ Category "${cat.name}" deleted.`, 'alert-success');
+      showToast(` Category "${cat.name}" deleted.`, 'alert-success');
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to delete category.', 'alert-danger');
@@ -1520,7 +1520,7 @@ const handleUpdateOrderStatus = async (order, newStatus) => {
     const res = await adminService.updateOrderStatus(order.id, newStatus);
     if (res && res.success) {
       order.status = newStatus;
-      showToast(`✓ Order ${order.order_number} status updated to ${newStatus}.`, 'alert-success');
+      showToast(` Order ${order.order_number} status updated to ${newStatus}.`, 'alert-success');
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to update order status.', 'alert-danger');

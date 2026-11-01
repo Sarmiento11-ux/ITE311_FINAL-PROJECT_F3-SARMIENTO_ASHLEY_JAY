@@ -35,13 +35,13 @@
               <img :src="product.image" :alt="product.title" class="main-product-img">
               <span v-if="product.badge" class="product-tag-float">{{ product.badge }}</span>
               <div class="eco-badge-corner">
-                <span>🌿 100% Genuine Craft</span>
+                <span> 100% Genuine Craft</span>
               </div>
             </div>
 
             <!-- Artisan Craftsmanship Trust Banner -->
             <div class="artisan-trust-card">
-              <div class="trust-icon">🤝</div>
+              <div class="trust-icon"></div>
               <div class="trust-text">
                 <h4>Fair Trade & Artisan Direct</h4>
                 <p>Over 90% of your payment is directly deposited into the artisan's local workshop account upon confirmed delivery.</p>
@@ -56,7 +56,7 @@
             <div class="info-top-meta">
               <span class="category-pill">{{ product.category }}</span>
               <div class="rating-badge">
-                <span class="stars">★★★★★</span>
+                <span class="stars">Rating: 5/5</span>
                 <span class="rating-text">{{ product.rating }} ({{ product.reviewsCount || 24 }} customer reviews)</span>
               </div>
             </div>
@@ -146,12 +146,12 @@
             <div class="seller-profile-card">
               <div class="seller-avatar-wrapper">
                 <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80" alt="Artisan Maker" class="seller-avatar">
-                <span class="verified-icon" title="Verified Artisan Maker">✓</span>
+                <span class="verified-icon" title="Verified Artisan Maker"></span>
               </div>
               <div class="seller-details">
                 <span class="seller-badge">Verified Local Artisan</span>
                 <h4 class="seller-name">{{ product.seller }}</h4>
-                <p class="seller-location">📍 {{ product.location }}</p>
+                <p class="seller-location">{{ product.location }}</p>
                 <p class="seller-bio">Dedicated to reviving regional handmade traditions using sustainable and responsibly sourced natural materials.</p>
               </div>
             </div>
@@ -190,7 +190,7 @@
   
   <!-- Loading state indicator -->
   <div v-if="isLoading" class="container" style="padding: 100px 0; text-align: center; color: #7A6F68;">
-    <p style="font-size: 1.2rem;">⏳ Loading artisan product details from CraftMarket API...</p>
+    <p style="font-size: 1.2rem;">Loading artisan product details from CraftMarket API...</p>
   </div>
 
   <!-- Fallback if ID is invalid -->
@@ -281,7 +281,7 @@ const addToCart = () => {
   if (!product.value) return;
   const result = cart.addToCart(product.value, quantity.value);
   if (result.success) {
-    cartFeedback.value = `✓ Successfully added ${quantity.value} item(s) to cart!`;
+    cartFeedback.value = ` Successfully added ${quantity.value} item(s) to cart!`;
     feedbackIsError.value = false;
     setTimeout(() => { cartFeedback.value = ''; }, 3500);
   } else {

@@ -7,13 +7,13 @@
         loading="lazy"
       >
       <span v-if="product.badge" class="product-tag" :class="tagClass">{{ product.badge }}</span>
-      <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist">♥</button>
+      <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist"></button>
     </div>
     
     <div class="product-details">
       <div class="product-artisan-row">
         <span class="artisan-byline">By {{ product.seller }}</span>
-        <span class="product-rating">★ {{ product.rating }} ({{ product.reviewsCount || 12 }})</span>
+        <span class="product-rating">{{ product.rating }} ({{ product.reviewsCount || 12 }})</span>
       </div>
       
       <h3 class="product-name">

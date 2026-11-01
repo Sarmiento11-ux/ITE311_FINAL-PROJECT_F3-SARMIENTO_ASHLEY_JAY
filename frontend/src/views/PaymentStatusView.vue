@@ -11,9 +11,9 @@
 
       <!-- SUCCESS -->
       <div v-else-if="paymentStatus === 'paid'" class="status-card success-card">
-        <div class="status-icon success-icon">✓</div>
+        <div class="status-icon success-icon"></div>
         <span class="status-eyebrow">PAYMENT CONFIRMED</span>
-        <h2 class="status-title">Bayad Na! Payment Successful 🎉</h2>
+        <h2 class="status-title">Bayad Na! Payment Successful</h2>
         <p class="status-subtitle">
           Your payment for order <strong class="order-tag">{{ orderNumber }}</strong> has been confirmed.
           The artisan makers have been notified to start preparing your handcrafted items.
@@ -50,7 +50,7 @@
 
       <!-- CANCELLED / EXPIRED -->
       <div v-else-if="paymentStatus === 'cancelled' || urlStatus === 'cancelled'" class="status-card cancelled-card">
-        <div class="status-icon cancelled-icon">✕</div>
+        <div class="status-icon cancelled-icon"></div>
         <span class="status-eyebrow">PAYMENT CANCELLED</span>
         <h2 class="status-title">Payment was Cancelled</h2>
         <p class="status-subtitle">
@@ -88,7 +88,7 @@
 
       <!-- PENDING (still processing) -->
       <div v-else-if="paymentStatus === 'pending'" class="status-card pending-card">
-        <div class="status-icon pending-icon">⏳</div>
+        <div class="status-icon pending-icon"></div>
         <span class="status-eyebrow">PAYMENT PENDING</span>
         <h2 class="status-title">Payment Is Being Processed</h2>
         <p class="status-subtitle">
@@ -100,7 +100,7 @@
             Check My Orders →
           </router-link>
           <button class="btn btn-secondary" @click="recheckStatus" :disabled="isRechecking">
-            {{ isRechecking ? 'Checking…' : '🔄 Refresh Status' }}
+            {{ isRechecking ? 'Checking…' : 'Refresh Status' }}
           </button>
         </div>
       </div>

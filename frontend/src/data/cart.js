@@ -184,7 +184,7 @@ export const cart = reactive({
     }
 
     // Toast notification
-    const msg = `✓ Added ${quantity} × "${product.title || product.name}" to your cart!`;
+    const msg = ` Added ${quantity} × "${product.title || product.name}" to your cart!`;
     state.toastMessage = msg;
     state.showToast    = true;
     setTimeout(() => { state.showToast = false; }, 3200);

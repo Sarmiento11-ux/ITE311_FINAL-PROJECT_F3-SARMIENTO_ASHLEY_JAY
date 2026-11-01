@@ -22,7 +22,7 @@
                 <label class="role-card-option">
                   <input type="radio" v-model="form.accountType" value="customer" id="roleCustomer">
                   <div class="role-card-content">
-                    <div class="role-icon">🛍️</div>
+                    
                     <div>
                       <strong class="role-name">Customer / Shopper</strong>
                       <p class="role-desc">Browse & buy handcrafted goods</p>
@@ -33,7 +33,7 @@
                 <label class="role-card-option">
                   <input type="radio" v-model="form.accountType" value="seller" id="roleSeller">
                   <div class="role-card-content">
-                    <div class="role-icon">🎨</div>
+                    
                     <div>
                       <strong class="role-name">Artisan / Seller</strong>
                       <p class="role-desc">Showcase & sell handmade creations</p>
@@ -298,7 +298,7 @@ const handleRegister = async () => {
 
     const user = await register(payload);
 
-    statusMsg.value = `✔ Account registered successfully! Welcome, ${user.name}!`;
+    statusMsg.value = `Account registered successfully! Welcome, ${user.name}!`;
     statusClass.value = 'alert-success';
 
     setTimeout(() => {

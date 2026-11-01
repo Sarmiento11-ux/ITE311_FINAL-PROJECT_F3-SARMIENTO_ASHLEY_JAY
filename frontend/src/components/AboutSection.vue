@@ -10,7 +10,7 @@
           loading="lazy"
         >
         <div class="about-badge-card">
-          <span class="badge-icon">🏛</span>
+          <span class="badge-icon"></span>
           <div>
             <strong>Preserving Heritage</strong>
             <p>Supporting generations of Filipino craftsmen</p>
@@ -28,14 +28,14 @@
 
         <div class="about-pillars">
           <div class="pillar-item">
-            <span class="pillar-check">✓</span>
+            <span class="pillar-check"></span>
             <div>
               <strong>Fair Compensation</strong>
               <p>Makers set their own pricing and retain up to 92% of sales proceeds.</p>
             </div>
           </div>
           <div class="pillar-item">
-            <span class="pillar-check">✓</span>
+            <span class="pillar-check"></span>
             <div>
               <strong>Traceable Origins</strong>
               <p>Know who made your product, where the raw materials were harvested, and their craft technique.</p>

@@ -14,7 +14,7 @@
 
           <!-- Post-Registration Success Notice -->
           <div v-if="postRegisterNotice" class="form-alert-msg alert-success">
-            ✔ Account registered successfully! You can now log in below.
+            Account registered successfully! You can now log in below.
           </div>
 
           <form @submit.prevent="handleLogin" novalidate>
@@ -67,7 +67,7 @@
 
           <!-- Quick Demo Accounts for Testing -->
           <div class="demo-accounts-box">
-            <h4 class="demo-title">🔑 Quick Demo Accounts for Testing:</h4>
+            <h4 class="demo-title">Quick Demo Accounts for Testing:</h4>
             <div class="demo-buttons-grid">
               <button type="button" class="btn-demo-fill" @click="fillDemo('maria@example.com', 'password')">
                 <strong>Customer</strong>
@@ -156,7 +156,7 @@ const handleLogin = async () => {
   try {
     const user = await login(email.value.trim(), password.value);
 
-    statusMsg.value  = `✔ Welcome back, ${user.name}! Redirecting…`;
+    statusMsg.value  = `Welcome back, ${user.name}! Redirecting…`;
     statusClass.value = 'alert-success';
 
     // Redirect: honour ?redirect= param or go to role-based dashboard

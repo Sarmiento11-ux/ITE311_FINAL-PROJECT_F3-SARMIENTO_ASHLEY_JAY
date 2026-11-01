@@ -6,12 +6,12 @@
       <div class="dashboard-header-banner">
         <div class="dashboard-welcome">
           <span class="section-eyebrow">CUSTOMER PORTAL</span>
-          <h1>Welcome back, {{ customer.fullName }}! 🛍️</h1>
+          <h1>Welcome back, {{ customer.fullName }}! </h1>
           <p>Track your handcrafted orders, browse independent artisans, and manage your delivery details.</p>
         </div>
 
         <div class="dashboard-user-badge">
-          <span>🛡️ Verified Conscious Shopper</span>
+          <span> Verified Conscious Shopper</span>
         </div>
       </div>
 
@@ -26,7 +26,7 @@
             :class="{ active: currentTab === 'overview' }"
             @click="currentTab = 'overview'"
           >
-            <span class="nav-item-icon">📊</span>
+            
             <span>Dashboard</span>
           </button>
 
@@ -36,17 +36,17 @@
             :class="{ active: currentTab === 'orders' }"
             @click="currentTab = 'orders'"
           >
-            <span class="nav-item-icon">📦</span>
+            
             <span>My Orders ({{ orders.length }})</span>
           </button>
 
           <router-link to="/products" class="dashboard-nav-item">
-            <span class="nav-item-icon">🏺</span>
+            
             <span>Browse Products</span>
           </router-link>
 
           <router-link to="/profile" class="dashboard-nav-item">
-            <span class="nav-item-icon">👤</span>
+            
             <span>My Profile</span>
           </router-link>
         </aside>
@@ -59,25 +59,25 @@
             <DashboardStatCard 
               title="Total Orders" 
               :value="totalOrdersCount" 
-              icon="🛍️" 
+              icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
               :value="pendingOrdersCount" 
-              icon="⏳" 
+              icon="" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
               :value="completedOrdersCount" 
-              icon="✓" 
+              icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Spent" 
               :value="`₱${totalSpent.toFixed(2)}`" 
-              icon="💳" 
+              icon="" 
               bgClass="terracotta-bg" 
             />
           </div>

@@ -43,7 +43,7 @@
                   @click="$emit('edit', product)"
                   title="Edit product listing"
                 >
-                  ✎ Edit
+                   Edit
                 </button>
                 <button 
                   type="button" 
@@ -51,7 +51,7 @@
                   @click="$emit('delete', product.id)"
                   title="Remove product"
                 >
-                  🗑 Delete
+                   Delete
                 </button>
               </div>
             </td>

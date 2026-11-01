@@ -47,7 +47,7 @@
           class="nav-link"
           active-class="active"
         >
-          Admin Panel 🛡️
+          Admin Panel
         </router-link>
         <router-link 
           v-else-if="auth.isAuthenticated && (auth.user.value?.role === 'Seller' || auth.user.value?.rawRole === 'seller')" 
@@ -77,7 +77,7 @@
           class="btn-seller-link"
           style="background-color: var(--cm-terracotta, #c25e3e); color: #ffffff;"
         >
-          <span>Admin Control 🛡️</span>
+          <span>Admin Control</span>
         </router-link>
 
         <router-link 

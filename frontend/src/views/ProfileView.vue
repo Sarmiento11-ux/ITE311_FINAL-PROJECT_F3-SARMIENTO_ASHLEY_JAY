@@ -34,7 +34,7 @@
           <div class="profile-summary-card">
             <div class="profile-avatar-container">
               <img :src="avatarUrl" alt="User Profile Picture" class="profile-avatar-large">
-              <button type="button" @click="toggleAvatar" class="avatar-edit-badge" title="Change profile picture">📷</button>
+              <button type="button" @click="toggleAvatar" class="avatar-edit-badge" title="Change profile picture"></button>
             </div>
 
             <h2 class="profile-card-name">{{ currentUser.fullName }}</h2>
@@ -49,11 +49,11 @@
 
             <div class="profile-meta-list">
               <div class="meta-item">
-                <span class="meta-icon">✉️</span>
+                <span class="meta-icon">️</span>
                 <span>{{ currentUser.email }}</span>
               </div>
               <div class="meta-item">
-                <span class="meta-icon">📍</span>
+                
                 <span>{{ currentUser.address }}</span>
               </div>
             </div>
@@ -347,7 +347,7 @@ const saveProfile = async () => {
   try {
     await auth.updateProfile({ ...editForm });
     isEditing.value = false;
-    alertMsg.value = '✓ Profile details updated successfully in database!';
+    alertMsg.value = ' Profile details updated successfully in database!';
     alertClass.value = 'alert-success';
   } catch (err) {
     alertMsg.value = err.message || 'Failed to update profile. Please try again.';
@@ -393,7 +393,7 @@ const updatePassword = async () => {
     passwords.current = '';
     passwords.newPass = '';
     passwords.confirmPass = '';
-    alertMsg.value = '✓ Password changed successfully! Please log in again with your new password.';
+    alertMsg.value = ' Password changed successfully! Please log in again with your new password.';
     alertClass.value = 'alert-success';
     
     setTimeout(() => {

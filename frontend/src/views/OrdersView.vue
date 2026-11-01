@@ -30,7 +30,7 @@
 
       <!-- Empty State -->
       <div v-else-if="orders.length === 0" class="empty-orders-card">
-        <div class="empty-icon">📦</div>
+        <div class="empty-icon-text">Notice</div>
         <h2>No Orders Found</h2>
         <p>You haven't placed any handcrafted orders yet. Browse our curated collection to support local makers.</p>
         <router-link to="/products" class="btn btn-primary" style="margin-top: 18px;">

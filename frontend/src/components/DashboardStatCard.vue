@@ -22,7 +22,7 @@ defineProps({
   },
   icon: {
     type: String,
-    default: '📊'
+    default: ''
   },
   bgClass: {
     type: String,
