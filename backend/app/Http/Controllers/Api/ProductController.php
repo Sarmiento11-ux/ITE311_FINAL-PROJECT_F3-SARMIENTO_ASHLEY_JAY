@@ -31,7 +31,7 @@ class ProductController extends Controller
             'page'         => 'nullable|integer|min:1',
         ]);
 
-        $query = Product::with(['category', 'seller:id,name,email', 'seller.sellerProfile']);
+        $query = Product::with(['category', 'seller:id,name,email,subscription_plan', 'seller.sellerProfile']);
 
         // Default to active products for public catalog unless requested
         if ($request->filled('status')) {
@@ -251,7 +251,7 @@ class ProductController extends Controller
         $validated['seller_id'] = $request->user()->id;
 
         $product = Product::create($validated);
-        $product->load(['category', 'seller:id,name,email']);
+        $product->load(['category', 'seller:id,name,email,subscription_plan']);
 
         return response()->json([
             'success' => true,
@@ -265,7 +265,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with(['category', 'seller:id,name,email,avatar'])->find($id);
+        $product = Product::with(['category', 'seller:id,name,email,avatar,subscription_plan'])->find($id);
 
         if (!$product) {
             return response()->json([
@@ -343,7 +343,7 @@ class ProductController extends Controller
         }
 
         $product->update($validated);
-        $product->load(['category', 'seller:id,name,email']);
+        $product->load(['category', 'seller:id,name,email,subscription_plan']);
 
         return response()->json([
             'success' => true,
@@ -399,7 +399,7 @@ class ProductController extends Controller
         $path = $file->storeAs('products', $safeFilename, 'public');
 
         $product->update(['image' => $path]);
-        $product->load(['category', 'seller:id,name,email']);
+        $product->load(['category', 'seller:id,name,email,subscription_plan']);
 
         return response()->json([
             'success' => true,
@@ -441,7 +441,7 @@ class ProductController extends Controller
         $this->cleanupPhysicalImage($product->raw_image_path);
 
         $product->update(['image' => null]);
-        $product->load(['category', 'seller:id,name,email']);
+        $product->load(['category', 'seller:id,name,email,subscription_plan']);
 
         return response()->json([
             'success' => true,
