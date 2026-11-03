@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <main class="cart-page-wrapper">
     <div class="container">
 
@@ -756,5 +756,30 @@ const clearAll = async () => {
   .btn-remove-mobile {
     display: block;
   }
+}
+
+@media (max-width: 900px) {
+  .cart-layout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-summary-card {
+    position: static;
+  }
+}
+
+/* Keyboard focus on cart action buttons */
+.qty-btn:focus-visible,
+.btn-remove-desktop:focus-visible,
+.btn-remove-mobile:focus-visible,
+.btn-checkout-main:focus-visible {
+  outline: 2px solid var(--cm-forest, #3E5943);
+  outline-offset: 2px;
+}
+
+/* Prevent qty buttons from stretching */
+.qty-btn {
+  width: 32px;
+  flex-shrink: 0;
 }
 </style>

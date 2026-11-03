@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <main class="checkout-page-wrapper">
     <div class="container">
 
@@ -625,8 +625,16 @@ const handlePlaceOrder = async () => {
 }
 
 .form-input:focus {
-  outline: none;
   border-color: var(--cm-forest, #3E5943);
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--cm-forest, #3E5943);
+  outline-offset: 1px;
+}
+
+.form-input:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .input-error {
