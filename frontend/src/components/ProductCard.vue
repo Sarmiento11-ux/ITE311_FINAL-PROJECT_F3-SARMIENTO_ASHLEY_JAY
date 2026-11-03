@@ -168,4 +168,14 @@ const handleAddToCart = () => {
   width: auto;
   flex-shrink: 0;
 }
+.pro-artisan-badge {
+  background: #FFF3D6;
+  color: #8A5300;
+  border: 1px solid #FCD34D;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
 </style>
