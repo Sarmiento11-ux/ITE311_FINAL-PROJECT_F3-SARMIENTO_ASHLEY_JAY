@@ -1286,6 +1286,7 @@
 </template>
 
 <script setup>
+import { subscriptionService } from '../services/subscriptionService.js';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { adminService } from '../services/adminService.js';
@@ -1325,6 +1326,8 @@ const products = ref([]);
 const categories = ref([]);
 const orders = ref([]);
 const reviews = ref([]);
+const subscriptionMetrics = ref(null);
+const subscribersList = ref([]);
 
 // Filter States
 const userFilter = reactive({ search: '', role: '', is_active: '' });
@@ -1688,6 +1691,15 @@ const handleAdminDeleteReview = async (review) => {
   } catch (err) {
     feedbackMsg.value = err?.response?.data?.message || 'Failed to remove review.';
     feedbackClass.value = 'alert-danger';
+  }
+};
+
+const fetchSubscriptionMetrics = async () => {
+  try {
+    const res = await subscriptionService.getAdminSubscriptionMetrics();
+    subscriptionMetrics.value = res?.data || null;
+  } catch (err) {
+    console.warn('Could not load subscription metrics:', err);
   }
 };
 </script>
