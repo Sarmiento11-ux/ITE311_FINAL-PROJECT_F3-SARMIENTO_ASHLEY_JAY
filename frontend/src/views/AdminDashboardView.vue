@@ -2022,9 +2022,12 @@ const handleAdminDeleteReview = async (review) => {
 /* Tables */
 .table-responsive {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 .admin-table {
   width: 100%;
+  min-width: 580px;
   border-collapse: collapse;
   font-size: 0.88rem;
 }
@@ -2452,6 +2455,42 @@ const handleAdminDeleteReview = async (review) => {
     grid-template-columns: 1fr;
   }
   .admin-dashboard-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .admin-header-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .admin-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .admin-sidebar .dashboard-nav-item {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
+
+  .order-info-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row-2col {
     grid-template-columns: 1fr;
   }
 }
