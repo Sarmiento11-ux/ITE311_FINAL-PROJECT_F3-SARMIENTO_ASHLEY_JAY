@@ -15,6 +15,10 @@ export function normalizeProduct(p) {
     ? p.seller.name 
     : (p.seller || 'Artisan Maker');
 
+  const sellerShop = p.seller?.seller_profile?.shop_name 
+    || p.seller?.sellerProfile?.shop_name 
+    || null;
+
   const categoryName = typeof p.category === 'object' && p.category 
     ? p.category.name 
     : (p.category || 'Handmade');
@@ -29,6 +33,7 @@ export function normalizeProduct(p) {
     categorySlug: p.category?.slug || '',
     price: typeof p.price === 'string' ? parseFloat(p.price) : (p.price || 0),
     seller: sellerName,
+    sellerShop: sellerShop,
     sellerId: p.seller_id || p.seller?.id || 1,
     sellerEmail: p.seller?.email || '',
     sellerAvatar: p.seller?.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80',
@@ -52,18 +57,65 @@ export function normalizeProduct(p) {
 
 export const productService = {
   /**
-   * Retrieve all products from Laravel API with fallback to sample data.
+   * Retrieve products with search, filters, sorting, and pagination.
+   * Returns { items: Array, pagination: Object }.
    */
   async getAll(params = {}) {
     try {
       const response = await apiClient.get('/products', { params });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
-        return response.data.data.map(normalizeProduct);
+        const items = response.data.data.map(normalizeProduct);
+        return {
+          items,
+          pagination: response.data.pagination || {
+            current_page: 1,
+            last_page: 1,
+            per_page: items.length,
+            total: items.length,
+            has_more: false,
+          }
+        };
       }
     } catch (err) {
       console.warn('[ProductService] Backend API unreachable, falling back to local dataset.', err.message);
     }
-    return sampleProducts.map(normalizeProduct);
+    const fallback = sampleProducts.map(normalizeProduct);
+    return {
+      items: fallback,
+      pagination: {
+        current_page: 1,
+        last_page: 1,
+        per_page: fallback.length,
+        total: fallback.length,
+        has_more: false,
+      }
+    };
+  },
+
+  /**
+   * Get dynamic filter options (categories, sellers, price range) from live MySQL records.
+   */
+  async getFilterMeta() {
+    try {
+      const response = await apiClient.get('/products/filters');
+      if (response.data && response.data.success) {
+        return response.data.data;
+      }
+    } catch (err) {
+      console.warn('[ProductService] Could not fetch filter metadata from API:', err.message);
+    }
+    return {
+      categories: [
+        { id: 1, name: 'Ceramics & Pottery', slug: 'ceramics-pottery' },
+        { id: 2, name: 'Woven Goods & Bags', slug: 'woven-goods-bags' },
+        { id: 3, name: 'Artisan Jewelry', slug: 'artisan-jewelry' },
+        { id: 4, name: 'Home Decor & Candles', slug: 'home-decor-candles' },
+        { id: 5, name: 'Wooden Crafts', slug: 'wooden-crafts' },
+        { id: 6, name: 'Baskets & Storage', slug: 'baskets-storage' },
+      ],
+      sellers: [],
+      price: { min: 0, max: 2000 }
+    };
   },
 
   /**
@@ -106,11 +158,11 @@ export const productService = {
   },
 
   /**
-   * Retrieve featured products.
+   * Retrieve featured products without pagination.
    */
   async getFeatured() {
     try {
-      const response = await apiClient.get('/products', { params: { featured: 1 } });
+      const response = await apiClient.get('/products', { params: { featured: 1, paginate: 0 } });
       if (response.data && response.data.success && Array.isArray(response.data.data) && response.data.data.length > 0) {
         return response.data.data.map(normalizeProduct);
       }
@@ -121,11 +173,11 @@ export const productService = {
   },
 
   /**
-   * Retrieve related products.
+   * Retrieve related products without pagination.
    */
   async getRelated(category, currentId) {
     try {
-      const response = await apiClient.get('/products', { params: { category } });
+      const response = await apiClient.get('/products', { params: { category, paginate: 0 } });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         return response.data.data
           .filter(p => p.id !== currentId)

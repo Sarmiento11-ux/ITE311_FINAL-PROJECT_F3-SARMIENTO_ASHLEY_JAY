@@ -44,8 +44,9 @@ Route::prefix('auth')->group(function () {
 // Products and categories are publicly browsable (no login required)
 Route::get('/categories',      [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
-Route::get('/products',        [ProductController::class, 'index']);
-Route::get('/products/{id}',   [ProductController::class, 'show']);
+Route::get('/products',         [ProductController::class, 'index']);
+Route::get('/products/filters', [ProductController::class, 'filters']);
+Route::get('/products/{id}',    [ProductController::class, 'show']);
 
 // Product reviews: publicly readable, auth required to write
 Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);

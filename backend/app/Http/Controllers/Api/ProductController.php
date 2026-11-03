@@ -11,70 +11,191 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     /**
-     * Display a listing of products with filtering, search, and sorting.
+     * Display a listing of products with advanced filtering, search, sorting, and pagination.
      */
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'seller:id,name,email']);
+        $request->validate([
+            'search'       => 'nullable|string|max:100',
+            'category'     => 'nullable',
+            'seller_id'    => 'nullable',
+            'seller'       => 'nullable|string|max:100',
+            'min_price'    => 'nullable|numeric|min:0',
+            'max_price'    => 'nullable|numeric|min:0',
+            'availability' => 'nullable|string|in:all,in_stock,out_of_stock',
+            'in_stock'     => 'nullable|boolean',
+            'status'       => 'nullable|string|in:active,inactive,all',
+            'featured'     => 'nullable|boolean',
+            'sort'         => 'nullable|string|max:50',
+            'per_page'     => 'nullable|integer|min:1|max:100',
+            'page'         => 'nullable|integer|min:1',
+        ]);
 
-        // Search by name or description
-        if ($request->filled('search')) {
-            $search = $request->query('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
+        $query = Product::with(['category', 'seller:id,name,email', 'seller.sellerProfile']);
+
+        // Default to active products for public catalog unless requested
+        if ($request->filled('status')) {
+            if ($request->query('status') !== 'all') {
+                $query->where('status', $request->query('status'));
+            }
+        } else {
+            $query->where('status', 'active');
         }
 
-        // Filter by category id or slug
-        if ($request->filled('category')) {
-            $cat = $request->query('category');
-            if (is_numeric($cat)) {
-                $query->where('category_id', $cat);
-            } else {
-                $query->whereHas('category', function ($q) use ($cat) {
-                    $q->where('slug', $cat)->orWhere('name', 'like', "%{$cat}%");
+        // 1. Advanced Search: product name, description, material, seller name, or artisan shop name
+        if ($request->filled('search')) {
+            $search = trim($request->query('search'));
+            if ($search !== '') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%")
+                      ->orWhere('material', 'like', "%{$search}%")
+                      ->orWhereHas('seller', function ($sq) use ($search) {
+                          $sq->where('name', 'like', "%{$search}%")
+                             ->orWhereHas('sellerProfile', function ($sp) use ($search) {
+                                 $sp->where('shop_name', 'like', "%{$search}%");
+                             });
+                      });
                 });
             }
         }
 
-        // Filter by seller id
-        if ($request->filled('seller_id')) {
-            $query->where('seller_id', $request->query('seller_id'));
+        // 2. Category Filter (id, slug, or name)
+        if ($request->filled('category') && strtolower($request->query('category')) !== 'all') {
+            $cat = $request->query('category');
+            if (is_numeric($cat)) {
+                $query->where('category_id', (int) $cat);
+            } else {
+                $query->whereHas('category', function ($q) use ($cat) {
+                    $q->where('slug', $cat)->orWhere('name', $cat);
+                });
+            }
         }
 
-        // Filter by status (default to active for public catalog unless requested)
-        if ($request->filled('status')) {
-            $query->where('status', $request->query('status'));
+        // 3. Seller Filter (by id or name/shop_name)
+        if ($request->filled('seller_id') && strtolower((string)$request->query('seller_id')) !== 'all') {
+            $query->where('seller_id', (int) $request->query('seller_id'));
+        } elseif ($request->filled('seller') && strtolower($request->query('seller')) !== 'all') {
+            $seller = trim($request->query('seller'));
+            $query->whereHas('seller', function ($sq) use ($seller) {
+                $sq->where('name', 'like', "%{$seller}%")
+                   ->orWhereHas('sellerProfile', function ($sp) use ($seller) {
+                       $sp->where('shop_name', 'like', "%{$seller}%");
+                   });
+            });
         }
 
-        // Filter by featured
+        // 4. Price Bounds
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', (float) $request->query('min_price'));
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', (float) $request->query('max_price'));
+        }
+
+        // 5. Product Availability
+        if ($request->filled('availability')) {
+            $avail = strtolower($request->query('availability'));
+            if ($avail === 'in_stock') {
+                $query->where('stock', '>', 0);
+            } elseif ($avail === 'out_of_stock') {
+                $query->where('stock', '<=', 0);
+            }
+        } elseif ($request->boolean('in_stock')) {
+            $query->where('stock', '>', 0);
+        }
+
+        // 6. Featured products
         if ($request->boolean('featured')) {
             $query->where('is_featured', true);
         }
 
-        // Sorting
-        $sort = $request->query('sort', 'latest');
+        // 7. Sorting
+        $sort = strtolower($request->query('sort', 'latest'));
         match ($sort) {
-            'price_asc', 'price-low'   => $query->orderBy('price', 'asc'),
-            'price_desc', 'price-high' => $query->orderBy('price', 'desc'),
-            'name_asc'                 => $query->orderBy('name', 'asc'),
-            'name_desc'                => $query->orderBy('name', 'desc'),
-            default                    => $query->orderBy('created_at', 'desc'),
+            'price_asc', 'price-low', 'price-low-high' => $query->orderBy('price', 'asc')->orderBy('id', 'asc'),
+            'price_desc', 'price-high', 'price-high-low' => $query->orderBy('price', 'desc')->orderBy('id', 'desc'),
+            'name_asc', 'name-a-z', 'alpha_asc' => $query->orderBy('name', 'asc'),
+            'name_desc', 'name-z-a', 'alpha_desc' => $query->orderBy('name', 'desc'),
+            'rating_desc', 'rating-high', 'top-rated' => $query->withAvg('reviews', 'rating')->orderByDesc('reviews_avg_rating')->orderByDesc('id'),
+            default => $query->orderBy('created_at', 'desc')->orderBy('id', 'desc'),
         };
 
-        // Pagination or all
-        if ($request->boolean('paginate', false)) {
-            $perPage = (int) $request->query('per_page', 12);
-            $products = $query->paginate($perPage);
-        } else {
-            $products = $query->get();
+        // 8. Pagination support
+        $paginate = $request->has('paginate') ? $request->boolean('paginate') : true;
+
+        if ($paginate) {
+            $perPage = max(1, min(100, (int) $request->query('per_page', 9)));
+            $page = max(1, (int) $request->query('page', 1));
+            $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'success'    => true,
+                'message'    => 'Products retrieved successfully.',
+                'data'       => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page'    => $paginator->lastPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                    'from'         => $paginator->firstItem(),
+                    'to'           => $paginator->lastItem(),
+                    'has_more'     => $paginator->hasMorePages(),
+                ],
+            ]);
         }
+
+        $products = $query->get();
 
         return response()->json([
             'success' => true,
             'message' => 'Products retrieved successfully.',
             'data'    => $products,
+        ]);
+    }
+
+    /**
+     * Get dynamic filter options (categories, sellers, price range) from live MySQL records.
+     *
+     * GET /api/products/filters
+     */
+    public function filters()
+    {
+        $categories = \App\Models\Category::withCount(['products' => fn($q) => $q->where('status', 'active')])
+            ->get()
+            ->map(fn($c) => [
+                'id'             => $c->id,
+                'name'           => $c->name,
+                'slug'           => $c->slug,
+                'products_count' => $c->products_count,
+            ]);
+
+        $sellers = \App\Models\User::where('role', 'seller')
+            ->whereHas('products', fn($q) => $q->where('status', 'active'))
+            ->with('sellerProfile')
+            ->withCount(['products' => fn($q) => $q->where('status', 'active')])
+            ->get()
+            ->map(fn($s) => [
+                'id'             => $s->id,
+                'name'           => $s->name,
+                'shop_name'      => $s->sellerProfile?->shop_name ?? $s->name,
+                'products_count' => $s->products_count,
+            ]);
+
+        $priceStats = Product::where('status', 'active')
+            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'categories' => $categories,
+                'sellers'    => $sellers,
+                'price'      => [
+                    'min' => (float) ($priceStats->min_price ?? 0),
+                    'max' => (float) ($priceStats->max_price ?? 1000),
+                ],
+            ],
         ]);
     }
 
