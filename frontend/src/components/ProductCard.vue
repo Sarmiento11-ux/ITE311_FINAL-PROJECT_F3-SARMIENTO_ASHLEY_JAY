@@ -1,19 +1,22 @@
 <template>
   <article class="product-card">
     <div class="product-media">
-      <img 
-        :src="product.image || defaultPlaceholder" @error="handleImgError" 
-        :alt="product.title"
-        loading="lazy"
-      >
+      <router-link :to="`/products/${product.id}`" class="product-media-link">
+        <img 
+          :src="product.image || defaultPlaceholder" 
+          @error="handleImgError" 
+          :alt="product.title"
+          loading="lazy"
+        >
+      </router-link>
       <span v-if="product.badge" class="product-tag" :class="tagClass">{{ product.badge }}</span>
-      <button class="btn-wishlist" title="Save to favorites" aria-label="Add to wishlist">♡</button>
+      <WishlistButton :product="product" variant="icon" size="sm" class="btn-wishlist" />
     </div>
     
     <div class="product-details">
       <div class="product-artisan-row">
         <span class="artisan-byline">By {{ product.seller }}</span>
-        <span class="product-rating">★ {{ product.rating }} ({{ product.reviewsCount || 12 }})</span>
+        <span class="product-rating">★ {{ Number(product.rating || 0).toFixed(1) }} ({{ product.reviewsCount || 0 }})</span>
       </div>
       
       <h3 class="product-name">
@@ -55,6 +58,8 @@
 <script setup>
 import { computed } from 'vue';
 import { cart } from '../data/cart.js';
+import WishlistButton from './WishlistButton.vue';
+import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
 
 const props = defineProps({
   product: {
@@ -74,12 +79,22 @@ const formatPrice = (price) => {
   return Number(price).toFixed(2);
 };
 
+const handleImgError = (e) => {
+  e.target.src = defaultPlaceholder;
+};
+
 const handleAddToCart = () => {
   cart.addToCart(props.product, 1);
 };
 </script>
 
 <style scoped>
+.product-media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .product-meta-row {
   display: flex;
   justify-content: space-between;

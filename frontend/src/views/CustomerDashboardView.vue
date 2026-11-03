@@ -40,6 +40,10 @@
             <span>My Orders ({{ orders.length }})</span>
           </button>
 
+          <router-link to="/wishlist" class="dashboard-nav-item">
+            <span>My Wishlist ({{ wishlist.totalCount }})</span>
+          </router-link>
+
           <router-link to="/products" class="dashboard-nav-item">
             
             <span>Browse Products</span>
@@ -169,6 +173,7 @@ import DashboardStatCard from '../components/DashboardStatCard.vue';
 import CustomerOrdersTable from '../components/CustomerOrdersTable.vue';
 import { orderService } from '../services/orderService.js';
 import { auth } from '../data/auth.js';
+import { wishlist } from '../data/wishlist.js';
 
 const currentTab = ref('overview');
 const orders = ref([]);

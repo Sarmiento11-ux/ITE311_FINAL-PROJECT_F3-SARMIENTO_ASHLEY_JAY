@@ -34,6 +34,7 @@
             <div class="main-image-frame">
               <img :src="product.image || defaultPlaceholder" :alt="product.title" class="main-product-img" @error="handleImgError">
               <span v-if="product.badge" class="product-tag-float">{{ product.badge }}</span>
+              <WishlistButton :product="product" variant="icon" size="md" class="details-wishlist-float" />
               <div class="eco-badge-corner">
                 <span>🌱 100% Genuine Craft</span>
               </div>
@@ -126,19 +127,23 @@
                 {{ cartFeedback }}
               </div>
 
-              <button 
-                type="button" 
-                @click="addToCart" 
-                class="btn btn-primary btn-add-cart-large"
-                :disabled="product.stock <= 0"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-                <span>Add to Cart ({{ quantity }})</span>
-              </button>
+              <div class="details-cta-group">
+                <button 
+                  type="button" 
+                  @click="addToCart" 
+                  class="btn btn-primary btn-add-cart-large"
+                  :disabled="product.stock <= 0"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                  <span>Add to Cart ({{ quantity }})</span>
+                </button>
+
+                <WishlistButton :product="product" variant="full" size="md" class="btn-details-wishlist" />
+              </div>
             </div>
 
             <!-- Artisan Maker Profile Card -->
@@ -259,6 +264,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ProductCard from '../components/ProductCard.vue';
+import WishlistButton from '../components/WishlistButton.vue';
 import ProductRating from '../components/ProductRating.vue';
 import ReviewList from '../components/ReviewList.vue';
 import ReviewForm from '../components/ReviewForm.vue';
@@ -608,5 +614,29 @@ const addToCart = () => {
 
 .dot-low {
   background-color: #c25e3e !important;
+}
+
+.details-wishlist-float {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+}
+
+.details-cta-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.details-cta-group .btn-add-cart-large {
+  flex: 1;
+}
+
+@media (max-width: 580px) {
+  .details-cta-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>

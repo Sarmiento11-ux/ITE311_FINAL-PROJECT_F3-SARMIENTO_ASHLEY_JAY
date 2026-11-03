@@ -124,6 +124,14 @@
           <span class="icon-text">Orders</span>
         </router-link>
 
+        <!-- Wishlist Link -->
+        <router-link to="/wishlist" class="nav-icon-link wishlist-pill" title="My Wishlist">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span v-if="wishlist.totalCount > 0" class="wishlist-count">{{ wishlist.totalCount }}</span>
+        </router-link>
+
         <!-- Cart Link -->
         <router-link to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -150,6 +158,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { cart } from '../data/cart.js';
+import { wishlist } from '../data/wishlist.js';
 import { auth } from '../data/auth.js';
 import { cmsService } from '../services/cmsService.js';
 
@@ -209,5 +218,37 @@ const handleSearch = () => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(12px);
+}
+
+.wishlist-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: var(--cm-charcoal, #2C221E);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.wishlist-pill:hover {
+  color: #c25e3e;
+}
+
+.wishlist-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #c25e3e;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 </style>

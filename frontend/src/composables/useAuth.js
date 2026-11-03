@@ -1,5 +1,6 @@
 ﻿import { reactive, computed } from 'vue';
 import { cart } from '../data/cart.js';
+import { wishlist } from '../data/wishlist.js';
 import { authService } from '../services/authService.js';
 
 // ─── Reactive global auth state ───────────────────────────────────────────────
@@ -34,6 +35,8 @@ export const useAuth = () => {
     try {
       const { user } = await authService.login(email, password);
       state.user = user;
+      cart.loadCart(true);
+      wishlist.loadWishlist(true);
       return user;
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed. Please try again.';
@@ -77,6 +80,7 @@ export const useAuth = () => {
       state.error   = null;
       state.loading = false;
       cart.reset();
+      wishlist.reset();
     }
   }
 

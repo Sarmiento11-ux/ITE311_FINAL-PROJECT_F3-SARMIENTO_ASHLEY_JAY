@@ -9,6 +9,7 @@ import ProfileView from '../views/ProfileView.vue';
 import CustomerDashboardView from '../views/CustomerDashboardView.vue';
 import SellerDashboardView from '../views/SellerDashboardView.vue';
 import CartView from '../views/CartView.vue';
+import WishlistView from '../views/WishlistView.vue';
 import CheckoutView from '../views/CheckoutView.vue';
 import OrdersView from '../views/OrdersView.vue';
 import PaymentStatusView from '../views/PaymentStatusView.vue';
@@ -74,6 +75,12 @@ const routes = [
   {
     path: '/admin',
     redirect: '/dashboard/admin'
+  },
+  {
+    path: '/wishlist',
+    name: 'wishlist',
+    component: WishlistView,
+    meta: { requiresAuth: true, roles: ['customer', 'admin'] }
   },
   {
     path: '/cart',

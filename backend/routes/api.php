@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SellerController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\ProductReviewController;
+use App\Http\Controllers\Api\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +73,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/cart/{id}',           [CartController::class, 'update']);
     Route::delete('/cart/{id}',        [CartController::class, 'destroy']);
     Route::delete('/cart',             [CartController::class, 'clear']);
+
+    // ─── Customer: Wishlist & Favorites (persistent MySQL wishlist) ─────
+    Route::get('/wishlist',                     [WishlistController::class, 'index']);
+    Route::get('/wishlist/ids',                 [WishlistController::class, 'ids']);
+    Route::get('/wishlist/status/{productId}',  [WishlistController::class, 'status']);
+    Route::post('/wishlist',                    [WishlistController::class, 'store']);
+    Route::delete('/wishlist/{productId}',      [WishlistController::class, 'destroy']);
+    Route::delete('/wishlist',                  [WishlistController::class, 'clear']);
 
     // ─── Customer: Orders (own orders only — enforced in controller) ──────
     Route::get('/orders',              [OrderController::class, 'index']);

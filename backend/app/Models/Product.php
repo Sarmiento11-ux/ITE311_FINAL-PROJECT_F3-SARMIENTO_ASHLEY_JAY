@@ -119,4 +119,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductReview::class);
     }
+
+    /**
+     * A product can be in many customers' wishlists.
+     */
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }
