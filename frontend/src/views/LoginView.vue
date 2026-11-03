@@ -65,25 +65,6 @@
 
           </form>
 
-          <!-- Quick Demo Accounts for Testing -->
-          <div class="demo-accounts-box">
-            <h4 class="demo-title">Quick Demo Accounts for Testing:</h4>
-            <div class="demo-buttons-grid">
-              <button type="button" class="btn-demo-fill" @click="fillDemo('maria@example.com', 'password')">
-                <strong>Customer</strong>
-                <span>maria@example.com</span>
-              </button>
-              <button type="button" class="btn-demo-fill" @click="fillDemo('artisan@example.com', 'password')">
-                <strong>Seller</strong>
-                <span>artisan@example.com</span>
-              </button>
-              <button type="button" class="btn-demo-fill" @click="fillDemo('admin@example.com', 'admin123')">
-                <strong>Admin</strong>
-                <span>admin@example.com</span>
-              </button>
-            </div>
-            <p class="demo-hint">Click any role button above to auto-fill sample credentials.</p>
-          </div>
 
           <!-- Footer Link to Register -->
           <div class="auth-card-footer">
