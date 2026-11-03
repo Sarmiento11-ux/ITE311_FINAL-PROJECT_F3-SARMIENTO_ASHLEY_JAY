@@ -37,6 +37,8 @@ export function normalizeProduct(p) {
     sellerId: p.seller_id || p.seller?.id || 1,
     sellerEmail: p.seller?.email || '',
     sellerAvatar: p.seller?.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80',
+    sellerPlan: p.seller?.subscription_plan || 'basic',
+    seller_plan: p.seller?.subscription_plan || 'basic',
     location: p.location || p.seller?.address || 'Philippines',
     rating: p.avg_rating !== undefined && p.avg_rating !== null ? Number(p.avg_rating) : (p.rating || 0),
     reviewsCount: p.review_count !== undefined && p.review_count !== null ? Number(p.review_count) : (p.reviews_count ?? (p.created_at ? 0 : 24)),
