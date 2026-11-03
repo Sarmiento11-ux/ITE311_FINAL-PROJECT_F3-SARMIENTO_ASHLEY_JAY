@@ -94,4 +94,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Wishlist::class);
     }
+
+    /**
+     * An artisan can have subscription billing records.
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(ArtisanSubscription::class);
+    }
 }
