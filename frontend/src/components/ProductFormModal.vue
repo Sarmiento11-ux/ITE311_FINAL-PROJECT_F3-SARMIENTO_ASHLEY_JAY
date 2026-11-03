@@ -17,7 +17,7 @@
         <div class="form-group image-upload-section">
           <label class="form-label">
             Product Photography <span class="required">*</span>
-            <small class="label-hint">JPG, PNG, WEBP &middot; Max 5MB</small>
+            <small class="label-hint">JPG, PNG, WEBP &middot; Up to 15MB</small>
           </label>
 
           <div class="image-uploader-card">
@@ -258,7 +258,53 @@ const triggerFileInput = () => {
   }
 };
 
-const handleFileChange = (e) => {
+const compressImage = (file, maxWidth = 1600, maxHeight = 1600, quality = 0.88) => {
+  return new Promise((resolve) => {
+    if (file.type === 'image/svg+xml' || file.size < 400 * 1024) {
+      return resolve(file);
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        canvas.toBlob((blob) => {
+          if (!blob) return resolve(file);
+          const optimizedFile = new File([blob], file.name, {
+            type: mime,
+            lastModified: Date.now()
+          });
+          resolve(optimizedFile);
+        }, mime, quality);
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
+const handleFileChange = async (e) => {
   validationError.value = '';
   const file = e.target.files?.[0];
   if (!file) return;
@@ -271,22 +317,24 @@ const handleFileChange = (e) => {
     return;
   }
 
-  // 2. Validate max file size: 5MB (5,242,880 bytes)
-  const maxSize = 5 * 1024 * 1024;
+  // 2. Validate max file size: 15MB
+  const maxSize = 15 * 1024 * 1024;
   if (file.size > maxSize) {
-    validationError.value = `The selected image is too large (${formatFileSize(file.size)}). Maximum allowed size is 5MB.`;
+    validationError.value = "The selected image is too large (" + formatFileSize(file.size) + "). Maximum allowed size is 15MB.";
     e.target.value = '';
     return;
   }
 
-  selectedFile.value = file;
+  // Client-side automatic optimization so large camera photos upload quickly without failing
+  const optimizedFile = await compressImage(file);
+  selectedFile.value = optimizedFile;
   isImageRemoved.value = false;
 
   // Create fast local browser preview URL
   if (previewUrl.value) {
     URL.revokeObjectURL(previewUrl.value);
   }
-  previewUrl.value = URL.createObjectURL(file);
+  previewUrl.value = URL.createObjectURL(optimizedFile);
 };
 
 const handleRemoveImage = () => {
