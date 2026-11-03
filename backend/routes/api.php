@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\SellerController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,7 @@ Route::prefix('auth')->group(function () {
 // Products and categories are publicly browsable (no login required)
 Route::get('/categories',      [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
+Route::get('/subscriptions/plans', [SubscriptionController::class, 'getPlans']);
 Route::get('/products',         [ProductController::class, 'index']);
 Route::get('/products/filters', [ProductController::class, 'filters']);
 Route::get('/products/{id}',    [ProductController::class, 'show']);
@@ -67,6 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
             'data'    => $request->user()->load('sellerProfile'),
         ]);
     });
+
+    // ─── Artisan Subscription & Tiers ───────────────────────────────────────
+    Route::get('/seller/subscription',              [SubscriptionController::class, 'getCurrentSubscription']);
+    Route::post('/seller/subscription/upgrade',     [SubscriptionController::class, 'upgradeToPro']);
+    Route::post('/seller/subscription/cancel',      [SubscriptionController::class, 'cancelSubscription']);
 
     // ─── Customer: Shopping Cart (persistent MySQL cart) ────────────────
     Route::get('/cart',                [CartController::class, 'index']);
@@ -122,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->group(function () {
         // Dedicated admin overview, reports & seller oversight
         Route::prefix('admin')->group(function () {
+            Route::get('/subscriptions/metrics',   [SubscriptionController::class, 'getAdminSubscriptionMetrics']);
             Route::get('/stats',                   [AdminController::class, 'stats']);
             Route::get('/recent-activity',         [AdminController::class, 'recentActivity']);
             Route::get('/reports',                 [AdminController::class, 'reports']);
