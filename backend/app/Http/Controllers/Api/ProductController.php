@@ -227,7 +227,7 @@ class ProductController extends Controller
         // Handle image file upload if provided
         if ($request->hasFile('image')) {
             $request->validate([
-                'image' => ['file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+                'image' => ['file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:15360'],
             ], [
                 'image.image' => 'The uploaded file must be a valid image.',
                 'image.mimes' => 'Supported image formats are JPG, JPEG, PNG, and WEBP.',
@@ -239,7 +239,7 @@ class ProductController extends Controller
             $validated['image'] = $file->storeAs('products', $safeFilename, 'public');
         } elseif ($request->hasFile('image_file')) {
             $request->validate([
-                'image_file' => ['file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+                'image_file' => ['file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:15360'],
             ]);
 
             $file = $request->file('image_file');
@@ -328,8 +328,8 @@ class ProductController extends Controller
             $file = $request->file('image') ?? $request->file('image_file');
 
             $request->validate([
-                'image'      => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
-                'image_file' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+                'image'      => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:15360'],
+                'image_file' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:15360'],
             ]);
 
             // Clean up previous image file from disk if locally stored
@@ -379,7 +379,7 @@ class ProductController extends Controller
         }
 
         $request->validate([
-            'image' => ['required', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+            'image' => ['required', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:15360'],
         ], [
             'image.required' => 'Please select an image file to upload.',
             'image.file'     => 'The uploaded file is not recognized.',
