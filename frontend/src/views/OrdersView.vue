@@ -668,4 +668,66 @@ const getStatusClass = (status) => {
   display: flex;
   justify-content: flex-end;
 }
+
+/* -- Responsive: Mobile ---------------------------------------------------- */
+@media (max-width: 640px) {
+  .orders-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .orders-page-title {
+    font-size: 1.6rem;
+  }
+
+  .order-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-meta-group {
+    gap: 14px;
+  }
+
+  .header-number-group {
+    flex-wrap: wrap;
+  }
+
+  .order-card-body {
+    padding: 16px;
+  }
+
+  .order-item-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .order-item-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .order-item-pricing {
+    text-align: left;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 8px;
+    border-top: 1px dashed #E8DFD5;
+  }
+
+  .meta-val.recipient {
+    max-width: 180px;
+  }
+
+  .receipt-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-dialog-box {
+    padding: 20px 16px;
+  }
+}
 </style>

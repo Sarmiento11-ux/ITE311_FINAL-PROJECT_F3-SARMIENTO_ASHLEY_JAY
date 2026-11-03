@@ -518,4 +518,30 @@ const handleClearWishlist = async () => {
   background: #fceee9;
   border-color: #c25e3e;
 }
+
+/* Prevent buttons from stretching full-width on mobile */
+.btn-add-cart-w,
+.btn-remove-w,
+.btn-outline-danger {
+  width: auto !important;
+}
+
+/* Keyboard focus rings */
+.btn-add-cart-w:focus-visible,
+.btn-remove-w:focus-visible,
+.btn-remove-pill:focus-visible {
+  outline: 2px solid #3e5943;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .wishlist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item-actions-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
 </style>
