@@ -273,6 +273,7 @@ import ProductFormModal from '../components/ProductFormModal.vue';
 import ProductRating from '../components/ProductRating.vue';
 import { sellerService } from '../services/sellerService.js';
 import { getSellerReviews } from '../services/reviewService.js';
+import { subscriptionService } from '../services/subscriptionService.js';
 import { auth } from '../data/auth.js';
 
 const currentTab = ref('overview');
@@ -285,6 +286,8 @@ const isLoading = ref(true);
 const showProductModal = ref(false);
 const editingProduct = ref(null);
 const isEditMode = ref(false);
+const subscriptionData = ref(null);
+const isSubmittingSubscription = ref(false);
 
 const seller = computed(() => {
   return auth.user.value || {
@@ -314,6 +317,14 @@ const loadSellerData = async () => {
       reviews.value = revRes?.data || [];
     } catch {
       reviews.value = [];
+    }
+
+    try {
+      const subRes = await subscriptionService.getCurrentSubscription();
+      subscriptionData.value = subRes?.data || null;
+    } catch (subErr) {
+      console.warn('Could not load subscription data:', subErr);
+      subscriptionData.value = { is_pro: false, commission_rate: 8, listing_limit: 10 };
     }
   } catch (err) {
     console.warn('Could not load seller data from API, using fallback:', err);
@@ -421,6 +432,38 @@ const deleteProduct = async (productId) => {
       console.warn('API delete fallback:', err);
       products.value = products.value.filter(p => p.id !== productId);
     }
+  }
+};
+
+const handleUpgradeSubscription = async () => {
+  if (!confirm("Confirm upgrading to Artisan Pro for ₱299/month? You will unlock 3% platform commission and unlimited craft listings.")) {
+    return;
+  }
+  isSubmittingSubscription.value = true;
+  try {
+    const res = await subscriptionService.upgradeToPro('GCash / Online Wallet');
+    alert(res.message || 'Upgraded to Artisan Pro successfully!');
+    await loadSellerData();
+  } catch (err) {
+    alert(err.response?.data?.message || 'Error processing upgrade.');
+  } finally {
+    isSubmittingSubscription.value = false;
+  }
+};
+
+const handleCancelSubscription = async () => {
+  if (!confirm("Are you sure you want to switch back to the Basic Free tier? Your commission rate will return to 8% and listings will be capped at 10.")) {
+    return;
+  }
+  isSubmittingSubscription.value = true;
+  try {
+    const res = await subscriptionService.cancelSubscription();
+    alert(res.message || 'Switched back to Basic Free tier.');
+    await loadSellerData();
+  } catch (err) {
+    alert(err.response?.data?.message || 'Error updating subscription.');
+  } finally {
+    isSubmittingSubscription.value = false;
   }
 };
 </script>
