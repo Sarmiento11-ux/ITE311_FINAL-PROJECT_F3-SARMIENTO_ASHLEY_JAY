@@ -4,6 +4,30 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   SKIP TO CONTENT (Accessibility)
+   -------------------------------------------------------------------------- */
+.skip-to-content {
+    position: absolute;
+    top: -100px;
+    left: 16px;
+    background-color: var(--color-forest, #3E5943);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 0 0 6px 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    z-index: 99999;
+    transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+    top: 0;
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
    1. CSS VARIABLES (DESIGN TOKENS)
    -------------------------------------------------------------------------- */
 :root {
@@ -428,6 +452,15 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
+    pointer-events: none; /* Clicks pass through to parent link */
+}
+
+/* Keyboard focus on nav icon links */
+.nav-icon-link:focus-visible {
+    outline: 2px solid var(--color-forest, #3E5943);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
 }
 
 /* --------------------------------------------------------------------------
@@ -1508,5 +1541,59 @@ button {
 
     .btn {
         width: 100%;
+    }
+
+    /* Override: keep small/inline buttons at auto width */
+    .btn-sm,
+    .btn-table-action,
+    .page-nav-btn,
+    .page-num-btn,
+    .qty-btn,
+    .wishlist-btn,
+    .btn-add-cart,
+    .btn-view-link,
+    .btn-remove-pill,
+    .chip-remove-btn,
+    .btn-modal-close,
+    .btn-newsletter,
+    .btn-clear-filters,
+    .btn-retry,
+    .btn-demo-fill {
+        width: auto;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   GLOBAL ACCESSIBILITY: Focus-Visible Keyboard Ring
+   -------------------------------------------------------------------------- */
+:focus-visible {
+    outline: 2px solid var(--color-forest, #3E5943);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Remove focus ring for mouse users */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   GLOBAL: Smooth Scroll & Reduced Motion
+   -------------------------------------------------------------------------- */
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

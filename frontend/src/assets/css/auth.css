@@ -176,6 +176,11 @@
     outline: none;
 }
 
+.form-input:focus-visible {
+    outline: 2px solid var(--color-forest, #3E5943);
+    outline-offset: 1px;
+}
+
 .form-input.is-invalid {
     border-color: #e53e3e;
     background-color: #fffaf0;

@@ -1,7 +1,9 @@
 <template>
   <div id="craftmarket-app">
     <Navbar />
-    <router-view />
+    <div id="main-content">
+      <router-view />
+    </div>
     <Footer />
   </div>
 </template>
