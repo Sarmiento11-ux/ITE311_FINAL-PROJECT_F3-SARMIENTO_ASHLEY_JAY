@@ -182,4 +182,16 @@ const handleToggle = async () => {
   opacity: 0.6;
   pointer-events: none;
 }
+
+/* Ensure wishlist buttons always stay auto width (never stretch from global .btn rule) */
+.wishlist-btn {
+  width: auto !important;
+}
+
+/* Keyboard focus ring */
+.wishlist-btn:focus-visible {
+  outline: 2px solid var(--cm-forest, #3E5943);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
 </style>

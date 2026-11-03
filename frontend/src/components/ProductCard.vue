@@ -154,4 +154,18 @@ const handleAddToCart = () => {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Keyboard focus rings */
+.btn-view-link:focus-visible,
+.btn-add-cart:focus-visible {
+  outline: 2px solid var(--cm-forest, #3E5943);
+  outline-offset: 2px;
+}
+
+/* Prevent stretching on mobile */
+.btn-view-link,
+.btn-add-cart {
+  width: auto;
+  flex-shrink: 0;
+}
 </style>

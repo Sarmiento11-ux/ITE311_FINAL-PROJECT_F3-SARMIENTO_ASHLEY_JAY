@@ -274,4 +274,23 @@ const visiblePages = computed(() => {
   color: #ffffff;
   border-color: #3e5943;
 }
+
+/* Prevent pagination buttons from stretching to 100% on mobile */
+.page-nav-btn,
+.page-num-btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.page-num-btn {
+  width: 38px;
+  height: 38px;
+}
+
+/* Keyboard focus rings */
+.page-nav-btn:focus-visible,
+.page-num-btn:focus-visible {
+  outline: 2px solid #3e5943;
+  outline-offset: 2px;
+}
 </style>
