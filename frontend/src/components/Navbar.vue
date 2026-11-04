@@ -38,8 +38,20 @@
 
       <!-- Desktop Navigation Links -->
       <nav class="main-navigation" aria-label="Primary Navigation">
-        <router-link to="/" class="nav-link" exact-active-class="active">Home</router-link>
-        <a href="/#categories" class="nav-link">Categories</a>
+        <router-link 
+            to="/" 
+            class="nav-link"
+            :class="{ active: route.path === '/' && route.hash === '' }" 
+            >
+            Home
+          </router-link>
+        <router-link
+            to="/#categories"
+            class="nav-link"
+            :class="{ active: route.path === '/' && route.hash === '#categories' }"
+          >
+            Categories
+          </router-link>
         <router-link to="/products" class="nav-link" active-class="active">Shop</router-link>
         <router-link 
           v-if="auth.isAuthenticated && (auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin')" 
@@ -197,7 +209,7 @@
           <!-- Primary Pages -->
           <router-link to="/" class="mobile-nav-item" exact-active-class="active" @click="closeMobileMenu">Home</router-link>
           <router-link to="/products" class="mobile-nav-item" active-class="active" @click="closeMobileMenu">Shop All Crafts</router-link>
-          <a href="/#categories" class="mobile-nav-item" @click="closeMobileMenu">Categories</a>
+          <router-link to="/#categories" class="mobile-nav-item":class="{ active: route.path === '/' && route.hash === '#categories' }" @click="closeMobileMenu"> Categories</router-link>
           <a href="/#how-it-works" class="mobile-nav-item" @click="closeMobileMenu">How It Works</a>
           <a href="/#about" class="mobile-nav-item" @click="closeMobileMenu">Our Story</a>
 
