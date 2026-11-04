@@ -69,6 +69,7 @@ export const productService = {
         const items = response.data.data.map(normalizeProduct);
         return {
           items,
+          isFallback: false,
           pagination: response.data.pagination || {
             current_page: 1,
             last_page: 1,
@@ -82,8 +83,10 @@ export const productService = {
       console.warn('[ProductService] Backend API unreachable, falling back to local dataset.', err.message);
     }
     const fallback = sampleProducts.map(normalizeProduct);
+
     return {
       items: fallback,
+      isFallback: true,
       pagination: {
         current_page: 1,
         last_page: 1,

@@ -156,6 +156,12 @@ const fetchProducts = async () => {
     const res = await productService.getAll(params);
     products.value = res.items || [];
     pagination.value = res.pagination || null;
+
+    if (res.isFallback) {
+      apiNotice.value = 'The API is currently unavailable. Showing sample products instead.';
+    } else {
+      apiNotice.value = '';
+    }
   } catch (err) {
     console.error('[ProductsView] Failed to fetch products:', err);
     apiNotice.value = 'Could not load products from CraftMarket API. Please try again.';
