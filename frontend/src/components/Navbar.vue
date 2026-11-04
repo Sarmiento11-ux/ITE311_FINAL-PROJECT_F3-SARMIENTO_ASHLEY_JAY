@@ -3,7 +3,7 @@
   <aside class="announcement-bar" aria-label="Marketplace Announcement">
     <div class="container announcement-content">
       <span class="announcement-pill">{{ isFromCms ? 'CMS Notice' : 'Community Notice' }}</span>
-      <p class="announcement-text" v-html="announcementText"></p>
+      <p class="announcement-text" v-html="safeAnnouncementText"></p>
       <router-link to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
     </div>
   </aside>
@@ -275,8 +275,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import DOMPurify from 'dompurify';
 import { cart } from '../data/cart.js';
 import { wishlist } from '../data/wishlist.js';
 import { auth } from '../data/auth.js';
@@ -286,6 +287,9 @@ const router = useRouter();
 const route = useRoute();
 const searchQuery = ref('');
 const announcementText = ref('Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>');
+const safeAnnouncementText = computed(() =>
+  DOMPurify.sanitize(announcementText.value)
+);
 const isFromCms = ref(false);
 const isMobileMenuOpen = ref(false);
 
