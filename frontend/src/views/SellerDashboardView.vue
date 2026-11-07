@@ -128,11 +128,7 @@
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop / Brand Name:</span>
                   <strong>{{ seller.fullName }}</strong>
                 </div>
-                <div>
-                  <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Craft Discipline:</span>
-                  <strong>Ceramics & Pottery</strong>
-                </div>
-                <div>
+                                <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop Location:</span>
                   <span>{{ seller.address }}</span>
                 </div>
