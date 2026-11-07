@@ -1,4 +1,4 @@
-﻿import { reactive, computed } from 'vue';
+import { reactive, computed } from 'vue';
 import { cart } from '../data/cart.js';
 import { wishlist } from '../data/wishlist.js';
 import { authService } from '../services/authService.js';
@@ -8,7 +8,7 @@ import { authService } from '../services/authService.js';
 // Components read from here; authService handles all API communication.
 
 const state = reactive({
-  user: authService.getUser(),   // hydrate from localStorage on page load
+  user: authService.getUser(),   // hydrate from sessionStorage on page load
   loading: false,
   error: null,
 });

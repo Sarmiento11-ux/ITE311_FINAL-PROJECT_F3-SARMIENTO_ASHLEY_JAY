@@ -1,29 +1,56 @@
 import apiClient from './api.js';
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
-// We store the Sanctum token in localStorage (NOT the password).
-// The user object (without password) is also cached in localStorage for UX.
+// Auth token and user data are stored in sessionStorage so sessions do NOT
+// automatically persist across browser restarts or when reopening the system.
 
 const TOKEN_KEY = 'craftmarket_token';
 const USER_KEY  = 'craftmarket_user';
 
+function clearLegacyLocalStorage() {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// Clear any stale persistent storage on module load
+clearLegacyLocalStorage();
+
 function saveSession(user, token) {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  clearLegacyLocalStorage();
+  try {
+    sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch {
+    // Ignore storage errors
+  }
   // Inject token into default Axios headers for all future requests
   apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
 function clearSession() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  clearLegacyLocalStorage();
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+  } catch {
+    // Ignore storage errors
+  }
   delete apiClient.defaults.headers.common['Authorization'];
 }
 
 function restoreSession() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) {
-    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  clearLegacyLocalStorage();
+  try {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    if (token) {
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  } catch {
+    // Ignore storage errors
   }
 }
 
@@ -31,7 +58,7 @@ function restoreSession() {
 export const authService = {
 
   /**
-   * Called once at app startup to restore the session from localStorage.
+   * Called once at app startup to restore the session from sessionStorage.
    */
   init() {
     restoreSession();
@@ -82,8 +109,11 @@ export const authService = {
   async fetchMe() {
     const response = await apiClient.get('/auth/me');
     const user = response.data.data;
-    // Refresh cached user object
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    try {
+      sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    } catch {
+      // Ignore storage errors
+    }
     return user;
   },
 
@@ -95,7 +125,11 @@ export const authService = {
   async updateProfile(data) {
     const response = await apiClient.put('/auth/profile', data);
     const user = response.data.data;
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    try {
+      sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    } catch {
+      // Ignore storage errors
+    }
     return user;
   },
 
@@ -108,15 +142,19 @@ export const authService = {
     clearSession(); // Force re-login after password change
   },
 
-  // ─── Synchronous helpers (from cached localStorage, no API call) ────────
+  // ─── Synchronous helpers (from cached sessionStorage, no API call) ────────
 
   getToken() {
-    return localStorage.getItem(TOKEN_KEY);
+    try {
+      return sessionStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
   },
 
   getUser() {
     try {
-      const raw = localStorage.getItem(USER_KEY);
+      const raw = sessionStorage.getItem(USER_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;

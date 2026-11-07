@@ -5,7 +5,7 @@ import router from './router';
 // Import CraftMarket Main Stylesheet
 import './assets/css/main.css';
 
-// Restore Sanctum token from localStorage into Axios headers on every page load
+// Restore Sanctum token from sessionStorage into Axios headers on page load
 import { authService } from './services/authService.js';
 authService.init();
 
