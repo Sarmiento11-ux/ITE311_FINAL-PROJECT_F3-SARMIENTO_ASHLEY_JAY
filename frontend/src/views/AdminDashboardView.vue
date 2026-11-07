@@ -358,7 +358,7 @@
               <div class="admin-card-header">
                 <div>
                   <h3>User Account Management</h3>
-                  <p class="admin-card-sub">Inspect, filter, update details, or toggle active status of all accounts.</p>
+                  <p class="admin-card-sub">Audit registered customer shoppers, artisan makers, and platform accounts.</p>
                 </div>
               </div>
 
@@ -403,7 +403,6 @@
                       <th>Products</th>
                       <th>Status</th>
                       <th>Joined</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -429,25 +428,9 @@
                         </span>
                       </td>
                       <td class="text-muted">{{ formatDate(u.created_at) }}</td>
-                      <td>
-                        <div class="action-buttons-group">
-                          <button type="button" class="btn-action btn-edit" @click="openEditUserModal(u)" title="Edit User Details">
-                            Edit
-                          </button>
-                          <button 
-                            type="button" 
-                            class="btn-action" 
-                            :class="u.is_active ? 'btn-deactivate' : 'btn-activate'"
-                            @click="toggleUserActive(u)"
-                            :title="u.is_active ? 'Deactivate account' : 'Reactivate account'"
-                          >
-                            {{ u.is_active ? 'Deactivate' : 'Activate' }}
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                     <tr v-if="!users.length">
-                      <td colspan="8" class="empty-cell">No users match your filter criteria.</td>
+                      <td colspan="7" class="empty-cell">No users match your filter criteria.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -522,14 +505,6 @@
                         <div class="action-buttons-group">
                           <button type="button" class="btn-action btn-view" @click="viewSellerDetails(s.id)">
                             View Shop
-                          </button>
-                          <button 
-                            type="button" 
-                            class="btn-action" 
-                            :class="s.is_active ? 'btn-deactivate' : 'btn-activate'"
-                            @click="toggleSellerActive(s)"
-                          >
-                            {{ s.is_active ? 'Deactivate' : 'Activate' }}
                           </button>
                         </div>
                       </td>
