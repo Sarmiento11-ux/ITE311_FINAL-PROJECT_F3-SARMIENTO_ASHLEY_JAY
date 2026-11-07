@@ -73,10 +73,10 @@ export const sellerService = {
    * Update the fulfillment status of a specific order item.
    * PATCH /api/seller/order-items/{id}/status
    */
-  async updateOrderItemStatus(orderItemId, status) {
-    const response = await apiClient.patch(`/seller/order-items/${orderItemId}/status`, {
-      status: status.toLowerCase()
-    });
+  async updateOrderItemStatus(orderItemId, status, trackingNumber = null) {
+    const payload = { status: status.toLowerCase() };
+    if (trackingNumber) payload.tracking_number = trackingNumber;
+    const response = await apiClient.patch(`/seller/order-items/${orderItemId}/status`, payload);
     return response.data;
   },
 

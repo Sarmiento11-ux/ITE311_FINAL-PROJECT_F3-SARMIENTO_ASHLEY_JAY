@@ -132,7 +132,8 @@ class SellerController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
+            'status'          => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
+            'tracking_number' => 'nullable|string|max:120',
         ]);
 
         $newStatus = $validated['status'];
@@ -152,7 +153,11 @@ class SellerController extends Controller
             ], 422);
         }
 
-        $item->update(['status' => $newStatus]);
+        $updateData = ['status' => $newStatus];
+        if ($newStatus === 'shipped' && !empty($validated['tracking_number'])) {
+            $updateData['tracking_number'] = $validated['tracking_number'];
+        }
+        $item->update($updateData);
 
         // Send fulfillment update notification
         NotificationService::sendSellerItemFulfillment($item);
