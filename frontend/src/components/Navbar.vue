@@ -58,7 +58,7 @@
           Seller Portal
         </router-link>
         <router-link 
-          v-else-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
+          v-else-if="isCustomer" 
           to="/dashboard/customer" 
           class="nav-link"
           active-class="active"
@@ -126,7 +126,7 @@
         
         <!-- Customer Orders Link -->
         <router-link 
-          v-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
+          v-if="isCustomer" 
           to="/orders" 
           class="nav-icon-link desktop-only-action" 
           title="My Orders"
@@ -140,7 +140,7 @@
         </router-link>
 
         <!-- Wishlist Link (always visible) -->
-        <router-link to="/wishlist" class="nav-icon-link wishlist-pill" title="My Wishlist" aria-label="My Wishlist">
+        <router-link v-if="isCustomer" to="/wishlist" class="nav-icon-link wishlist-pill" title="My Wishlist" aria-label="My Wishlist">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
@@ -148,7 +148,7 @@
         </router-link>
 
         <!-- Cart Link (always visible) -->
-        <router-link to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart" aria-label="Shopping Cart">
+        <router-link v-if="isCustomer" to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart" aria-label="Shopping Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -237,11 +237,23 @@
 
           <!-- Account / Orders -->
           <router-link 
-            v-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
+            v-if="isCustomer" 
             to="/orders" 
             class="mobile-nav-item"
             @click="closeMobileMenu"
           >My Orders</router-link>
+          <router-link 
+            v-if="isCustomer" 
+            to="/wishlist" 
+            class="mobile-nav-item"
+            @click="closeMobileMenu"
+          >My Wishlist ({{ wishlist.totalCount }})</router-link>
+          <router-link 
+            v-if="isCustomer" 
+            to="/cart" 
+            class="mobile-nav-item"
+            @click="closeMobileMenu"
+          >Shopping Cart ({{ cart.totalCount }})</router-link>
           <router-link 
             :to="auth.isAuthenticated ? '/profile' : '/login'" 
             class="mobile-nav-item"
@@ -282,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { cart } from '../data/cart.js';
 import { wishlist } from '../data/wishlist.js';
@@ -290,6 +302,12 @@ import { auth } from '../data/auth.js';
 import { cmsService } from '../services/cmsService.js';
 
 const router = useRouter();
+const isCustomer = computed(() => {
+  if (!auth.isAuthenticated || !auth.user.value) return false;
+  const role = (auth.user.value.rawRole || auth.user.value.role || '').toLowerCase();
+  return role === 'customer';
+});
+
 const route = useRoute();
 const searchQuery = ref('');
 const announcementText = ref('Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>');
