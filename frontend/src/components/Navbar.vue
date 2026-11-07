@@ -58,7 +58,7 @@
           Seller Portal
         </router-link>
         <router-link 
-          v-else-if="auth.isAuthenticated" 
+          v-else-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
           to="/dashboard/customer" 
           class="nav-link"
           active-class="active"

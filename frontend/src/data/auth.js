@@ -30,7 +30,9 @@ const state = reactive({
 
 export const auth = {
   user: computed(() => state.user),
-  isAuthenticated: computed(() => !!state.user && !!authService.getToken()),
+  get isAuthenticated() {
+    return !!state.user && !!authService.getToken();
+  },
 
   setUser(userData) {
     state.user = normalizeUser(userData);
