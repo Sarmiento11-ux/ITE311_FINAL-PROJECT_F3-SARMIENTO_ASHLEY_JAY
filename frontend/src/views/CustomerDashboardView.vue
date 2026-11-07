@@ -215,6 +215,8 @@ const completedOrdersCount = computed(() => {
 });
 
 const totalSpent = computed(() => {
-  return orders.value.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  return orders.value
+    .filter(o => !['cancelled', 'refunded'].includes(o.status?.toLowerCase()))
+    .reduce((acc, curr) => acc + curr.totalAmount, 0);
 });
 </script>
