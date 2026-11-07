@@ -15,7 +15,7 @@
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.id">
-            <td><strong>{{ order.id }}</strong></td>
+            <td><strong>{{ order.orderNumber || order.id }}</strong></td>
             <td>{{ order.productName }} <span v-if="order.quantity > 1" style="color: #7A6F68;">(×{{ order.quantity }})</span></td>
             <td>{{ order.artisan }}</td>
             <td>{{ order.date }}</td>
@@ -43,7 +43,7 @@
     <div v-if="selectedOrder" class="modal-overlay" @click.self="selectedOrder = null">
       <div class="modal-dialog-box">
         <div class="modal-header-row">
-          <h3 class="modal-title">Order Summary: {{ selectedOrder.id }}</h3>
+          <h3 class="modal-title">Order Summary: {{ selectedOrder.orderNumber || selectedOrder.id }}</h3>
           <button type="button" class="btn-modal-close" @click="selectedOrder = null">&times;</button>
         </div>
 
