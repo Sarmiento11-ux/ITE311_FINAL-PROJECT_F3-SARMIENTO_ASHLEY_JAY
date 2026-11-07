@@ -76,7 +76,12 @@ class SellerController extends Controller
 
         $orderItems = OrderItem::with('order')->where('seller_id', $sellerId)->get();
         $totalOrders = $orderItems->pluck('order_id')->unique()->count();
-        $totalSales = $orderItems->sum('subtotal');
+        $totalSales = (float) $orderItems->sum('subtotal');
+
+        $sellerUser = \App\Models\User::find($sellerId);
+        $commissionRate = $sellerUser && $sellerUser->subscription_plan === 'pro' ? 3.0 : 8.0;
+        $platformFee = round($totalSales * ($commissionRate / 100), 2);
+        $netEarnings = round($totalSales - $platformFee, 2);
 
         $pendingOrders = $orderItems->filter(fn($item) => $item->status === 'pending' || ($item->order && $item->order->status === 'pending'))->pluck('order_id')->unique()->count();
         $completedOrders = $orderItems->filter(fn($item) => $item->status === 'delivered')->pluck('order_id')->unique()->count();
@@ -88,7 +93,10 @@ class SellerController extends Controller
                 'total_products'    => $totalProducts,
                 'active_products'   => $activeProducts,
                 'total_orders'      => $totalOrders,
-                'total_sales'       => (float) $totalSales,
+                'total_sales'       => $totalSales,
+                'commission_rate'   => $commissionRate,
+                'platform_fee'      => $platformFee,
+                'net_earnings'      => $netEarnings,
                 'pending_orders'    => $pendingOrders,
                 'completed_orders'  => $completedOrders,
             ],
@@ -153,9 +161,9 @@ class SellerController extends Controller
         $order = $item->order;
         if ($order) {
             $prevOrderStatus = $order->status;
-            $allItems = $order->items;
+            $allItems = $order->items()->get();
             $allDelivered = $allItems->every(fn($i) => $i->status === 'delivered');
-            $anyCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
+            $allCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
 
             if ($allDelivered) {
                 $order->update([
@@ -164,7 +172,7 @@ class SellerController extends Controller
                     'payment_status' => 'paid',
                 ]);
                 NotificationService::sendOrderStatusUpdate($order, 'delivered');
-            } elseif ($anyCancelled) {
+            } elseif ($allCancelled) {
                 $order->update(['status' => 'cancelled']);
                 NotificationService::sendOrderStatusUpdate($order, 'cancelled');
             } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {
