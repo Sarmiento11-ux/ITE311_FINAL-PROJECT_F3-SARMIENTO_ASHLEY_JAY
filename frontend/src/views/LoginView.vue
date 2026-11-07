@@ -81,6 +81,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth.js';
+import { auth } from '../data/auth.js';
 
 const route  = useRoute();
 const router = useRouter();
@@ -136,6 +137,9 @@ const handleLogin = async () => {
 
   try {
     const user = await login(email.value.trim(), password.value);
+
+    // Sync data/auth.js reactive state so all components reflect the new user immediately
+    auth.setUser(user);
 
     statusMsg.value  = `Welcome back, ${user.name}! Redirecting…`;
     statusClass.value = 'alert-success';
