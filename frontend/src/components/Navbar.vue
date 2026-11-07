@@ -71,9 +71,18 @@
 
       <!-- User Actions -->
       <div class="header-actions">
-        <!-- "Become a Seller" / Dashboard links (hidden on small mobile to save space) -->
+        <!-- Primary Auth / Dashboard links -->
         <router-link 
-          v-if="auth.isAuthenticated && (auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin')" 
+          v-if="!auth.isAuthenticated" 
+          to="/login" 
+          class="btn-seller-link desktop-only-action"
+          style="background-color: var(--cm-forest, #2D4A3E); color: #ffffff;"
+        >
+          <span>Log In</span>
+        </router-link>
+
+        <router-link 
+          v-else-if="auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin'" 
           to="/dashboard/admin" 
           class="btn-seller-link desktop-only-action"
           style="background-color: var(--cm-terracotta, #c25e3e); color: #ffffff;"
@@ -82,21 +91,24 @@
         </router-link>
 
         <router-link 
-          v-else-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
-          to="/register?role=seller" 
-          class="btn-seller-link desktop-only-action"
-        >
-          <span>Become a Seller</span>
-        </router-link>
-        
-        <router-link 
-          v-else 
+          v-else-if="auth.user.value?.rawRole === 'seller' || auth.user.value?.role === 'Seller'" 
           to="/dashboard/seller" 
           class="btn-seller-link desktop-only-action"
           style="background-color: var(--cm-forest, #3E5943); color: #ffffff;"
         >
           <span>Artisan Dashboard</span>
         </router-link>
+
+        <button 
+          v-else 
+          type="button"
+          @click="handleLogout"
+          class="btn-seller-link desktop-only-action"
+          style="background-color: transparent; border-color: #d1d5db; color: #5c524b;"
+          title="Sign out of your account"
+        >
+          <span>Sign Out</span>
+        </button>
 
         <!-- Account / Profile Link -->
         <router-link 
@@ -242,18 +254,25 @@
           <div class="mobile-drawer-cta">
             <router-link 
               v-if="!auth.isAuthenticated" 
+              to="/login" 
+              class="btn btn-primary"
+              style="width: 100%; justify-content: center;"
+              @click="closeMobileMenu"
+            >Log In →</router-link>
+            <router-link 
+              v-if="!auth.isAuthenticated" 
               to="/register" 
               class="btn btn-secondary"
               style="width: 100%; justify-content: center;"
               @click="closeMobileMenu"
             >Create Account</router-link>
-            <router-link 
-              v-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
-              to="/register?role=seller" 
-              class="btn btn-primary"
+            <button 
+              v-else 
+              type="button"
+              class="btn btn-secondary"
               style="width: 100%; justify-content: center;"
-              @click="closeMobileMenu"
-            >Become a Seller ↗</router-link>
+              @click="() => { handleLogout(); closeMobileMenu(); }"
+            >Sign Out</button>
           </div>
 
         </nav>
@@ -313,6 +332,11 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
+};
+
+const handleLogout = async () => {
+  await auth.logout();
+  router.push('/login');
 };
 </script>
 
