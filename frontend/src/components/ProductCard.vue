@@ -57,7 +57,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { cart } from '../data/cart.js';
+import { authService } from '../services/authService.js';
 import WishlistButton from './WishlistButton.vue';
 import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
 
@@ -83,7 +85,14 @@ const handleImgError = (e) => {
   e.target.src = defaultPlaceholder;
 };
 
+const router = useRouter();
+
 const handleAddToCart = () => {
+  if (!authService.isAuthenticated()) {
+    alert('Please log in or create an account to add items to your shopping cart.');
+    router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
+    return;
+  }
   cart.addToCart(props.product, 1);
 };
 </script>

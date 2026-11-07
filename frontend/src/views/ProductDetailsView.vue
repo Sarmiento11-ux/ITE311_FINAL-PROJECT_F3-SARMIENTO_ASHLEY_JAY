@@ -262,7 +262,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import ProductCard from '../components/ProductCard.vue';
 import WishlistButton from '../components/WishlistButton.vue';
 import ProductRating from '../components/ProductRating.vue';
@@ -275,6 +275,7 @@ import { cart } from '../data/cart.js';
 import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
 
 const route = useRoute();
+const router = useRouter();
 
 const product = ref(null);
 const relatedProducts = ref([]);
@@ -461,6 +462,11 @@ const increaseQty = () => {
 
 const addToCart = () => {
   if (!product.value) return;
+  if (!authService.isAuthenticated()) {
+    alert('Please log in or create an account to add items to your shopping cart.');
+    router.push({ name: 'login', query: { redirect: route.fullPath } });
+    return;
+  }
   const result = cart.addToCart(product.value, quantity.value);
   if (result.success) {
     cartFeedback.value = ` Successfully added ${quantity.value} item(s) to cart!`;

@@ -131,6 +131,14 @@ export const cart = reactive({
    * Add a product to cart. Optimistically updates UI, then syncs to backend.
    */
   async addToCart(product, quantity = 1) {
+    if (!authService.isAuthenticated()) {
+      const msg = 'Please log in or create an account to add items to your shopping cart.';
+      state.toastMessage = msg;
+      state.showToast    = true;
+      setTimeout(() => { state.showToast = false; }, 3200);
+      return { success: false, requiresAuth: true, message: msg };
+    }
+
     if (quantity < 1) return { success: false, message: 'Quantity must be at least 1.' };
 
     const availStock = Number(product.stock) || 0;
