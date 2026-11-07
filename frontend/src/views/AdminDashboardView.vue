@@ -97,6 +97,15 @@
           <button 
             type="button" 
             class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'subscriptions' }"
+            @click="setTab('subscriptions')"
+          >
+            <span class="nav-icon">💎</span><span>Subscriptions</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
             :class="{ active: currentTab === 'reviews' }"
             @click="setTab('reviews')"
           >
@@ -948,7 +957,94 @@
           </div>
 
           <!-- TAB 8: REVIEWS MODERATION -->
-          <div v-else-if="currentTab === 'reviews'" class="tab-pane">
+
+          <!-- TAB 9: SUBSCRIPTIONS & ARTISAN PRO REVENUE -->
+          <div v-else-if="currentTab === 'subscriptions'" class="tab-pane">
+            <div class="admin-metrics-grid">
+              <div class="metric-card metric-gold">
+                <div class="metric-icon">💎</div>
+                <div class="metric-info">
+                  <span class="metric-label">Monthly Recurring Revenue (MRR)</span>
+                  <strong class="metric-value">₱{{ formatMoney(subscriptionMetrics?.mrr ?? 0) }}</strong>
+                  <small class="metric-sub">Active Artisan Pro subscribers</small>
+                </div>
+              </div>
+
+              <div class="metric-card metric-primary">
+                <div class="metric-icon">⭐</div>
+                <div class="metric-info">
+                  <span class="metric-label">Artisan Pro Makers</span>
+                  <strong class="metric-value">{{ subscriptionMetrics?.pro_subscribers_count ?? 0 }}</strong>
+                  <small class="metric-sub">On 3% commission tier</small>
+                </div>
+              </div>
+
+              <div class="metric-card metric-forest">
+                <div class="metric-icon">🏛️</div>
+                <div class="metric-info">
+                  <span class="metric-label">Basic Free Makers</span>
+                  <strong class="metric-value">{{ subscriptionMetrics?.basic_sellers_count ?? 0 }}</strong>
+                  <small class="metric-sub">On standard 8% commission</small>
+                </div>
+              </div>
+
+              <div class="metric-card metric-amber">
+                <div class="metric-icon">📈</div>
+                <div class="metric-info">
+                  <span class="metric-label">All-time Subscription GMV</span>
+                  <strong class="metric-value">₱{{ formatMoney(subscriptionMetrics?.all_time_revenue ?? 0) }}</strong>
+                  <small class="metric-sub">{{ subscriptionMetrics?.conversion_rate ?? 0 }}% conversion rate</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subscribers Records Table -->
+            <div class="admin-card" style="margin-top: 24px;">
+              <div class="admin-card-header">
+                <div>
+                  <h3 class="panel-heading">Artisan Pro Billing & Subscription Records</h3>
+                  <p class="admin-card-sub">Recent billing cycles and membership status for verified artisan workshops.</p>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Artisan / Workshop</th>
+                      <th>Plan Tier</th>
+                      <th>Billing Fee</th>
+                      <th>Payment Channel</th>
+                      <th>Start Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="sub in (subscriptionMetrics?.recent_records || [])" :key="sub.id">
+                      <td>
+                        <strong>{{ sub.user?.name || 'Artisan Maker' }}</strong>
+                        <small class="d-block text-muted">{{ sub.user?.email }}</small>
+                      </td>
+                      <td>
+                        <span class="status-badge badge-active">⭐ Artisan Pro</span>
+                      </td>
+                      <td><strong>₱{{ formatMoney(sub.amount) }}</strong></td>
+                      <td>{{ sub.payment_method || 'GCash / Online Wallet' }}</td>
+                      <td class="text-muted">{{ formatDate(sub.starts_at || sub.created_at) }}</td>
+                      <td>
+                        <span class="status-badge badge-paid">Active</span>
+                      </td>
+                    </tr>
+                    <tr v-if="!(subscriptionMetrics?.recent_records?.length)">
+                      <td colspan="6" class="empty-cell">No subscription billing transactions recorded yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+                    <div v-else-if="currentTab === 'reviews'" class="tab-pane">
             <div class="panel-header-row">
               <div>
                 <h3 class="panel-heading">Product Reviews & Content Moderation</h3>
@@ -1403,6 +1499,8 @@ const loadCurrentTabData = async () => {
       reports.value = await adminService.getReports();
     } else if (currentTab.value === 'reviews') {
       reviews.value = await adminService.getReviews();
+    } else if (currentTab.value === 'subscriptions') {
+      await fetchSubscriptionMetrics();
     }
   } catch (err) {
     showToast(err.message || 'Failed to retrieve data from API.', 'alert-danger');
