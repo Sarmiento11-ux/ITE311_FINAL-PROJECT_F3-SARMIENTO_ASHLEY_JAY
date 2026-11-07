@@ -792,19 +792,9 @@
                         </span>
                       </td>
                       <td>
-                        <select 
-                          :value="o.status" 
-                          @change="handleUpdateOrderStatus(o, $event.target.value)"
-                          class="status-select"
-                          :class="'status-' + o.status"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="processing">Processing</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
+                        <span class="status-badge" :class="'badge-' + (o.status || 'pending').toLowerCase()">
+                          {{ (o.status || 'pending').charAt(0).toUpperCase() + (o.status || 'pending').slice(1) }}
+                        </span>
                       </td>
                       <td class="text-muted">{{ formatDate(o.created_at) }}</td>
                       <td>
