@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ProductSearch from '../components/ProductSearch.vue';
 import CategoryFilter from '../components/CategoryFilter.vue';
@@ -79,7 +79,7 @@ import { productService } from '../services/productService.js';
 const route = useRoute();
 const router = useRouter();
 
-// ── State ────────────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────
 const products = ref([]);
 const pagination = ref(null);
 const isLoading = ref(true);
@@ -91,7 +91,7 @@ const filterMeta = reactive({
   price: { min: 0, max: 2000 },
 });
 
-// Query State
+// ── Query State ────────────────────────────────────────
 const searchQuery = ref(route.query.search || '');
 const selectedCategory = ref(route.query.category || 'all');
 const selectedSeller = ref(route.query.seller_id || route.query.seller || 'all');
@@ -99,26 +99,37 @@ const minPrice = ref(route.query.min_price || '');
 const maxPrice = ref(route.query.max_price || '');
 const availability = ref(route.query.availability || 'all');
 const sortBy = ref(route.query.sort || 'latest');
-const currentPage = ref(Number(route.query.page) || 1);
+const currentPage = ref(Math.max(1, Number(route.query.page) || 1));
 const perPage = ref(9);
 
-// ── Load Metadata & Initial Products ──────────────────────────────────────────
+// Prevent outdated requests from replacing newer results.
+let latestRequestId = 0;
+
+// Suppress the filter watcher while applying a browser navigation.
+let isApplyingRouteQuery = false;
+
+// ── Load Filter Metadata ───────────────────────────────
 const loadFilterMetadata = async () => {
   try {
     const meta = await productService.getFilterMeta();
+
     if (meta) {
       filterMeta.categories = meta.categories || [];
       filterMeta.sellers = meta.sellers || [];
+
       if (meta.price) {
         filterMeta.price = meta.price;
       }
     }
   } catch (err) {
-    console.warn('[ProductsView] Filter meta load error:', err);
+    console.warn('[ProductsView] Filter metadata error:', err);
   }
 };
 
+// ── Fetch Products ─────────────────────────────────────
 const fetchProducts = async () => {
+  const requestId = ++latestRequestId;
+
   isLoading.value = true;
   apiNotice.value = '';
 
@@ -154,38 +165,76 @@ const fetchProducts = async () => {
 
   try {
     const res = await productService.getAll(params);
+
+    // Ignore outdated responses.
+    if (requestId !== latestRequestId) return;
+
     products.value = res.items || [];
     pagination.value = res.pagination || null;
 
-    if (res.isFallback) {
-      apiNotice.value = 'The API is currently unavailable. Showing sample products instead.';
-    } else {
-      apiNotice.value = '';
+    if (pagination.value?.current_page) {
+      currentPage.value = Number(pagination.value.current_page);
     }
+
+    apiNotice.value = res.isFallback
+      ? 'The API is currently unavailable. Showing sample products instead.'
+      : '';
+
   } catch (err) {
+    if (requestId !== latestRequestId) return;
+
     console.error('[ProductsView] Failed to fetch products:', err);
-    apiNotice.value = 'Could not load products from CraftMarket API. Please try again.';
+    products.value = [];
+    pagination.value = null;
+    apiNotice.value = 'Could not load products. Please try again.';
+
   } finally {
-    isLoading.value = false;
+    if (requestId === latestRequestId) {
+      isLoading.value = false;
+    }
   }
 };
 
-// ── URL Synchronization ───────────────────────────────────────────────────────
+// ── URL Synchronization ────────────────────────────────
 const syncUrl = () => {
   const query = {};
-  if (searchQuery.value.trim()) query.search = searchQuery.value.trim();
-  if (selectedCategory.value && selectedCategory.value !== 'all') query.category = selectedCategory.value;
-  if (selectedSeller.value && selectedSeller.value !== 'all') query.seller_id = selectedSeller.value;
-  if (minPrice.value !== '') query.min_price = minPrice.value;
-  if (maxPrice.value !== '') query.max_price = maxPrice.value;
-  if (availability.value && availability.value !== 'all') query.availability = availability.value;
-  if (sortBy.value && sortBy.value !== 'latest') query.sort = sortBy.value;
-  if (currentPage.value > 1) query.page = currentPage.value;
+
+  if (searchQuery.value.trim()) {
+    query.search = searchQuery.value.trim();
+  }
+
+  if (selectedCategory.value !== 'all') {
+    query.category = selectedCategory.value;
+  }
+
+  if (selectedSeller.value !== 'all') {
+    query.seller_id = selectedSeller.value;
+  }
+
+  if (minPrice.value !== '') {
+    query.min_price = minPrice.value;
+  }
+
+  if (maxPrice.value !== '') {
+    query.max_price = maxPrice.value;
+  }
+
+  if (availability.value !== 'all') {
+    query.availability = availability.value;
+  }
+
+  if (sortBy.value !== 'latest') {
+    query.sort = sortBy.value;
+  }
+
+  if (currentPage.value > 1) {
+    query.page = String(currentPage.value);
+  }
 
   router.replace({ query }).catch(() => {});
 };
 
-// ── Handlers ─────────────────────────────────────────────────────────────────
+// ── Search Handler ─────────────────────────────────────
 const handleSearch = () => {
   currentPage.value = 1;
   syncUrl();
@@ -199,17 +248,36 @@ const handleClearSearch = () => {
   fetchProducts();
 };
 
+// ── Pagination Handler ──────────────────────────────────
 const handlePageChange = (page) => {
-  currentPage.value = page;
+  const nextPage = Number(page);
+
+  if (!Number.isInteger(nextPage) || nextPage < 1) return;
+  if (pagination.value && nextPage > pagination.value.last_page) return;
+  if (nextPage === currentPage.value) return;
+
+  currentPage.value = nextPage;
+
   syncUrl();
   fetchProducts();
+
   const el = document.getElementById('catalog-controls');
+
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' });
   }
 };
 
+// ── Reset Filters ───────────────────────────────────────
 const resetFilters = () => {
+  const filtersWereActive =
+    selectedCategory.value !== 'all' ||
+    selectedSeller.value !== 'all' ||
+    minPrice.value !== '' ||
+    maxPrice.value !== '' ||
+    availability.value !== 'all' ||
+    sortBy.value !== 'latest';
+
   searchQuery.value = '';
   selectedCategory.value = 'all';
   selectedSeller.value = 'all';
@@ -220,20 +288,83 @@ const resetFilters = () => {
   currentPage.value = 1;
 
   syncUrl();
-  fetchProducts();
+
+  // The filter watcher refetches when a filter changed. When only the
+  // search term or page was active, we must refetch here instead.
+  if (!filtersWereActive) {
+    fetchProducts();
+  }
 };
 
-// ── Watchers for filter triggers ──────────────────────────────────────────────
-watch([selectedCategory, selectedSeller, minPrice, maxPrice, availability, sortBy], () => {
-  currentPage.value = 1;
-  syncUrl();
-  fetchProducts();
-});
+// ── Watch Filter Changes ───────────────────────────────
+watch(
+  [
+    selectedCategory,
+    selectedSeller,
+    minPrice,
+    maxPrice,
+    availability,
+    sortBy,
+  ],
+  () => {
+    // URL changes are handled by the route watcher below.
+    if (isApplyingRouteQuery) return;
 
+    currentPage.value = 1;
+    syncUrl();
+    fetchProducts();
+  }
+);
+
+// ── Browser Back / Forward Support ─────────────────────
+watch(
+  () => route.query,
+  async (query) => {
+    const nextSearch = query.search || '';
+    const nextCategory = query.category || 'all';
+    const nextSeller = String(query.seller_id || query.seller || 'all');
+    const nextMinPrice = query.min_price || '';
+    const nextMaxPrice = query.max_price || '';
+    const nextAvailability = query.availability || 'all';
+    const nextSort = query.sort || 'latest';
+    const nextPage = Math.max(1, Number(query.page) || 1);
+
+    const isSameState =
+      nextSearch === searchQuery.value &&
+      nextCategory === selectedCategory.value &&
+      nextSeller === String(selectedSeller.value) &&
+      nextMinPrice === String(minPrice.value) &&
+      nextMaxPrice === String(maxPrice.value) &&
+      nextAvailability === availability.value &&
+      nextSort === sortBy.value &&
+      nextPage === currentPage.value;
+
+    // Ignore query updates caused by our own URL synchronization.
+    if (isSameState) return;
+
+    isApplyingRouteQuery = true;
+    searchQuery.value = nextSearch;
+    selectedCategory.value = nextCategory;
+    selectedSeller.value = nextSeller;
+    minPrice.value = nextMinPrice;
+    maxPrice.value = nextMaxPrice;
+    availability.value = nextAvailability;
+    sortBy.value = nextSort;
+    currentPage.value = nextPage;
+
+    await nextTick();
+    isApplyingRouteQuery = false;
+
+    // Search and page changes are not covered by the filter watcher.
+    fetchProducts();
+  }
+);
+
+// ── Initial Load ────────────────────────────────────────
 onMounted(async () => {
   await Promise.all([
     loadFilterMetadata(),
-    fetchProducts()
+    fetchProducts(),
   ]);
 });
 </script>

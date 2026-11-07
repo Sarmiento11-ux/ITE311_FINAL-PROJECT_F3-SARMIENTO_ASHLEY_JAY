@@ -7,7 +7,7 @@
     <input 
       :value="modelValue" 
       @input="onInput"
-      @keyup.enter="$emit('search', modelValue)"
+      @keydown.enter="onEnter"
       type="text" 
       :placeholder="placeholder || 'Search by craft, description, or artisan...'" 
       aria-label="Search handmade products"
@@ -54,8 +54,13 @@ const onClear = () => {
   clearTimeout(debounceTimer);
   emit('update:modelValue', '');
   emit('clear');
-  emit('search', '');
 };
+
+const onEnter = () => {
+  clearTimeout(debounceTimer);
+  emit('search', props.modelValue);
+};
+
 </script>
 
 <style scoped>
