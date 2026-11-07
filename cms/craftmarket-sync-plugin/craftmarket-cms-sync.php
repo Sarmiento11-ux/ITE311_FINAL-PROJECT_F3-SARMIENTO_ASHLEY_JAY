@@ -170,7 +170,7 @@ class CraftMarket_CMS_Bridge {
      * Render Users View.
      */
     public function render_users_page() {
-        $users = $this->fetch_api('/users');
+        $users = $this->fetch_api('/cms-bridge/users');
         ?>
         <div class="wrap">
             <h1>CraftMarket User Data & Roles (CMS Integration)</h1>
@@ -212,7 +212,7 @@ class CraftMarket_CMS_Bridge {
      * Render Reports View.
      */
     public function render_reports_page() {
-        $reports = $this->fetch_api('/admin/reports');
+        $reports = $this->fetch_api('/cms-bridge/reports');
         ?>
         <div class="wrap">
             <h1>CraftMarket Platform Sales & Escrow Reports</h1>

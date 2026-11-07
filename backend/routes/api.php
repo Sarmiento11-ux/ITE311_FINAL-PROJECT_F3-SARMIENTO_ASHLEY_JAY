@@ -53,6 +53,12 @@ Route::get('/products/{id}',    [ProductController::class, 'show']);
 // Product reviews: publicly readable, auth required to write
 Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
 
+// Headless WordPress CMS Bridge Routes (allows local CMS to synchronize users & reports)
+Route::prefix('cms-bridge')->group(function () {
+    Route::get('/users',   [\App\Http\Controllers\Api\UserController::class, 'index']);
+    Route::get('/reports', [\App\Http\Controllers\Api\AdminController::class, 'reports']);
+});
+
 // ─── Authenticated Routes (any logged-in user) ───────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
