@@ -352,6 +352,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import SellerProductsTable from '../components/SellerProductsTable.vue';
 import SellerOrdersTable from '../components/SellerOrdersTable.vue';
@@ -360,6 +361,8 @@ import ProductRating from '../components/ProductRating.vue';
 import { sellerService } from '../services/sellerService.js';
 import { getSellerReviews } from '../services/reviewService.js';
 import { subscriptionService } from '../services/subscriptionService.js';
+
+const route = useRoute();
 import { auth } from '../data/auth.js';
 
 const currentTab = ref('overview');
@@ -419,8 +422,19 @@ const loadSellerData = async () => {
   }
 };
 
-onMounted(() => {
-  loadSellerData();
+onMounted(async () => {
+  await loadSellerData();
+  if (route.query.payment === 'success') {
+    try {
+      const vRes = await subscriptionService.verifySession(route.query.session_id);
+      if (vRes?.success) {
+        alert(vRes.message || 'Payment confirmed! Welcome to Artisan Pro!');
+        await loadSellerData();
+      }
+    } catch (e) {
+      console.warn('Subscription payment verification:', e);
+    }
+  }
 });
 
 const pendingOrdersCount = computed(() => {
@@ -527,7 +541,11 @@ const handleUpgradeSubscription = async () => {
   }
   isSubmittingSubscription.value = true;
   try {
-    const res = await subscriptionService.upgradeToPro('GCash / Online Wallet');
+    const res = await subscriptionService.upgradeToPro('PayMongo Online');
+    if (res && res.checkout_url) {
+      window.location.href = res.checkout_url;
+      return;
+    }
     alert(res.message || 'Upgraded to Artisan Pro successfully!');
     await loadSellerData();
   } catch (err) {

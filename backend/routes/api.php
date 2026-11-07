@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ─── Artisan Subscription & Tiers ───────────────────────────────────────
     Route::get('/seller/subscription',              [SubscriptionController::class, 'getCurrentSubscription']);
     Route::post('/seller/subscription/upgrade',     [SubscriptionController::class, 'upgradeToPro']);
+    Route::get('/seller/subscription/verify',       [SubscriptionController::class, 'verifyPaymongoSession']);
     Route::post('/seller/subscription/cancel',      [SubscriptionController::class, 'cancelSubscription']);
 
     // ─── Customer: Shopping Cart (persistent MySQL cart) ────────────────
