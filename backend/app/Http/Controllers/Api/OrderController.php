@@ -220,9 +220,26 @@ class OrderController extends Controller
             ], 404);
         }
 
+        $user = $request->user();
+        if ($user && $user->role !== 'admin' && $order->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You do not have permission to update this order.',
+                'data'    => null,
+            ], 403);
+        }
+
         $validated = $request->validate([
             'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,refunded',
         ]);
+
+        if ($user && $user->role !== 'admin' && ($validated['status'] !== 'cancelled' || $order->status !== 'pending')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customers may only cancel orders that are still pending.',
+                'data'    => null,
+            ], 422);
+        }
 
         $updateData = ['status' => $validated['status']];
 
@@ -235,7 +252,18 @@ class OrderController extends Controller
             $updateData['payment_status'] = 'paid';
         }
 
+        $previousStatus = $order->status;
         $order->update($updateData);
+
+        // Cascade status to child order items
+        $order->items()->update(['status' => $validated['status']]);
+
+        // Restock inventory if cancelled
+        if ($validated['status'] === 'cancelled' && $previousStatus !== 'cancelled') {
+            foreach ($order->items as $item) {
+                $item->product?->increment('stock', $item->quantity);
+            }
+        }
 
         // Notify customer about order status change
         NotificationService::sendOrderStatusUpdate($order, $validated['status']);
