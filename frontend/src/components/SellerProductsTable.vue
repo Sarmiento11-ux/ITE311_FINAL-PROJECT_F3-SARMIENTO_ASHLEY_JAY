@@ -74,8 +74,8 @@ defineEmits(['edit', 'delete']);
 
 const getStatusClass = (status) => {
   const s = status.toLowerCase();
-  if (s.includes('published')) return 'status-published';
-  if (s.includes('low')) return 'status-low-stock';
+  if (s.includes('published') || s.includes('active')) return 'status-published';
+  if (s.includes('low') || s.includes('out')) return 'status-low-stock';
   return 'status-draft';
 };
 </script>
