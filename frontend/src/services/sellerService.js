@@ -48,8 +48,10 @@ export const sellerService = {
           orderNumber: item.order?.order_number || `CM-${item.id}`,
           customerName: item.order?.user?.name || 'Valued Customer',
           productName: item.product_name,
+          product: item.product_name, // Map both for backward and forward compatibility
           quantity: item.quantity,
           totalAmount: parseFloat(item.subtotal),
+          payoutStatus: item.order?.payment_status === 'paid' ? 'Paid (Escrow Released)' : 'Awaiting Payment',
           status: (item.status || item.order?.status || 'pending').charAt(0).toUpperCase() + (item.status || item.order?.status || 'pending').slice(1),
           rawStatus: item.status || 'pending',
           orderDate: new Date(item.created_at).toLocaleDateString('en-US', {

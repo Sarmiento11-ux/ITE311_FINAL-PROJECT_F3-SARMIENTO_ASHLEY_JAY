@@ -15,9 +15,9 @@
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.id">
-            <td><strong>{{ order.id }}</strong></td>
+            <td><strong>{{ order.orderNumber || order.id }}</strong></td>
             <td>{{ order.customerName }}</td>
-            <td>{{ order.product }}</td>
+            <td>{{ order.product || order.productName }}</td>
             <td>{{ order.quantity }}</td>
             <td><strong>₱{{ Number(order.totalAmount).toFixed(2) }}</strong></td>
             <td>
@@ -49,7 +49,7 @@
 
         <div style="font-size: 0.9rem; line-height: 1.7; color: #423B36;">
           <p><strong>Customer Name:</strong> {{ activeOrder.customerName }}</p>
-          <p><strong>Product:</strong> {{ activeOrder.product }} (Quantity: {{ activeOrder.quantity }})</p>
+          <p><strong>Product:</strong> {{ activeOrder.product || activeOrder.productName }} (Quantity: {{ activeOrder.quantity }})</p>
           <p><strong>Order Date:</strong> {{ activeOrder.orderDate }}</p>
           <p><strong>Total Transaction:</strong> ₱{{ Number(activeOrder.totalAmount).toFixed(2) }}</p>
           <p><strong>Shipping Address:</strong> {{ activeOrder.shippingAddress }}</p>
