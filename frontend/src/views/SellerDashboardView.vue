@@ -59,6 +59,15 @@
             <span>Customer Reviews ({{ reviews.length }})</span>
           </button>
 
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'subscription' }"
+            @click="currentTab = 'subscription'"
+          >
+            <span>Artisan Pro Tier ⭐</span>
+          </button>
+
           <router-link to="/profile" class="dashboard-nav-item">
             
             <span>My Profile</span>
@@ -129,7 +138,7 @@
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Escrow Payout Rate:</span>
-                  <span style="color: #2E7D32; font-weight: 600;">92% Direct Maker Payout</span>
+                  <span style="color: #2E7D32; font-weight: 600;">{{ subscriptionData?.is_pro ? '97% Direct Maker Payout (Pro Tier)' : '92% Direct Maker Payout (Basic Tier)' }}</span>
                 </div>
               </div>
             </div>
@@ -242,6 +251,87 @@
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+        
+          <!-- Tab 5: Artisan Subscription & Growth Tier -->
+          <div v-else-if="currentTab === 'subscription'">
+            <div class="dashboard-panel-card">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Artisan Membership & Subscription</h3>
+                  <p class="panel-subheading">Choose the right tier to scale your craft workshop with lower commission and premium marketplace tools.</p>
+                </div>
+                <span class="status-pill" :class="subscriptionData?.is_pro ? 'status-delivered' : 'status-transit'">
+                  {{ subscriptionData?.is_pro ? '⭐ Artisan Pro Active' : 'Basic Free Tier' }}
+                </span>
+              </div>
+
+              <!-- Plan Comparison Grid -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px;">
+                
+                <!-- Plan 1: Basic Plan -->
+                <div style="border: 1px solid #E8DFD5; border-radius: 12px; padding: 24px; background: #FAF8F5;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7A6F68; font-weight: 700;">STARTER</span>
+                  <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2F4533;">Basic Artisan</h4>
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #2D2420; margin-bottom: 12px;">₱0 <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ month</span></div>
+                  <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">Ideal for emerging crafts makers starting to showcase handmade items online.</p>
+                  
+                  <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                    <li>✓ <strong>8%</strong> Platform Escrow Commission</li>
+                    <li>✓ Up to <strong>10 Active</strong> Craft Listings</li>
+                    <li>✓ Standard Marketplace Search Placement</li>
+                    <li>✓ Standard Community Support</li>
+                  </ul>
+
+                  <button 
+                    v-if="subscriptionData?.is_pro"
+                    type="button" 
+                    class="btn btn-secondary" 
+                    style="width: 100%; justify-content: center;"
+                    @click="handleCancelSubscription"
+                    :disabled="isSubmittingSubscription"
+                  >
+                    {{ isSubmittingSubscription ? 'Switching...' : 'Switch to Basic' }}
+                  </button>
+                  <div v-else style="padding: 10px; text-align: center; font-size: 0.85rem; color: #7A6F68; background: #EFE8DE; border-radius: 6px; font-weight: 600;">
+                    ✓ Current Active Plan
+                  </div>
+                </div>
+
+                <!-- Plan 2: Artisan Pro -->
+                <div style="border: 2px solid #C25E3E; border-radius: 12px; padding: 24px; background: #FFF; box-shadow: 0 8px 24px rgba(194, 94, 62, 0.08); position: relative;">
+                  <span style="position: absolute; top: -12px; right: 20px; background: #C25E3E; color: #FFF; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">RECOMMENDED</span>
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #C25E3E; font-weight: 700;">PRO SCALE</span>
+                  <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2D2420;">Artisan Pro ⭐</h4>
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #C25E3E; margin-bottom: 12px;">₱299 <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ month</span></div>
+                  <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">For passionate artisans who want to maximize earnings with minimal commission.</p>
+
+                  <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                    <li>✓ <strong>3%</strong> Ultra-Low Commission (Keep 97% Payout!)</li>
+                    <li>✓ <strong>Unlimited</strong> Craft Listings & Workshops</li>
+                    <li>✓ Featured Placement on Marketplace Homepage</li>
+                    <li>✓ Real-Time Analytics & Escrow Priority</li>
+                  </ul>
+
+                  <button 
+                    v-if="!subscriptionData?.is_pro"
+                    type="button" 
+                    class="btn btn-primary" 
+                    style="width: 100%; justify-content: center; background: #C25E3E; border-color: #C25E3E;"
+                    @click="handleUpgradeSubscription"
+                    :disabled="isSubmittingSubscription"
+                  >
+                    {{ isSubmittingSubscription ? 'Upgrading...' : 'Upgrade to Artisan Pro (₱299/mo) →' }}
+                  </button>
+                  <div v-else style="padding: 10px; text-align: center; font-size: 0.85rem; color: #2E7D32; background: #E8F0EA; border-radius: 6px; font-weight: 700;">
+                    ⭐ Artisan Pro Active
+                  </div>
+                </div>
+
+              </div>
+
             </div>
           </div>
 
