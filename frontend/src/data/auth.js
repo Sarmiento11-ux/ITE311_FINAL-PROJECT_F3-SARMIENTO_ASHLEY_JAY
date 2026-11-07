@@ -51,9 +51,8 @@ export const auth = {
       });
       state.user = normalizeUser(res);
       return state.user;
-    } catch {
-      state.user = normalizeUser({ ...state.user, ...updatedData });
-      return state.user;
+    } catch (err) {
+      throw err;
     }
   },
 
