@@ -123,10 +123,7 @@
 
           <hr class="sidebar-divider" />
 
-          <router-link to="/" class="dashboard-nav-item">
-            
-            <span>Marketplace Storefront</span>
-          </router-link>
+
 
           <button 
             type="button" 
