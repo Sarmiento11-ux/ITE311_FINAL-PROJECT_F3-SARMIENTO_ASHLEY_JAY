@@ -615,16 +615,9 @@
                         </span>
                       </td>
                       <td>
-                        <select 
-                          :value="p.status" 
-                          @change="updateProductStatus(p, $event.target.value)"
-                          class="status-select"
-                          :class="'status-' + p.status"
-                        >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="out_of_stock">Out of Stock</option>
-                        </select>
+                        <span class="status-badge" :class="'badge-' + (p.status || 'active').toLowerCase()">
+                          {{ p.status === 'out_of_stock' ? 'Out of Stock' : (p.status || 'active').charAt(0).toUpperCase() + (p.status || 'active').slice(1) }}
+                        </span>
                       </td>
                       <td>
                         <div class="action-buttons-group">
