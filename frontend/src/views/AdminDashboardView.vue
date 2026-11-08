@@ -605,7 +605,7 @@
                     <tr v-for="p in products" :key="p.id">
                       <td>
                         <div class="product-cell">
-                          <img :src="p.image || fallbackImg" :alt="p.name" class="table-product-thumb" />
+                          <img :src="p.image || fallbackImg" :alt="p.name" class="table-product-thumb" @error="handleImgError($event, fallbackImg)" />
                           <div>
                             <strong>{{ p.name }}</strong>
                             <small class="d-block text-muted">ID: #{{ p.id }}</small>
@@ -675,7 +675,7 @@
                   <tbody>
                     <tr v-for="c in categories" :key="c.id">
                       <td>
-                        <img :src="c.image || fallbackCatImg" :alt="c.name" class="table-cat-thumb" />
+                        <img :src="c.image || fallbackCatImg" :alt="c.name" class="table-cat-thumb" @error="handleImgError($event, fallbackCatImg)" />
                       </td>
                       <td><strong>{{ c.name }}</strong></td>
                       <td><code>{{ c.slug }}</code></td>
@@ -1628,6 +1628,11 @@ const feedbackClass = ref('alert-success');
 // Fallback images
 const fallbackImg = 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=150&q=80';
 const fallbackCatImg = 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=150&q=80';
+
+const handleImgError = (event, fallback = fallbackImg) => {
+  event.target.onerror = null;
+  event.target.src = fallback;
+};
 
 // Current admin user info
 const currentAdminName = computed(() => auth.user.value?.fullName || auth.user.value?.name || 'Administrator');
