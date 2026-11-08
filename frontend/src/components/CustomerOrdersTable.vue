@@ -16,7 +16,15 @@
         <tbody>
           <tr v-for="order in orders" :key="order.id">
             <td><strong>{{ order.orderNumber || order.id }}</strong></td>
-            <td>{{ order.productName }} <span v-if="order.quantity > 1" style="color: #7A6F68;">(×{{ order.quantity }})</span></td>
+            <td>
+              {{ order.productName }}
+              <span v-if="order.items && order.items.length > 1" style="color: #7A6F68; font-size: 0.8rem; display: block;">
+                {{ order.items.length }} distinct crafts ({{ order.quantity }} pcs total)
+              </span>
+              <span v-else-if="order.quantity > 1" style="color: #7A6F68; font-size: 0.82rem;">
+                (×{{ order.quantity }})
+              </span>
+            </td>
             <td>{{ order.artisan }}</td>
             <td>{{ order.date }}</td>
             <td><strong>₱{{ Number(order.totalAmount).toFixed(2) }}</strong></td>
@@ -60,7 +68,16 @@
         </div>
 
         <div style="font-size: 0.9rem; line-height: 1.7; color: #423B36;">
-          <p><strong>Craft Item:</strong> {{ selectedOrder.productName }} (Qty: {{ selectedOrder.quantity }})</p>
+          <div v-if="selectedOrder.items && selectedOrder.items.length > 0" style="margin-bottom: 10px;">
+            <strong>Ordered Items:</strong>
+            <ul style="margin: 4px 0 0 18px; padding: 0;">
+              <li v-for="item in selectedOrder.items" :key="item.id" style="margin-bottom: 2px;">
+                {{ item.product_name || item.name }}
+                <span style="color: #7A6F68;">— Qty: {{ item.quantity }} × ₱{{ Number(item.unit_price || item.price || 0).toFixed(2) }}</span>
+              </li>
+            </ul>
+          </div>
+          <p v-else><strong>Craft Item:</strong> {{ selectedOrder.productName }} (Qty: {{ selectedOrder.quantity }})</p>
           <p><strong>Artisan Seller:</strong> {{ selectedOrder.artisan }}</p>
           <p><strong>Order Date:</strong> {{ selectedOrder.date }}</p>
           <p><strong>Total Amount:</strong> ₱{{ Number(selectedOrder.totalAmount).toFixed(2) }}</p>
