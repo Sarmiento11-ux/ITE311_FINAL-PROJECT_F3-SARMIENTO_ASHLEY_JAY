@@ -82,31 +82,31 @@
             <DashboardStatCard 
               title="Total Products" 
               :value="isLoading ? '...' : products.length" 
-              icon="" 
+              icon="products" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Orders Received" 
               :value="isLoading ? '...' : orders.length" 
-              icon="" 
+              icon="orders" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
               :value="isLoading ? '...' : pendingOrdersCount" 
-              icon="" 
+              icon="pending" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
               :value="isLoading ? '...' : completedOrdersCount" 
-              icon="" 
+              icon="completed" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Revenue" 
               :value="isLoading ? '...' : `₱${totalRevenue.toFixed(2)}`" 
-              icon="" 
+              icon="money" 
               bgClass="terracotta-bg" 
             />
           </div>
