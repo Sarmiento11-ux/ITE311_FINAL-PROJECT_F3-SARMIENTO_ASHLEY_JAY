@@ -59,7 +59,7 @@
         </router-link>
         <router-link 
           v-else-if="isCustomer" 
-          to="/dashboard/customer" 
+          to="/orders" 
           class="nav-link"
           active-class="active"
         >
