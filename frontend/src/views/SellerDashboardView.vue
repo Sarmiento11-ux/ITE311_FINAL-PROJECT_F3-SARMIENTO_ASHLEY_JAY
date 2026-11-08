@@ -69,9 +69,21 @@
           </button>
 
           <router-link to="/profile" class="dashboard-nav-item">
-            
             <span>My Profile</span>
           </router-link>
+
+          <router-link to="/products" class="dashboard-nav-item" style="opacity: 0.85;">
+            <span>↗ View Marketplace</span>
+          </router-link>
+
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            @click="handleLogout"
+            style="color: #dc2626; margin-top: 14px;"
+          >
+            <span>Sign Out</span>
+          </button>
         </aside>
 
         <!-- Main Content Area -->
@@ -375,7 +387,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useAuth } from '../composables/useAuth.js';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import SellerProductsTable from '../components/SellerProductsTable.vue';
 import SellerOrdersTable from '../components/SellerOrdersTable.vue';
@@ -386,7 +399,14 @@ import { getSellerReviews } from '../services/reviewService.js';
 import { subscriptionService } from '../services/subscriptionService.js';
 
 const route = useRoute();
+const router = useRouter();
+const { logout } = useAuth();
 import { auth } from '../data/auth.js';
+
+const handleLogout = async () => {
+  await logout();
+  router.push('/login');
+};
 
 const currentTab = ref('overview');
 const products = ref([]);
