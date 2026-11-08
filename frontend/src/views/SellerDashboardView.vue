@@ -531,10 +531,12 @@ const deleteProduct = async (productId) => {
     try {
       await sellerService.deleteProduct(productId);
       products.value = products.value.filter(p => p.id !== productId);
-      alert(' Product listing removed successfully.');
+      alert('Product listing removed successfully.');
+      await loadSellerData();
     } catch (err) {
-      console.warn('API delete fallback:', err);
-      products.value = products.value.filter(p => p.id !== productId);
+      console.error('API delete error:', err);
+      const errMsg = err.response?.data?.message || err.message || 'Unable to delete product listing. Please try again.';
+      alert(`Failed to delete product: ${errMsg}`);
     }
   }
 };
