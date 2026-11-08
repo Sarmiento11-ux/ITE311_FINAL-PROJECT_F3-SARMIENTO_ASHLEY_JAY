@@ -63,6 +63,8 @@
 </template>
 
 <script setup>
+import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
+
 defineProps({
   products: {
     type: Array,
@@ -72,8 +74,13 @@ defineProps({
 
 defineEmits(['edit', 'delete']);
 
+const handleImgError = (e) => {
+  e.target.src = defaultPlaceholder;
+};
+
 const getStatusClass = (status) => {
-  const s = status.toLowerCase();
+  if (!status) return 'status-draft';
+  const s = String(status).toLowerCase();
   if (s.includes('published') || s.includes('active')) return 'status-published';
   if (s.includes('low') || s.includes('out')) return 'status-low-stock';
   return 'status-draft';
