@@ -30,7 +30,7 @@
               :alt="cat.name" 
               loading="lazy"
             >
-            <span class="category-badge">{{ cat.count }}</span>
+            <span v-if="cat.count" class="category-badge">{{ cat.count }}</span>
             <span class="category-action-icon">↗</span>
           </div>
           <div class="category-meta">
@@ -45,30 +45,58 @@
 </template>
 
 <script setup>
-const categories = [
+import { ref, onMounted } from 'vue';
+import apiClient from '../services/api.js';
+
+const defaultCategories = [
   {
     name: 'Ceramics & Pottery',
     subtitle: 'Wheel-thrown mugs, planters & dining ware',
-    count: '42 Items',
+    count: '…',
     image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80'
   },
   {
     name: 'Woven Goods & Bags',
     subtitle: 'Indigenous weaves, abaca baskets & totes',
-    count: '38 Items',
+    count: '…',
     image: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=600&q=80'
   },
   {
     name: 'Artisan Jewelry',
     subtitle: 'Beaded necklaces, brass rings & stones',
-    count: '56 Items',
+    count: '…',
     image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=600&q=80'
   },
   {
     name: 'Home Decor & Candles',
     subtitle: 'Soy wax candles, woodcrafts & accents',
-    count: '29 Items',
+    count: '…',
     image: 'https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?auto=format&fit=crop&w=600&q=80'
   }
 ];
+
+const categories = ref([...defaultCategories]);
+
+onMounted(async () => {
+  try {
+    const res = await apiClient.get('/categories');
+    if (res.data?.success && Array.isArray(res.data.data)) {
+      const apiCats = res.data.data;
+      categories.value = defaultCategories.map(cat => {
+        const matched = apiCats.find(c => 
+          c.name.trim().toLowerCase() === cat.name.trim().toLowerCase()
+        );
+        const count = matched?.products_count ?? 0;
+        return {
+          ...cat,
+          image: matched?.image || cat.image,
+          count: count === 1 ? '1 Item' : `${count} Items`
+        };
+      });
+    }
+  } catch (err) {
+    console.warn('[CategorySection] Could not load live category product counts:', err);
+    categories.value = defaultCategories.map(c => ({ ...c, count: 'Handmade' }));
+  }
+});
 </script>
