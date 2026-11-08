@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -37,11 +38,17 @@ class AdminController extends Controller
         $ordersPending = Order::where('status', 'pending')->count();
         $ordersPaid    = Order::where('payment_status', 'paid')->count();
 
-        // Commission ledger and escrow exposure
-        $commissionEarned = (float) Order::whereNotIn('status', ['cancelled', 'refunded'])
-            ->sum('platform_fee');
-        $escrowHeld = (float) Order::where('escrow_status', 'held')->sum('seller_payout');
-        $escrowReleased = (float) Order::where('escrow_status', 'released_to_seller')->sum('seller_payout');
+        // Commission ledger and escrow exposure (safely guarded against missing schema columns)
+        $hasEscrowColumns = Schema::hasColumn('orders', 'platform_fee');
+        $commissionEarned = $hasEscrowColumns
+            ? (float) Order::whereNotIn('status', ['cancelled', 'refunded'])->sum('platform_fee')
+            : 0.0;
+        $escrowHeld = ($hasEscrowColumns && Schema::hasColumn('orders', 'escrow_status'))
+            ? (float) Order::where('escrow_status', 'held')->sum('seller_payout')
+            : 0.0;
+        $escrowReleased = ($hasEscrowColumns && Schema::hasColumn('orders', 'escrow_status'))
+            ? (float) Order::where('escrow_status', 'released_to_seller')->sum('seller_payout')
+            : 0.0;
 
         return response()->json([
             'success' => true,
@@ -237,31 +244,43 @@ class AdminController extends Controller
         ->values()
         ->take(5);
 
-        // 6. Commission ledger and escrow breakdown
-        $escrowTotals = Order::select(
-                'escrow_status',
-                DB::raw('COUNT(*) as orders_count'),
-                DB::raw('SUM(platform_fee) as platform_fees'),
-                DB::raw('SUM(seller_payout) as seller_payouts')
-            )
-            ->groupBy('escrow_status')
-            ->get()
-            ->keyBy('escrow_status');
-
+        // 6. Commission ledger and escrow breakdown (safely guarded against missing schema columns)
+        $hasEscrowColumns = Schema::hasColumn('orders', 'platform_fee');
         $commissionLedger = [];
 
-        foreach (['pending', 'held', 'released_to_seller', 'refunded', 'cancelled'] as $escrowStatus) {
-            $row = $escrowTotals->get($escrowStatus);
+        if ($hasEscrowColumns && Schema::hasColumn('orders', 'escrow_status')) {
+            $escrowTotals = Order::select(
+                    'escrow_status',
+                    DB::raw('COUNT(*) as orders_count'),
+                    DB::raw('SUM(platform_fee) as platform_fees'),
+                    DB::raw('SUM(seller_payout) as seller_payouts')
+                )
+                ->groupBy('escrow_status')
+                ->get()
+                ->keyBy('escrow_status');
 
-            $commissionLedger[$escrowStatus] = [
-                'orders_count'   => (int) ($row->orders_count ?? 0),
-                'platform_fees'  => round((float) ($row->platform_fees ?? 0), 2),
-                'seller_payouts' => round((float) ($row->seller_payouts ?? 0), 2),
-            ];
+            foreach (['pending', 'held', 'released_to_seller', 'refunded', 'cancelled'] as $escrowStatus) {
+                $row = $escrowTotals->get($escrowStatus);
+
+                $commissionLedger[$escrowStatus] = [
+                    'orders_count'   => (int) ($row->orders_count ?? 0),
+                    'platform_fees'  => round((float) ($row->platform_fees ?? 0), 2),
+                    'seller_payouts' => round((float) ($row->seller_payouts ?? 0), 2),
+                ];
+            }
+
+            $totalCommission = (float) Order::whereNotIn('status', ['cancelled', 'refunded'])
+                ->sum('platform_fee');
+        } else {
+            foreach (['pending', 'held', 'released_to_seller', 'refunded', 'cancelled'] as $escrowStatus) {
+                $commissionLedger[$escrowStatus] = [
+                    'orders_count'   => 0,
+                    'platform_fees'  => 0.0,
+                    'seller_payouts' => 0.0,
+                ];
+            }
+            $totalCommission = 0.0;
         }
-
-        $totalCommission = (float) Order::whereNotIn('status', ['cancelled', 'refunded'])
-            ->sum('platform_fee');
 
         return response()->json([
             'success' => true,
