@@ -131,16 +131,11 @@ router.beforeEach((to, from, next) => {
     return next({ name: 'login', query: { redirect: to.fullPath } });
   }
 
-  // 2. Route is guest-only (login/register) and user IS logged in → send to profile
+  // 2. Route is guest-only (login/register) and user IS logged in → send to dashboard/profile
   if (to.meta.guestOnly && isAuth) {
+    if (role === 'admin') return next({ name: 'admin-dashboard' });
+    if (role === 'seller') return next({ name: 'seller-dashboard' });
     return next({ name: 'profile' });
-  }
-
-  // 3. Admin lockdown: Admin exclusively operates inside the Admin Dashboard
-  if (isAuth && role === 'admin') {
-    if (to.name !== 'admin-dashboard') {
-      return next({ name: 'admin-dashboard' });
-    }
   }
 
   // 4. Route has role restriction and user's role is not allowed → send to home
