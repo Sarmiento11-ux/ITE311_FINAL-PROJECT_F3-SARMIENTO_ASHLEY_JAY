@@ -482,6 +482,14 @@ const totalRevenue = computed(() => {
 
 // Product Actions
 const openAddModal = () => {
+  const isPro = !!subscriptionData.value?.is_pro;
+  const listingLimit = subscriptionData.value?.listing_limit || 10;
+  if (!isPro && products.value.length >= listingLimit) {
+    if (confirm(`You have reached the ${listingLimit}-product limit for the Basic Artisan plan.\n\nWould you like to explore Artisan Pro to unlock unlimited craft listings?`)) {
+      currentTab.value = 'subscription';
+    }
+    return;
+  }
   editingProduct.value = null;
   isEditMode.value = false;
   showProductModal.value = true;
