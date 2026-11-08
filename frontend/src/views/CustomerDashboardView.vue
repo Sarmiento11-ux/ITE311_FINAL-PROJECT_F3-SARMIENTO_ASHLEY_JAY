@@ -62,25 +62,25 @@
           <div class="dashboard-stats-grid">
             <DashboardStatCard 
               title="Total Orders" 
-              :value="totalOrdersCount" 
+              :value="isLoading ? '…' : totalOrdersCount" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
-              :value="pendingOrdersCount" 
+              :value="isLoading ? '…' : pendingOrdersCount" 
               icon="" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
-              :value="completedOrdersCount" 
+              :value="isLoading ? '…' : completedOrdersCount" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Spent" 
-              :value="`₱${totalSpent.toFixed(2)}`" 
+              :value="isLoading ? '…' : `₱${totalSpent.toFixed(2)}`" 
               icon="" 
               bgClass="terracotta-bg" 
             />
@@ -130,7 +130,11 @@
                 </button>
               </div>
 
-              <CustomerOrdersTable :orders="orders.slice(0, 3)" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading your orders and purchase history…</p>
+              </div>
+              <CustomerOrdersTable v-else :orders="orders.slice(0, 3)" />
             </div>
 
             <!-- Browse CTA Banner -->
@@ -155,7 +159,11 @@
                 </div>
               </div>
 
-              <CustomerOrdersTable :orders="orders" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading complete order history…</p>
+              </div>
+              <CustomerOrdersTable v-else :orders="orders" />
             </div>
           </div>
 
@@ -228,3 +236,23 @@ const totalSpent = computed(() => {
     .reduce((acc, curr) => acc + curr.totalAmount, 0);
 });
 </script>
+
+<style scoped>
+.dashboard-loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #7A6F68;
+}
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #E8DFD5;
+  border-top-color: #3E5943;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
