@@ -1070,16 +1070,35 @@
             </div>
 
             <!-- Connection Status Strip -->
-            <div style="background: #FFF; border: 1px solid #E8DFD5; border-radius: 10px; padding: 18px 24px; margin-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap: 16px;">
+            <div style="background: #FFF; border: 1px solid #E8DFD5; border-radius: 10px; padding: 18px 24px; margin-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
               <div>
                 <span style="font-size: 0.78rem; text-transform: uppercase; color: #7A6F68; font-weight: 700; letter-spacing: 0.05em;">REST API ENDPOINT</span>
                 <div style="font-family: monospace; font-size: 0.92rem; color: #2F4533; font-weight: 600; margin-top: 4px;">
-                  http://localhost/craftmarket-cms/wp-json/wp/v2
+                  {{ wpEndpoint }}
                 </div>
               </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #2E7D32;"></span>
-                <span style="font-size: 0.88rem; font-weight: 600; color: #2E7D32;">CMS Integration Active</span>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span 
+                    style="display: inline-block; width: 10px; height: 10px; border-radius: 50%;"
+                    :style="{ background: cmsStatus.online ? '#2E7D32' : '#D97706' }"
+                  ></span>
+                  <span 
+                    style="font-size: 0.88rem; font-weight: 600;"
+                    :style="{ color: cmsStatus.online ? '#2E7D32' : '#D97706' }"
+                  >
+                    {{ cmsStatus.checking ? 'Checking Status...' : (cmsStatus.online ? 'CMS Integration Active (Connected)' : 'CMS Offline / Standby (Built-in Mode)') }}
+                  </span>
+                </div>
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-sm" 
+                  style="padding: 4px 10px; font-size: 0.78rem;"
+                  @click="checkCmsConnection"
+                  :disabled="cmsStatus.checking"
+                >
+                  {{ cmsStatus.checking ? 'Testing...' : 'Test Connection' }}
+                </button>
               </div>
             </div>
 
@@ -1490,6 +1509,7 @@ import { subscriptionService } from '../services/subscriptionService.js';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { adminService } from '../services/adminService.js';
+import { cmsService } from '../services/cmsService.js';
 import { auth } from '../data/auth.js';
 import { useAuth } from '../composables/useAuth.js';
 
@@ -1499,6 +1519,19 @@ const { logout } = useAuth();
 
 // Current active sidebar tab
 const currentTab = ref(route.query.tab || 'dashboard');
+const cmsStatus = ref({ checked: false, online: false, checking: false });
+const wpEndpoint = computed(() => cmsService.getEndpoint());
+
+const checkCmsConnection = async () => {
+  cmsStatus.value.checking = true;
+  try {
+    const res = await cmsService.checkHealth();
+    cmsStatus.value = { checked: true, online: res.online, checking: false };
+  } catch {
+    cmsStatus.value = { checked: true, online: false, checking: false };
+  }
+};
+
 
 // Loading & Feedback
 const isLoading   = ref(false);
@@ -1605,6 +1638,8 @@ const loadCurrentTabData = async () => {
       reviews.value = await adminService.getReviews();
     } else if (currentTab.value === 'subscriptions') {
       await fetchSubscriptionMetrics();
+    } else if (currentTab.value === 'cms') {
+      await checkCmsConnection();
     }
   } catch (err) {
     showToast(err.message || 'Failed to retrieve data from API.', 'alert-danger');
