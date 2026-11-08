@@ -109,7 +109,13 @@
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Default Shipping Address:</span>
-                  <span>{{ customer.address }}</span>
+                  <span v-if="customer.address">{{ customer.address }}</span>
+                  <span v-else style="color: #7A6F68; font-style: italic;">
+                    No address set.
+                    <router-link to="/profile" style="color: #3E5943; font-weight: 600; text-decoration: underline; margin-left: 4px;">
+                      Add delivery address ↗
+                    </router-link>
+                  </span>
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Member Since:</span>

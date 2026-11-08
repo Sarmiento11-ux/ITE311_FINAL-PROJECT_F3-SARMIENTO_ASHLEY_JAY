@@ -17,8 +17,8 @@ function normalizeUser(u) {
     username: u.username || u.email?.split('@')[0] || 'artisan_member',
     role: displayRole,
     rawRole: rawRole,
-    phone: u.phone || u.contact_number || '+63 917 123 4567',
-    address: u.address || 'Metro Manila, Philippines',
+    phone: u.phone || u.contact_number || null,
+    address: u.address || null,
     bio: u.bio || (rawRole === 'seller' ? 'Independent craftmaker and local handmade artisan.' : 'Conscious supporter of local handmade crafts.'),
     shopName: u.seller_profile?.shop_name || u.sellerProfile?.shop_name || u.shopName || (u.name + "'s Workshop")
   };
