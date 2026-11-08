@@ -126,7 +126,7 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; font-size: 0.9rem;">
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop / Brand Name:</span>
-                  <strong>{{ seller.fullName }}</strong>
+                  <strong>{{ seller.shopName || seller.fullName }}</strong>
                 </div>
                                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop Location:</span>
