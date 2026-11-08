@@ -627,9 +627,9 @@
                       </td>
                       <td>
                         <div class="action-buttons-group">
-                          <router-link :to="'/products/' + p.id" class="btn-action btn-view" title="View product page">
-                            ↗ View
-                          </router-link>
+                          <button type="button" class="btn-action btn-view" @click="openProductDetailsModal(p)" title="Inspect product details">
+                            View
+                          </button>
                           <button type="button" class="btn-action btn-delete" @click="handleDeleteProduct(p)" title="Remove product listing from marketplace">
                             Remove
                           </button>
@@ -1466,6 +1466,64 @@
     </div>
 
     <!-- ─── MODAL 4: ORDER DETAILS MODAL ─────────────────────────────────── -->
+        <!-- Product Details & Inspection Modal -->
+    <div v-if="showProductDetailsModal" class="admin-modal-backdrop" @click.self="showProductDetailsModal = false">
+      <div class="admin-modal-box admin-modal-lg">
+        <div class="modal-header">
+          <div>
+            <h3>Product Inspection: {{ activeProduct?.name }}</h3>
+            <p class="modal-sub">Listing ID: #{{ activeProduct?.id }} • Category: {{ activeProduct?.category?.name || 'Handmade' }}</p>
+          </div>
+          <button type="button" class="btn-modal-close" @click="showProductDetailsModal = false"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="order-info-columns">
+            <div class="order-info-card" style="text-align: center;">
+              <img 
+                :src="activeProduct?.image || fallbackImg" 
+                :alt="activeProduct?.name" 
+                style="max-width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; border: 1px solid #E5E7EB;"
+                @error="handleImgError($event, fallbackImg)"
+              />
+              <div style="margin-top: 12px;">
+                <span class="status-badge" :class="getStatusBadgeClass(activeProduct?.status || 'active')">
+                  {{ activeProduct?.status === 'out_of_stock' ? 'Out of Stock' : (activeProduct?.status || 'active') }}
+                </span>
+              </div>
+            </div>
+
+            <div class="order-info-card">
+              <h4>Catalog Specifications</h4>
+              <p><strong>Artisan Maker:</strong> {{ activeProduct?.seller?.name || activeProduct?.seller?.shop_name || 'Artisan Workshop' }}</p>
+              <p><strong>Unit Price:</strong> ₱{{ formatMoney(activeProduct?.price) }}</p>
+              <p><strong>Inventory Stock:</strong> {{ activeProduct?.stock }} units available</p>
+              <p><strong>Category Taxonomy:</strong> {{ activeProduct?.category?.name || 'Handmade' }}</p>
+              <p v-if="activeProduct?.created_at"><strong>Listed Date:</strong> {{ formatDate(activeProduct?.created_at) }}</p>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h4>Product Description</h4>
+            <p style="color: #4B5563; font-size: 0.9rem; line-height: 1.6; background: #F9FAFB; padding: 14px; border-radius: 6px; border: 1px solid #E5E7EB;">
+              {{ activeProduct?.description || 'No detailed product description provided.' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button 
+            type="button" 
+            class="btn btn-danger btn-sm" 
+            @click="handleDeleteProduct(activeProduct); showProductDetailsModal = false;"
+          >
+            Remove Listing
+          </button>
+          <button type="button" class="btn btn-secondary" @click="showProductDetailsModal = false">Close</button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="showOrderModal" class="admin-modal-backdrop" @click.self="showOrderModal = false">
       <div class="admin-modal-box admin-modal-lg">
         <div class="modal-header">
@@ -1693,6 +1751,14 @@ const categoryForm = reactive({
   image: '',
   is_active: true
 });
+
+const showProductDetailsModal = ref(false);
+const activeProduct = ref(null);
+
+const openProductDetailsModal = (p) => {
+  activeProduct.value = p;
+  showProductDetailsModal.value = true;
+};
 
 const showOrderModal = ref(false);
 const activeOrder = ref(null);

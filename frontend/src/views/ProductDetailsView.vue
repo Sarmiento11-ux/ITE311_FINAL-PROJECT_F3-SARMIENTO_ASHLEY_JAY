@@ -121,44 +121,60 @@
 
             <!-- Purchase Actions & Subtotal Calculation -->
             <div class="purchase-box">
-              <div class="purchase-top-row">
-                <div class="quantity-control-group">
-                  <label for="quantityInput" class="quantity-label">Quantity:</label>
-                  <div class="quantity-selector">
-                    <button type="button" @click="decreaseQty" class="qty-btn" aria-label="Decrease quantity" :disabled="quantity <= 1">−</button>
-                    <input type="number" id="quantityInput" v-model.number="quantity" min="1" :max="product.stock" @change="validateQty">
-                    <button type="button" @click="increaseQty" class="qty-btn" aria-label="Increase quantity" :disabled="quantity >= product.stock">+</button>
+              <!-- Administrator Inspection Mode Banner (Purchasing Disabled) -->
+              <div v-if="isAdmin" class="admin-preview-box" style="background: #FFF8E1; border: 1px solid #FFE082; border-radius: 8px; padding: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #B78103; font-size: 0.95rem;">
+                  <span>🛡️ Administrator Inspection Mode</span>
+                </div>
+                <p style="margin: 8px 0 12px; font-size: 0.85rem; color: #6D4C41; line-height: 1.5;">
+                  You are inspecting this craft listing as an Administrator. Purchasing and cart operations are disabled for administrator accounts.
+                </p>
+                <router-link to="/dashboard/admin?tab=products" class="btn btn-secondary btn-sm" style="font-size: 0.82rem;">
+                  ← Back to Admin Products Management
+                </router-link>
+              </div>
+
+              <!-- Customer Purchasing Controls -->
+              <template v-else>
+                <div class="purchase-top-row">
+                  <div class="quantity-control-group">
+                    <label for="quantityInput" class="quantity-label">Quantity:</label>
+                    <div class="quantity-selector">
+                      <button type="button" @click="decreaseQty" class="qty-btn" aria-label="Decrease quantity" :disabled="quantity <= 1">−</button>
+                      <input type="number" id="quantityInput" v-model.number="quantity" min="1" :max="product.stock" @change="validateQty">
+                      <button type="button" @click="increaseQty" class="qty-btn" aria-label="Increase quantity" :disabled="quantity >= product.stock">+</button>
+                    </div>
+                  </div>
+
+                  <div class="subtotal-indicator">
+                    <span class="subtotal-label">Subtotal:</span>
+                    <span class="subtotal-amount">₱{{ calculatedSubtotal }}</span>
                   </div>
                 </div>
 
-                <div class="subtotal-indicator">
-                  <span class="subtotal-label">Subtotal:</span>
-                  <span class="subtotal-amount">₱{{ calculatedSubtotal }}</span>
+                <!-- Feedback message -->
+                <div v-if="cartFeedback" class="cart-feedback-note" :class="{ 'note-error': feedbackIsError }">
+                  {{ cartFeedback }}
                 </div>
-              </div>
 
-              <!-- Feedback message -->
-              <div v-if="cartFeedback" class="cart-feedback-note" :class="{ 'note-error': feedbackIsError }">
-                {{ cartFeedback }}
-              </div>
+                <div class="details-cta-group">
+                  <button 
+                    type="button" 
+                    @click="addToCart" 
+                    class="btn btn-primary btn-add-cart-large"
+                    :disabled="product.stock <= 0"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                      <line x1="3" y1="6" x2="21" y2="6"></line>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span>Add to Cart ({{ quantity }})</span>
+                  </button>
 
-              <div class="details-cta-group">
-                <button 
-                  type="button" 
-                  @click="addToCart" 
-                  class="btn btn-primary btn-add-cart-large"
-                  :disabled="product.stock <= 0"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  <span>Add to Cart ({{ quantity }})</span>
-                </button>
-
-                <WishlistButton :product="product" variant="full" size="md" class="btn-details-wishlist" />
-              </div>
+                  <WishlistButton :product="product" variant="full" size="md" class="btn-details-wishlist" />
+                </div>
+              </template>
             </div>
 
             <!-- Artisan Maker Profile Card -->
@@ -496,6 +512,10 @@ const increaseQty = () => {
 
 const addToCart = () => {
   if (!product.value) return;
+  if (isAdmin.value || authService.isAdmin()) {
+    alert('Administrators cannot purchase items. Please log in with a customer account to shop.');
+    return;
+  }
   if (!authService.isAuthenticated()) {
     alert('Please log in or create an account to add items to your shopping cart.');
     router.push({ name: 'login', query: { redirect: route.fullPath } });
