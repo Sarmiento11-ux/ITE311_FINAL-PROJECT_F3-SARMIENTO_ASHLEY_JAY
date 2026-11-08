@@ -30,15 +30,9 @@
             <span>Dashboard</span>
           </button>
 
-          <button 
-            type="button" 
-            class="dashboard-nav-item" 
-            :class="{ active: currentTab === 'orders' }"
-            @click="currentTab = 'orders'"
-          >
-            
+          <router-link to="/orders" class="dashboard-nav-item">
             <span>My Orders ({{ orders.length }})</span>
-          </button>
+          </router-link>
 
           <router-link to="/wishlist" class="dashboard-nav-item">
             <span>My Wishlist ({{ wishlist.totalCount }})</span>
@@ -131,9 +125,9 @@
                   <h3 class="panel-heading">Recent Orders</h3>
                   <p class="panel-subheading">Track current order progress with fair-trade escrow protection.</p>
                 </div>
-                <button type="button" @click="currentTab = 'orders'" class="btn btn-secondary btn-sm">
+                <router-link to="/orders" class="btn btn-secondary btn-sm">
                   View All Orders →
-                </button>
+                </router-link>
               </div>
 
               <div v-if="isLoading" class="dashboard-loading-state">
