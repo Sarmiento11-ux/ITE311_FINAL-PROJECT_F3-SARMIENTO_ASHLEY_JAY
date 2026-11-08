@@ -627,7 +627,7 @@
                       </td>
                       <td>
                         <div class="action-buttons-group">
-                          <router-link :to="'/products/' + p.id" target="_blank" class="btn-action btn-view" title="View product page in new tab">
+                          <router-link :to="'/products/' + p.id" class="btn-action btn-view" title="View product page">
                             ↗ View
                           </router-link>
                           <button type="button" class="btn-action btn-delete" @click="handleDeleteProduct(p)" title="Remove product listing from marketplace">

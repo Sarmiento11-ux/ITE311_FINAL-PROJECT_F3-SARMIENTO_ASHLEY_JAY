@@ -17,7 +17,7 @@ import { authService } from './services/authService.js';
 
 const route = useRoute();
 const isAdminView = computed(() => {
-  return route.path.startsWith('/dashboard/admin') || route.path.startsWith('/admin') || authService.getRole() === 'admin';
+  return route.path.startsWith('/dashboard/admin') || route.path.startsWith('/admin');
 });
 </script>
 
