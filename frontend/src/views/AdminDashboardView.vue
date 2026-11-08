@@ -434,10 +434,10 @@
                           <button 
                             type="button" 
                             class="btn-action btn-view" 
-                            @click="openEditUserModal(u)" 
-                            title="Edit user details and role"
+                            @click="openUserDetailsModal(u)" 
+                            title="View user account audit details"
                           >
-                            Edit
+                            View
                           </button>
                           <button 
                             type="button" 
@@ -1257,60 +1257,56 @@
 
     </div>
 
-    <!-- ─── MODAL 1: EDIT USER MODAL ─────────────────────────────────────── -->
-    <div v-if="showEditUserModal" class="admin-modal-backdrop" @click.self="showEditUserModal = false">
+    <!-- ─── MODAL 1: USER ACCOUNT AUDIT MODAL ─────────────────────────────── -->
+    <div v-if="showUserDetailsModal" class="admin-modal-backdrop" @click.self="showUserDetailsModal = false">
       <div class="admin-modal-box">
         <div class="modal-header">
-          <h3>Edit User Account</h3>
-          <button type="button" class="btn-modal-close" @click="showEditUserModal = false"></button>
+          <div>
+            <h3>User Account Audit: {{ activeUser?.name }}</h3>
+            <p class="modal-sub">Account ID: #{{ activeUser?.id }} • Registered on {{ formatDate(activeUser?.created_at) }}</p>
+          </div>
+          <button type="button" class="btn-modal-close" @click="showUserDetailsModal = false"></button>
         </div>
-        <form @submit.prevent="saveUserEdit" class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Full Name</label>
-            <input type="text" v-model="editUserForm.name" required class="form-control" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input type="email" v-model="editUserForm.email" required class="form-control" />
-          </div>
-
-          <div class="form-row-2col">
-            <div class="form-group">
-              <label class="form-label">Role</label>
-              <select v-model="editUserForm.role" required class="form-select">
-                <option value="customer">Customer</option>
-                <option value="seller">Seller / Artisan</option>
-                <option value="admin">Administrator</option>
-              </select>
+        
+        <div class="modal-body">
+          <div class="order-info-columns">
+            <div class="order-info-card">
+              <h4>Account Information</h4>
+              <p><strong>Full Name:</strong> {{ activeUser?.name }}</p>
+              <p><strong>Email Address:</strong> {{ activeUser?.email }}</p>
+              <p>
+                <strong>System Role:</strong> 
+                <span class="role-badge" :class="'role-' + activeUser?.role">{{ activeUser?.role }}</span>
+              </p>
+              <p>
+                <strong>Account Status:</strong> 
+                <span class="status-badge" :class="activeUser?.is_active ? 'badge-active' : 'badge-inactive'">
+                  {{ activeUser?.is_active ? 'Active' : 'Deactivated' }}
+                </span>
+              </p>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Account Status</label>
-              <select v-model="editUserForm.is_active" class="form-select">
-                <option :value="true">Active</option>
-                <option :value="false">Deactivated</option>
-              </select>
+            <div class="order-info-card">
+              <h4>Contact & Platform Activity</h4>
+              <p><strong>Contact Phone:</strong> {{ activeUser?.phone || 'Not provided' }}</p>
+              <p><strong>Registered Address:</strong> {{ activeUser?.address || 'Not provided' }}</p>
+              <p v-if="activeUser?.role === 'customer'"><strong>Completed Orders:</strong> {{ activeUser?.orders_count ?? 0 }}</p>
+              <p v-if="activeUser?.role === 'seller'"><strong>Active Craft Listings:</strong> {{ activeUser?.products_count ?? 0 }}</p>
             </div>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">Phone Number</label>
-            <input type="text" v-model="editUserForm.phone" placeholder="+63 9..." class="form-control" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Delivery / Shop Address</label>
-            <textarea v-model="editUserForm.address" rows="2" class="form-control"></textarea>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="showEditUserModal = false">Cancel</button>
-            <button type="submit" class="btn btn-primary" :disabled="isSaving">
-              {{ isSaving ? 'Saving…' : 'Save Changes' }}
-            </button>
-          </div>
-        </form>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button 
+            type="button" 
+            class="btn btn-sm"
+            :class="activeUser?.is_active ? 'btn-danger' : 'btn-primary'"
+            @click="toggleUserActive(activeUser); if (activeUser) activeUser.is_active = !activeUser.is_active;"
+          >
+            {{ activeUser?.is_active ? 'Deactivate User Account' : 'Activate User Account' }}
+          </button>
+          <button type="button" class="btn btn-secondary" @click="showUserDetailsModal = false">Close</button>
+        </div>
       </div>
     </div>
 
@@ -1725,17 +1721,8 @@ const productFilter = reactive({ search: '', category: '', status: '' });
 const orderFilter = reactive({ search: '', status: '', payment_status: '' });
 
 // Modals State
-const showEditUserModal = ref(false);
-const isSaving = ref(false);
-const editUserForm = reactive({
-  id: null,
-  name: '',
-  email: '',
-  role: 'customer',
-  is_active: true,
-  phone: '',
-  address: ''
-});
+const showUserDetailsModal = ref(false);
+const activeUser = ref(null);
 
 const showSellerDetailsModal = ref(false);
 const activeSeller = ref(null);
@@ -1862,39 +1849,9 @@ const debounceFetchProducts = () => debounce(fetchProducts);
 const debounceFetchOrders = () => debounce(fetchOrders);
 
 // ─── User Actions ────────────────────────────────────────────────────────────
-const openEditUserModal = (u) => {
-  editUserForm.id = u.id;
-  editUserForm.name = u.name;
-  editUserForm.email = u.email;
-  editUserForm.role = u.role;
-  editUserForm.is_active = Boolean(u.is_active);
-  editUserForm.phone = u.phone || '';
-  editUserForm.address = u.address || '';
-  showEditUserModal.value = true;
-};
-
-const saveUserEdit = async () => {
-  isSaving.value = true;
-  try {
-    const res = await adminService.updateUser(editUserForm.id, {
-      name: editUserForm.name.trim(),
-      email: editUserForm.email.trim(),
-      role: editUserForm.role,
-      is_active: editUserForm.is_active,
-      phone: editUserForm.phone.trim(),
-      address: editUserForm.address.trim()
-    });
-
-    if (res && res.success) {
-      showToast(` User account "${res.data.name}" updated successfully!`, 'alert-success');
-      showEditUserModal.value = false;
-      await fetchUsers();
-    }
-  } catch (err) {
-    showToast(err.response?.data?.message || err.message || 'Failed to update user.', 'alert-danger');
-  } finally {
-    isSaving.value = false;
-  }
+const openUserDetailsModal = (u) => {
+  activeUser.value = u;
+  showUserDetailsModal.value = true;
 };
 
 const toggleUserActive = async (u) => {
