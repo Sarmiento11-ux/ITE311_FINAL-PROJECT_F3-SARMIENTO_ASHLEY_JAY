@@ -8,7 +8,8 @@
             <th>Customer Name</th>
             <th>Product Ordered</th>
             <th>Qty</th>
-            <th>Total Amount</th>
+            <th>Gross Sale</th>
+            <th>Payout</th>
             <th>Fulfillment Status</th>
             <th>Action</th>
           </tr>
@@ -20,6 +21,11 @@
             <td>{{ order.product || order.productName }}</td>
             <td>{{ order.quantity }}</td>
             <td><strong>₱{{ Number(order.totalAmount).toFixed(2) }}</strong></td>
+            <td>
+              <span class="status-pill" :class="getEscrowClass(order.escrowStatus)">
+                {{ order.payoutStatus || 'Awaiting Payment' }}
+              </span>
+            </td>
             <td>
               <span class="status-pill" :class="getStatusClass(order.status)">
                 {{ order.status }}
@@ -59,10 +65,24 @@
         <div style="font-size: 0.9rem; line-height: 1.7; color: #423B36;">
           <p><strong>Customer Name:</strong> {{ activeOrder.customerName }}</p>
           <p><strong>Product:</strong> {{ activeOrder.product || activeOrder.productName }} (Quantity: {{ activeOrder.quantity }})</p>
+          <p><strong>Order Number:</strong> {{ activeOrder.orderNumber }}</p>
           <p><strong>Order Date:</strong> {{ activeOrder.orderDate }}</p>
-          <p><strong>Total Transaction:</strong> ₱{{ Number(activeOrder.totalAmount).toFixed(2) }}</p>
           <p><strong>Shipping Address:</strong> {{ activeOrder.shippingAddress }}</p>
-          <p><strong>Payout Status:</strong> <span class="status-pill status-published">{{ activeOrder.payoutStatus }}</span></p>
+
+          <div style="margin-top: 12px; padding: 12px; background-color: #F4FBF4; border: 1px solid #D6EBD6; border-radius: 8px;">
+            <p style="margin: 0 0 4px;"><strong>Gross Sale:</strong> ₱{{ Number(activeOrder.grossAmount ?? activeOrder.totalAmount).toFixed(2) }}</p>
+            <p style="margin: 0 0 4px;">
+              <strong>Platform Commission ({{ Number(activeOrder.commissionRate ?? 8).toFixed(2) }}%):</strong>
+              −₱{{ Number(activeOrder.platformFee ?? 0).toFixed(2) }}
+            </p>
+            <p style="margin: 0 0 6px; color: #2E7D32;">
+              <strong>Your Payout:</strong> ₱{{ Number(activeOrder.sellerPayout ?? activeOrder.totalAmount).toFixed(2) }}
+            </p>
+            <p style="margin: 0;">
+              <strong>Escrow Status:</strong>
+              <span class="status-pill" :class="getEscrowClass(activeOrder.escrowStatus)">{{ activeOrder.payoutStatus }}</span>
+            </p>
+          </div>
 
           <div style="margin-top: 16px; padding: 12px; background-color: #FAF6F0; border-radius: 8px;">
             <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">
@@ -168,6 +188,14 @@ const saveStatus = async () => {
   } finally {
     isSaving.value = false;
   }
+};
+
+const getEscrowClass = (status) => {
+  const s = (status || '').toLowerCase();
+  if (s === 'released_to_seller') return 'status-delivered';
+  if (s === 'held') return 'status-published';
+  if (s === 'refunded' || s === 'cancelled') return 'status-cancelled';
+  return 'status-pending';
 };
 
 const getStatusClass = (status) => {

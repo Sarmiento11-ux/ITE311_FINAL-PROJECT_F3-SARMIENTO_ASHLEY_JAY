@@ -27,6 +27,11 @@ class User extends Authenticatable
         'phone',
         'address',
         'avatar',
+        'subscription_plan',        // 'basic' | 'pro'
+        'subscription_status',      // 'active' | 'cancelled' | 'expired'
+        'subscription_expires_at',
+        'commission_rate',          // 8.00 basic | 3.00 pro
+        'listing_limit',            // 10 basic | null (unlimited) pro
     ];
 
     /**
@@ -47,9 +52,12 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_active' => 'boolean',
+            'email_verified_at'      => 'datetime',
+            'password'               => 'hashed',
+            'is_active'              => 'boolean',
+            'subscription_expires_at' => 'datetime',
+            'commission_rate'        => 'decimal:2',
+            'listing_limit'          => 'integer',
         ];
     }
 

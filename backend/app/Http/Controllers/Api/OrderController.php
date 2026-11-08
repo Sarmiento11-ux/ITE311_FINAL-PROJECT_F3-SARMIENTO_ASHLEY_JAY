@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,8 @@ class OrderController extends Controller
         try {
             $order = DB::transaction(function () use ($validated, $userId) {
                 $subtotal = 0;
+                $platformFeeTotal = 0;
+                $sellerPayoutTotal = 0;
                 $itemsData = [];
 
                 foreach ($validated['items'] as $item) {
@@ -106,15 +109,29 @@ class OrderController extends Controller
                     $itemSubtotal = $unitPrice * $item['quantity'];
                     $subtotal += $itemSubtotal;
 
+                    // Commission snapshot: Artisan Pro sellers keep 97% (3% fee),
+                    // Basic sellers keep 92% (8% fee). Falls back to the global default.
+                    $seller = User::find($product->seller_id);
+                    $commissionRate = $this->resolveCommissionRate($seller);
+                    $platformFee = round($itemSubtotal * ($commissionRate / 100), 2);
+                    $sellerPayout = round($itemSubtotal - $platformFee, 2);
+
+                    $platformFeeTotal += $platformFee;
+                    $sellerPayoutTotal += $sellerPayout;
+
                     $itemsData[] = [
-                        'product_id'   => $product->id,
-                        'seller_id'    => $product->seller_id,
-                        'product_name' => $product->name,
-                        'unit_price'   => $unitPrice,
-                        'price'        => $unitPrice,
-                        'quantity'     => $item['quantity'],
-                        'subtotal'     => $itemSubtotal,
-                        'status'       => 'pending',
+                        'product_id'      => $product->id,
+                        'seller_id'       => $product->seller_id,
+                        'product_name'    => $product->name,
+                        'unit_price'      => $unitPrice,
+                        'price'           => $unitPrice,
+                        'quantity'        => $item['quantity'],
+                        'subtotal'        => $itemSubtotal,
+                        'status'          => 'pending',
+                        'commission_rate' => $commissionRate,
+                        'platform_fee'    => $platformFee,
+                        'seller_payout'   => $sellerPayout,
+                        'escrow_status'   => 'pending',
                     ];
 
                     // Deduct stock immediately in transaction
@@ -127,13 +144,16 @@ class OrderController extends Controller
 
                 $order = Order::create([
                     'user_id'          => $userId,
-                    'order_number'     => 'CM-' . strtoupper(Str::random(8)),
+                    'order_number'     => $this->generateOrderNumber(),
                     'subtotal'         => $subtotal,
                     'shipping_fee'     => $shippingFee,
                     'total_amount'     => $totalAmount,
                     'status'           => 'pending',
                     'payment_method'   => $validated['payment_method'] ?? 'Cash on Delivery',
                     'payment_status'   => 'unpaid',
+                    'escrow_status'    => 'pending',
+                    'platform_fee'     => round($platformFeeTotal, 2),
+                    'seller_payout'    => round($sellerPayoutTotal, 2),
                     'shipping_address' => $validated['shipping_address'],
                     'contact_number'   => $validated['contact_number'],
                     'notes'            => $validated['notes'] ?? null,
@@ -247,16 +267,41 @@ class OrderController extends Controller
             $updateData['confirmed_at'] = now();
         } elseif ($validated['status'] === 'shipped' && !$order->shipped_at) {
             $updateData['shipped_at'] = now();
-        } elseif ($validated['status'] === 'delivered' && !$order->delivered_at) {
-            $updateData['delivered_at'] = now();
+        } elseif ($validated['status'] === 'delivered') {
+            if (!$order->delivered_at) {
+                $updateData['delivered_at'] = now();
+            }
             $updateData['payment_status'] = 'paid';
+            // Delivery completes the escrow cycle: release funds to the artisan.
+            $updateData['escrow_status'] = 'released_to_seller';
+            $updateData['escrow_released_at'] = $order->escrow_released_at ?? now();
+        } elseif ($validated['status'] === 'cancelled') {
+            // Paid orders are refunded; unpaid orders are simply cancelled.
+            $updateData['escrow_status'] = $order->payment_status === 'paid' ? 'refunded' : 'cancelled';
+            if ($order->payment_status === 'paid') {
+                $updateData['payment_status'] = 'refunded';
+            }
+        } elseif ($validated['status'] === 'refunded') {
+            $updateData['escrow_status'] = 'refunded';
+            $updateData['payment_status'] = 'refunded';
         }
 
         $previousStatus = $order->status;
         $order->update($updateData);
 
-        // Cascade status to child order items
-        $order->items()->update(['status' => $validated['status']]);
+        // Cascade status to child order items, keeping the escrow ledger in sync.
+        $itemUpdate = ['status' => $validated['status']];
+
+        if ($validated['status'] === 'delivered') {
+            $itemUpdate['escrow_status'] = 'released_to_seller';
+            $itemUpdate['escrow_released_at'] = now();
+        } elseif ($validated['status'] === 'cancelled') {
+            $itemUpdate['escrow_status'] = $updateData['escrow_status'];
+        } elseif ($validated['status'] === 'refunded') {
+            $itemUpdate['escrow_status'] = 'refunded';
+        }
+
+        $order->items()->update($itemUpdate);
 
         // Restock inventory if cancelled
         if ($validated['status'] === 'cancelled' && $previousStatus !== 'cancelled') {
@@ -273,5 +318,41 @@ class OrderController extends Controller
             'message' => 'Order status updated successfully.',
             'data'    => $order->fresh(['user:id,name,email', 'items.product']),
         ]);
+    }
+
+    /**
+     * Generate a human-readable, unique order number in CM-YYYYMMDD-XXXX format.
+     */
+    private function generateOrderNumber(): string
+    {
+        $date = now()->format('Ymd');
+
+        for ($attempt = 0; $attempt < 20; $attempt++) {
+            $candidate = 'CM-' . $date . '-' . str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+
+            if (!Order::where('order_number', $candidate)->exists()) {
+                return $candidate;
+            }
+        }
+
+        // Extremely unlikely fallback: keep the format but widen the suffix.
+        return 'CM-' . $date . '-' . str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Resolve the commission rate for a seller from their subscription snapshot.
+     * Artisan Pro: 3% (97% payout) / Basic: 8% (92% payout).
+     */
+    private function resolveCommissionRate(?User $seller): float
+    {
+        if (!$seller) {
+            return 8.00;
+        }
+
+        $isActivePro = $seller->subscription_plan === 'pro'
+            && ($seller->subscription_status ?? 'active') === 'active'
+            && (!$seller->subscription_expires_at || $seller->subscription_expires_at->isFuture());
+
+        return $isActivePro ? 3.00 : 8.00;
     }
 }

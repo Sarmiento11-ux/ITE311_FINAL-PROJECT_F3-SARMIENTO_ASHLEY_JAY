@@ -31,6 +31,7 @@ class Product extends Model
     protected $appends = [
         'image_url',
         'raw_image_path',
+        'gallery',
         'avg_rating',
         'review_count',
     ];
@@ -68,6 +69,35 @@ class Product extends Model
     public function getRawImagePathAttribute(): ?string
     {
         return $this->attributes['image'] ?? null;
+    }
+
+    /**
+     * Resolve the product image gallery to public URLs.
+     * The primary image is included first, followed by any extra uploads.
+     */
+    public function getGalleryAttribute(): array
+    {
+        $paths = [];
+
+        if (!empty($this->attributes['image'])) {
+            $paths[] = $this->attributes['image'];
+        }
+
+        foreach ((array) ($this->images ?? []) as $path) {
+            if (!empty($path)) {
+                $paths[] = $path;
+            }
+        }
+
+        $urls = array_map(function (string $path): string {
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+
+            return url('storage/' . ltrim($path, '/'));
+        }, $paths);
+
+        return array_values(array_unique($urls));
     }
 
     // ─── Relationships ─────────────────────────────────────────────

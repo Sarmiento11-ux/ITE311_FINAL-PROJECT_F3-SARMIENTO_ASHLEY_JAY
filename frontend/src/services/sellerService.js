@@ -1,5 +1,17 @@
 import apiClient from './api.js';
 
+const ESCROW_LABELS = {
+  pending: 'Awaiting Payment',
+  held: 'In Escrow',
+  released_to_seller: 'Released to Artisan',
+  refunded: 'Refunded to Buyer',
+  cancelled: 'Cancelled',
+};
+
+function escrowLabel(status) {
+  return ESCROW_LABELS[status] || 'Awaiting Payment';
+}
+
 export const sellerService = {
   /**
    * Get products belonging to a seller.
@@ -39,26 +51,46 @@ export const sellerService = {
       const params = sellerId ? { seller_id: sellerId } : {};
       const response = await apiClient.get('/seller/orders', { params });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
-        return response.data.data.map(item => ({
-          id: item.order?.id || item.id,
-          orderItemId: item.id, // ID of the specific order_item for multi-seller tracking
-          orderNumber: item.order?.order_number || `CM-${item.id}`,
-          customerName: item.order?.user?.name || 'Valued Customer',
-          productName: item.product_name,
-          product: item.product_name, // Map both for backward and forward compatibility
-          quantity: item.quantity,
-          totalAmount: parseFloat(item.subtotal),
-          payoutStatus: item.order?.payment_status === 'paid' ? 'Paid (Escrow Released)' : 'Awaiting Payment',
-          status: (item.status || item.order?.status || 'pending').charAt(0).toUpperCase() + (item.status || item.order?.status || 'pending').slice(1),
-          rawStatus: item.status || 'pending',
-          orderDate: new Date(item.created_at).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          }),
-          shippingAddress: item.order?.shipping_address || 'Registered Delivery Address',
-          isFromApi: true,
-        }));
+        return response.data.data.map(item => {
+          const grossAmount = parseFloat(item.subtotal) || 0;
+          const commissionRate = item.commission_rate !== null && item.commission_rate !== undefined
+            ? parseFloat(item.commission_rate)
+            : 8;
+          const storedFee = parseFloat(item.platform_fee);
+          const platformFee = storedFee > 0 ? storedFee : Math.round(grossAmount * commissionRate) / 100;
+          const storedPayout = parseFloat(item.seller_payout);
+          const sellerPayout = storedPayout > 0 ? storedPayout : Math.round((grossAmount - platformFee) * 100) / 100;
+          const escrowStatus = item.escrow_status
+            || item.order?.escrow_status
+            || (item.order?.payment_status === 'paid' ? 'held' : 'pending');
+
+          return {
+            id: item.order?.id || item.id,
+            orderItemId: item.id, // ID of the specific order_item for multi-seller tracking
+            orderNumber: item.order?.order_number || `CM-${item.id}`,
+            customerName: item.order?.user?.name || 'Valued Customer',
+            productName: item.product_name,
+            product: item.product_name, // Map both for backward and forward compatibility
+            quantity: item.quantity,
+            totalAmount: grossAmount,
+            grossAmount,
+            commissionRate,
+            platformFee,
+            sellerPayout,
+            escrowStatus,
+            payoutStatus: escrowLabel(escrowStatus),
+            paymentStatus: item.order?.payment_status || 'unpaid',
+            status: (item.status || item.order?.status || 'pending').charAt(0).toUpperCase() + (item.status || item.order?.status || 'pending').slice(1),
+            rawStatus: item.status || 'pending',
+            orderDate: new Date(item.created_at).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            }),
+            shippingAddress: item.order?.shipping_address || 'Registered Delivery Address',
+            isFromApi: true,
+          };
+        });
       }
     } catch (err) {
       console.warn('[SellerService] Could not fetch seller orders from API, using fallback.', err.message);

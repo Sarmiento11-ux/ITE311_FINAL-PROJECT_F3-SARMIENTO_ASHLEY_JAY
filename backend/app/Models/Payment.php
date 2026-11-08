@@ -55,8 +55,17 @@ class Payment extends Model
             'payment_reference'  => $reference ?? $this->payment_reference,
         ]);
 
-        // Also update the order's payment_status
-        $this->order()->update(['payment_status' => 'paid']);
+        // Also update the order's payment_status and move funds into escrow
+        $order = $this->order;
+
+        if ($order) {
+            $order->update([
+                'payment_status' => 'paid',
+                'escrow_status'  => 'held',
+            ]);
+
+            $order->items()->update(['escrow_status' => 'held']);
+        }
     }
 
     /**

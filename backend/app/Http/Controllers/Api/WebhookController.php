@@ -124,13 +124,15 @@ class WebhookController extends Controller
                 'payment_method'     => $paymentMethodType,
             ]);
 
-            // Update order
+            // Update order — payment is captured into escrow until delivery.
             $order = $payment->order;
             $order->update([
                 'payment_status' => 'paid',
                 'status'         => 'confirmed',
                 'confirmed_at'   => now(),
+                'escrow_status'  => 'held',
             ]);
+            $order->items()->update(['escrow_status' => 'held']);
 
             Log::info('[Webhook] Order ' . ($order->order_number ?? $order->id) . ' marked as PAID via ' . $paymentMethodType);
 
@@ -157,11 +159,16 @@ class WebhookController extends Controller
                 'paid_at'   => now(),
             ]);
 
-            $payment->order()->update([
-                'payment_status' => 'paid',
-                'status'         => 'confirmed',
-                'confirmed_at'   => now(),
-            ]);
+            $order = $payment->order;
+            if ($order) {
+                $order->update([
+                    'payment_status' => 'paid',
+                    'status'         => 'confirmed',
+                    'confirmed_at'   => now(),
+                    'escrow_status'  => 'held',
+                ]);
+                $order->items()->update(['escrow_status' => 'held']);
+            }
 
             // Send payment confirmation email receipt
             NotificationService::sendPaymentSuccess($payment->order, (float) $payment->amount, $payment->payment_method ?? 'online', $paymentIntentId);

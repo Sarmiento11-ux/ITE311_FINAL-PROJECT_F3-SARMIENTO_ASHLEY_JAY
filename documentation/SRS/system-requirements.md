@@ -4,7 +4,7 @@
 ### 1. System Overview
 CraftMarket is an enterprise-grade digital marketplace designed to bridge independent Filipino artisans, weavers, potters, and woodcrafters directly with conscious shoppers. The system is architected as a decoupled solution combining:
 - **Frontend Presentation:** Vue.js 3 + Vite Single Page Application (SPA)
-- **Core Business Backend:** Laravel 11/PHP RESTful API with MySQL
+- **Core Business Backend:** Laravel 12/PHP RESTful API with MySQL
 - **Content Management:** Headless WordPress via WP REST API
 
 ---

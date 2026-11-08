@@ -15,6 +15,10 @@ class Order extends Model
         'status',
         'payment_method',
         'payment_status',
+        'escrow_status',
+        'platform_fee',
+        'seller_payout',
+        'escrow_released_at',
         'shipping_address',
         'contact_number',
         'notes',
@@ -24,12 +28,15 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'subtotal'      => 'decimal:2',
-        'shipping_fee'  => 'decimal:2',
-        'total_amount'  => 'decimal:2',
-        'confirmed_at'  => 'datetime',
-        'shipped_at'    => 'datetime',
-        'delivered_at'  => 'datetime',
+        'subtotal'           => 'decimal:2',
+        'shipping_fee'       => 'decimal:2',
+        'total_amount'       => 'decimal:2',
+        'platform_fee'       => 'decimal:2',
+        'seller_payout'      => 'decimal:2',
+        'confirmed_at'       => 'datetime',
+        'shipped_at'         => 'datetime',
+        'delivered_at'       => 'datetime',
+        'escrow_released_at' => 'datetime',
     ];
 
     // ─── Relationships ─────────────────────────────────────────────

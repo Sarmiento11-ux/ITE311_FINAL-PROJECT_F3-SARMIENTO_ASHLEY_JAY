@@ -17,13 +17,22 @@ class OrderItem extends Model
         'subtotal',
         'status',
         'tracking_number',
+        'commission_rate',
+        'platform_fee',
+        'seller_payout',
+        'escrow_status',
+        'escrow_released_at',
     ];
 
     protected $casts = [
-        'unit_price' => 'decimal:2',
-        'price'      => 'decimal:2',
-        'subtotal'   => 'decimal:2',
-        'quantity'   => 'integer',
+        'unit_price'         => 'decimal:2',
+        'price'              => 'decimal:2',
+        'subtotal'           => 'decimal:2',
+        'quantity'           => 'integer',
+        'commission_rate'    => 'decimal:2',
+        'platform_fee'       => 'decimal:2',
+        'seller_payout'      => 'decimal:2',
+        'escrow_released_at' => 'datetime',
     ];
 
     // ─── Relationships ─────────────────────────────────────────────

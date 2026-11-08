@@ -84,9 +84,23 @@ class SellerController extends Controller
         $totalSales = (float) $validSalesItems->sum('subtotal');
 
         $sellerUser = \App\Models\User::find($sellerId);
-        $commissionRate = $sellerUser && $sellerUser->subscription_plan === 'pro' ? 3.0 : 8.0;
-        $platformFee = round($totalSales * ($commissionRate / 100), 2);
-        $netEarnings = round($totalSales - $platformFee, 2);
+        $isActivePro = $sellerUser
+            && $sellerUser->subscription_plan === 'pro'
+            && ($sellerUser->subscription_status ?? 'active') === 'active'
+            && (!$sellerUser->subscription_expires_at || $sellerUser->subscription_expires_at->isFuture());
+        $commissionRate = $isActivePro ? 3.0 : 8.0;
+
+        // Prefer the per-item commission snapshot recorded at checkout.
+        $snapshotFees = (float) $validSalesItems->sum(fn($item) => (float) ($item->platform_fee ?? 0));
+        $snapshotPayout = (float) $validSalesItems->sum(fn($item) => (float) ($item->seller_payout ?? 0));
+
+        if ($snapshotFees > 0 || $snapshotPayout > 0) {
+            $platformFee = round($snapshotFees, 2);
+            $netEarnings = round($snapshotPayout, 2);
+        } else {
+            $platformFee = round($totalSales * ($commissionRate / 100), 2);
+            $netEarnings = round($totalSales - $platformFee, 2);
+        }
 
         $pendingStatuses = ['pending', 'confirmed', 'processing', 'shipped'];
         $pendingOrders = $orderItems->filter(function ($item) use ($pendingStatuses) {
@@ -163,32 +177,48 @@ class SellerController extends Controller
             ], 422);
         }
 
+        $order = $item->order;
+
         $updateData = ['status' => $newStatus];
         if ($newStatus === 'shipped' && !empty($validated['tracking_number'])) {
             $updateData['tracking_number'] = $validated['tracking_number'];
         }
+
+        // Keep the escrow ledger in sync with the item's fulfillment state.
+        if ($newStatus === 'delivered') {
+            $updateData['escrow_status'] = 'released_to_seller';
+            $updateData['escrow_released_at'] = now();
+        } elseif ($newStatus === 'cancelled') {
+            $updateData['escrow_status'] = $order && $order->payment_status === 'paid' ? 'refunded' : 'cancelled';
+        }
+
         $item->update($updateData);
 
         // Send fulfillment update notification
         NotificationService::sendSellerItemFulfillment($item);
 
         // Evaluate parent order status across all multi-seller items
-        $order = $item->order;
         if ($order) {
-            $prevOrderStatus = $order->status;
             $allItems = $order->items()->get();
             $allDelivered = $allItems->every(fn($i) => $i->status === 'delivered');
             $allCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
 
             if ($allDelivered) {
                 $order->update([
-                    'status'         => 'delivered',
-                    'delivered_at'   => now(),
-                    'payment_status' => 'paid',
+                    'status'             => 'delivered',
+                    'delivered_at'       => now(),
+                    'payment_status'     => 'paid',
+                    'escrow_status'      => 'released_to_seller',
+                    'escrow_released_at' => $order->escrow_released_at ?? now(),
                 ]);
                 NotificationService::sendOrderStatusUpdate($order, 'delivered');
             } elseif ($allCancelled) {
-                $order->update(['status' => 'cancelled']);
+                $isPaid = $order->payment_status === 'paid';
+                $order->update([
+                    'status'         => 'cancelled',
+                    'escrow_status'  => $isPaid ? 'refunded' : 'cancelled',
+                    'payment_status' => $isPaid ? 'refunded' : $order->payment_status,
+                ]);
                 NotificationService::sendOrderStatusUpdate($order, 'cancelled');
             } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {
                 $order->update(['status' => 'processing']);

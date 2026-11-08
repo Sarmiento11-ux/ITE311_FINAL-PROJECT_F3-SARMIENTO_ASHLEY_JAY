@@ -32,12 +32,27 @@
           <!-- Visual Column: Large Image & Trust Banner -->
           <div class="details-gallery-col">
             <div class="main-image-frame">
-              <img :src="product.image || defaultPlaceholder" :alt="product.title" class="main-product-img" @error="handleImgError">
+              <img :src="activeImage || product.image || defaultPlaceholder" :alt="product.title" class="main-product-img" @error="handleImgError">
               <span v-if="product.badge" class="product-tag-float">{{ product.badge }}</span>
               <WishlistButton :product="product" variant="icon" size="md" class="details-wishlist-float" />
               <div class="eco-badge-corner">
                 <span>🌱 100% Genuine Craft</span>
               </div>
+            </div>
+
+            <!-- Thumbnail gallery: supports multiple product photos -->
+            <div v-if="galleryImages.length > 1" class="gallery-thumbnails">
+              <button
+                v-for="(image, index) in galleryImages"
+                :key="`${image}-${index}`"
+                type="button"
+                class="gallery-thumb"
+                :class="{ 'gallery-thumb-active': activeImage === image }"
+                :aria-label="`View product photo ${index + 1}`"
+                @click="activeImage = image"
+              >
+                <img :src="image" :alt="`${product.title} photo ${index + 1}`" @error="handleImgError">
+              </button>
             </div>
 
             <!-- Artisan Craftsmanship Trust Banner -->
@@ -279,6 +294,7 @@ const router = useRouter();
 
 const product = ref(null);
 const relatedProducts = ref([]);
+const activeImage = ref('');
 const quantity = ref(1);
 const isLoading = ref(true);
 const cartFeedback = ref('');
@@ -304,6 +320,22 @@ const displayReviewsCount = computed(() => {
 const displayRating = computed(() => {
   if (reviews.value.length > 0 && reviewsAvg.value > 0) return reviewsAvg.value;
   return Number(product.value?.rating) || 0;
+});
+
+const galleryImages = computed(() => {
+  if (!product.value) return [];
+
+  const fromGallery = Array.isArray(product.value.gallery)
+    ? product.value.gallery.filter(Boolean)
+    : [];
+
+  const fallback = [];
+  if (product.value.image) fallback.push(product.value.image);
+  if (Array.isArray(product.value.images)) {
+    fallback.push(...product.value.images.filter(Boolean));
+  }
+
+  return [...new Set(fromGallery.length ? fromGallery : fallback)];
 });
 
 const handleImgError = (e) => {
@@ -402,6 +434,7 @@ const loadProductData = async (id) => {
   try {
     const found = await productService.getById(id);
     product.value = found || null;
+    activeImage.value = galleryImages.value[0] || '';
 
     if (found) {
       relatedProducts.value = await productService.getRelated(found.category, found.id);
@@ -422,6 +455,7 @@ onMounted(() => {
 watch(() => route.params.id, (newId) => {
   if (newId) {
     quantity.value = 1;
+    activeImage.value = '';
     cartFeedback.value = '';
     editingReview.value = null;
     loadProductData(newId);
@@ -644,5 +678,44 @@ const addToCart = () => {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* ── Product Photo Gallery ── */
+.gallery-thumbnails {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.gallery-thumb {
+  flex: 0 0 auto;
+  width: 74px;
+  height: 74px;
+  padding: 0;
+  border: 2px solid #efe8de;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-thumb:hover {
+  transform: translateY(-2px);
+  border-color: #c25e3e;
+}
+
+.gallery-thumb-active {
+  border-color: #c25e3e;
+  box-shadow: 0 0 0 2px rgba(194, 94, 62, 0.18);
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>

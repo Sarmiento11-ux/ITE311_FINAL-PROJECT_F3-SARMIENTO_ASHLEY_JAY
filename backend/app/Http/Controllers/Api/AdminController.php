@@ -37,6 +37,12 @@ class AdminController extends Controller
         $ordersPending = Order::where('status', 'pending')->count();
         $ordersPaid    = Order::where('payment_status', 'paid')->count();
 
+        // Commission ledger and escrow exposure
+        $commissionEarned = (float) Order::whereNotIn('status', ['cancelled', 'refunded'])
+            ->sum('platform_fee');
+        $escrowHeld = (float) Order::where('escrow_status', 'held')->sum('seller_payout');
+        $escrowReleased = (float) Order::where('escrow_status', 'released_to_seller')->sum('seller_payout');
+
         return response()->json([
             'success' => true,
             'message' => 'Admin dashboard statistics retrieved successfully.',
@@ -49,6 +55,9 @@ class AdminController extends Controller
                 'total_sales'     => round($totalSales, 2),
                 'orders_pending'  => $ordersPending,
                 'orders_paid'     => $ordersPaid,
+                'commission_earned' => round($commissionEarned, 2),
+                'escrow_held'       => round($escrowHeld, 2),
+                'escrow_released'   => round($escrowReleased, 2),
             ],
         ]);
     }
@@ -218,6 +227,32 @@ class AdminController extends Controller
         ->values()
         ->take(5);
 
+        // 6. Commission ledger and escrow breakdown
+        $escrowTotals = Order::select(
+                'escrow_status',
+                DB::raw('COUNT(*) as orders_count'),
+                DB::raw('SUM(platform_fee) as platform_fees'),
+                DB::raw('SUM(seller_payout) as seller_payouts')
+            )
+            ->groupBy('escrow_status')
+            ->get()
+            ->keyBy('escrow_status');
+
+        $commissionLedger = [];
+
+        foreach (['pending', 'held', 'released_to_seller', 'refunded', 'cancelled'] as $escrowStatus) {
+            $row = $escrowTotals->get($escrowStatus);
+
+            $commissionLedger[$escrowStatus] = [
+                'orders_count'   => (int) ($row->orders_count ?? 0),
+                'platform_fees'  => round((float) ($row->platform_fees ?? 0), 2),
+                'seller_payouts' => round((float) ($row->seller_payouts ?? 0), 2),
+            ];
+        }
+
+        $totalCommission = (float) Order::whereNotIn('status', ['cancelled', 'refunded'])
+            ->sum('platform_fee');
+
         return response()->json([
             'success' => true,
             'message' => 'Reports data generated successfully.',
@@ -228,6 +263,8 @@ class AdminController extends Controller
                 'payment_status_summary'=> $paymentStatusSummary,
                 'best_selling_products' => $bestSellingProducts,
                 'most_active_sellers'   => $mostActiveSellers,
+                'total_commission'      => round($totalCommission, 2),
+                'commission_ledger'     => $commissionLedger,
             ],
         ]);
     }

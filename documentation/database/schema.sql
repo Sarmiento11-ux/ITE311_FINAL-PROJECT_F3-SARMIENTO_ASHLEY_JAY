@@ -1,7 +1,15 @@
 -- ========================================================
 -- CraftMarket: Relational MySQL Database Schema Blueprint
--- Version: 1.0.0
+-- Version: 1.1.0
 -- Charset: utf8mb4 / Collation: utf8mb4_unicode_ci
+--
+-- NOTE: This file is a conceptual blueprint for documentation and
+-- coursework diagrams. The canonical, executable schema lives in
+-- backend/database/migrations/. When they disagree, trust the migrations.
+--
+-- Escrow ledger (implemented): orders and order_items carry escrow_status,
+-- platform_fee, seller_payout, and escrow_released_at. Each order item also
+-- stores a commission_rate snapshot (8% Basic / 3% Artisan Pro).
 -- ========================================================
 
 CREATE DATABASE IF NOT EXISTS craftmarket_db 

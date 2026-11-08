@@ -47,6 +47,13 @@ export function normalizeProduct(p) {
   const stock = Number(p.stock ?? 10);
   const status = p.status || 'active';
 
+  // Prefer the backend-resolved gallery (absolute URLs). Fall back to the raw
+  // images array so sample/legacy products still render thumbnails.
+  const rawImages = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+  const gallery = Array.isArray(p.gallery) && p.gallery.length
+    ? p.gallery.filter(Boolean)
+    : rawImages;
+
   return {
     id: p.id,
     title: p.name || p.title || 'Handmade Craft',
@@ -77,7 +84,8 @@ export function normalizeProduct(p) {
       : status === 'active' && stock > 0,
     status,
     image: p.image || defaultPlaceholder,
-    images: Array.isArray(p.images) ? p.images : [],
+    images: rawImages,
+    gallery,
     shortDesc: p.shortDesc || (p.description ? p.description.slice(0, 110) + '...' : ''),
     description: p.description || '',
     materials: p.material || p.materials || 'Locally sourced sustainable materials',
