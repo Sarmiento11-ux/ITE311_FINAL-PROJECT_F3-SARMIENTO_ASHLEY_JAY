@@ -6,7 +6,7 @@
       <div class="dashboard-header-banner">
         <div class="dashboard-welcome">
           <span class="section-eyebrow">ARTISAN MERCHANT PORTAL</span>
-          <h1>Welcome to {{ seller.fullName }}!</h1>
+          <h1>Welcome to your Artisan Portal, {{ seller.fullName }}!</h1>
           <p>Manage your handmade craft listings, review customer orders, and track your escrow payouts.</p>
         </div>
 
