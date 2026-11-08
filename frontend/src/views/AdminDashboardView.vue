@@ -403,6 +403,7 @@
                       <th>Products</th>
                       <th>Status</th>
                       <th>Joined</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -428,9 +429,30 @@
                         </span>
                       </td>
                       <td class="text-muted">{{ formatDate(u.created_at) }}</td>
+                      <td>
+                        <div class="action-buttons-group">
+                          <button 
+                            type="button" 
+                            class="btn-action btn-view" 
+                            @click="openEditUserModal(u)" 
+                            title="Edit user details and role"
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            type="button" 
+                            class="btn-action" 
+                            :class="u.is_active ? 'btn-delete' : 'btn-view'"
+                            @click="toggleUserActive(u)" 
+                            :title="u.is_active ? 'Deactivate user account' : 'Reactivate user account'"
+                          >
+                            {{ u.is_active ? 'Deactivate' : 'Activate' }}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                     <tr v-if="!users.length">
-                      <td colspan="7" class="empty-cell">No users match your filter criteria.</td>
+                      <td colspan="8" class="empty-cell">No users match your filter criteria.</td>
                     </tr>
                   </tbody>
                 </table>
