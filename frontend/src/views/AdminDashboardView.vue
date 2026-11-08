@@ -1083,63 +1083,104 @@
               </div>
             </div>
 
-            <!-- 3 Editorial Management Modules -->
+            <!-- 5 Required CMS Functions Grid (Aligned with Course & SRS Specifications) -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px;">
               
-              <!-- Card 1: Announcement Bar -->
+              <!-- 1. Required CMS Function: Announcements -->
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>📢 Marketplace Notice & Announcement</h4>
-                    <p class="admin-card-sub">Top bar announcement visible to all shoppers</p>
+                    <h4>📢 1. Announcements</h4>
+                    <p class="admin-card-sub">Top bar announcement visible across the storefront</p>
                   </div>
                 </div>
                 <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #C25E3E;">
-                  <em>"Free nationwide shipping on handcrafted orders over ₱1,500 • Support 120+ local makers"</em>
+                  <em>"Free nationwide shipping on handcrafted orders over ₱1,500 • Direct Maker Support"</em>
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Posts tagged <code>announcement</code>.</small>
                   <a href="http://localhost/craftmarket-cms/wp-admin/edit.php" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
-                    Edit Announcement in WordPress ↗
+                    Manage Announcements in WordPress ↗
                   </a>
                 </div>
               </div>
 
-              <!-- Card 2: Hero Section & Mission -->
+              <!-- 2. Required CMS Function: Website Content -->
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>🎨 Homepage Hero & Cultural Narrative</h4>
-                    <p class="admin-card-sub">Front-facing brand headline and mission excerpt</p>
+                    <h4>🎨 2. Website Content</h4>
+                    <p class="admin-card-sub">Homepage narrative, About Us, & cultural blogs</p>
                   </div>
                 </div>
                 <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #2F4533;">
-                  <strong>Discover Unique Filipino Craftsmanship</strong>
-                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">Curated authentic pottery, handwoven textiles, and heritage crafts directly from indigenous makers.</p>
+                  <strong>Homepage Hero, About Us & Heritage Stories</strong>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">Cultural storytelling pages published in WordPress and rendered headless on Vue.js storefront.</p>
                 </div>
                 <div style="padding: 0 16px 16px;">
-                  <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Page slug <code>homepage</code>.</small>
+                  <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Pages (<code>homepage</code>, <code>about-us</code>) and Posts.</small>
                   <a href="http://localhost/craftmarket-cms/wp-admin/edit.php?post_type=page" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
-                    Edit Hero Content in WordPress ↗
+                    Edit Website Content in WordPress ↗
                   </a>
                 </div>
               </div>
 
-              <!-- Card 3: Artisan Spotlight Blogs -->
+              <!-- 3. Required CMS Function: Products / Services -->
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>📖 Artisan Storytelling & Blogs</h4>
-                    <p class="admin-card-sub">Cultural heritage articles and craft tutorials</p>
+                    <h4>🏺 3. Products & Services</h4>
+                    <p class="admin-card-sub">Artisan catalog listings & inventory synced to CMS</p>
                   </div>
                 </div>
                 <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #3B82F6;">
-                  <span>3 Published artisan heritage articles available in BlogSection.</span>
+                  <strong>{{ stats?.total_products ?? products.length }} Active Craft Listings</strong>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">All marketplace products, stock levels, and category taxonomies synced with WordPress CMS bridge.</p>
                 </div>
                 <div style="padding: 0 16px 16px;">
-                  <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Category <code>artisan-stories</code>.</small>
-                  <a href="http://localhost/craftmarket-cms/wp-admin/post-new.php" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
-                    Publish New Artisan Story in WordPress ↗
+                  <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Synced to WordPress via <code>craftmarket-products</code> plugin hook.</small>
+                  <a href="http://localhost/craftmarket-cms/wp-admin/admin.php?page=craftmarket-products" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                    View Products in WordPress CMS ↗
+                  </a>
+                </div>
+              </div>
+
+              <!-- 4. Required CMS Function: User Data -->
+              <div class="admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h4>👥 4. User Data</h4>
+                    <p class="admin-card-sub">Artisan makers & customer directory synced to CMS</p>
+                  </div>
+                </div>
+                <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #8B5CF6;">
+                  <strong>{{ stats?.total_users ?? users.length }} Registered Members</strong>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">{{ stats?.total_sellers ?? sellers.length }} artisan workshops and {{ stats?.total_customers ?? 0 }} buyers managed and accessible from CMS.</p>
+                </div>
+                <div style="padding: 0 16px 16px;">
+                  <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Synced to WordPress via <code>craftmarket-users</code> plugin hook.</small>
+                  <a href="http://localhost/craftmarket-cms/wp-admin/admin.php?page=craftmarket-users" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                    View Users in WordPress CMS ↗
+                  </a>
+                </div>
+              </div>
+
+              <!-- 5. Required CMS Function: Reports -->
+              <div class="admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h4>📈 5. Financial & Sales Reports</h4>
+                    <p class="admin-card-sub">Order summaries & escrow payouts mirrored in CMS</p>
+                  </div>
+                </div>
+                <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #10B981;">
+                  <strong>₱{{ formatMoney(stats?.total_sales ?? 0) }} Total GMV Volume</strong>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">Financial audit trails, order breakdown, and escrow payouts accessible by CMS administrators.</p>
+                </div>
+                <div style="padding: 0 16px 16px;">
+                  <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Synced to WordPress via <code>craftmarket-reports</code> plugin hook.</small>
+                  <a href="http://localhost/craftmarket-cms/wp-admin/admin.php?page=craftmarket-reports" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                    View Reports in WordPress CMS ↗
                   </a>
                 </div>
               </div>
