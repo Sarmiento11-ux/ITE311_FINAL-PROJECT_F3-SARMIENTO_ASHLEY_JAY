@@ -130,7 +130,10 @@
                 </div>
                                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop Location:</span>
-                  <span>{{ seller.address }}</span>
+                  <span v-if="seller.address">{{ seller.address }}</span>
+                  <span v-else style="color: #9E8F85; font-style: italic;">
+                    Not set (<router-link to="/profile" style="color: #C25E3E; text-decoration: underline;">Add location</router-link>)
+                  </span>
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Escrow Payout Rate:</span>
