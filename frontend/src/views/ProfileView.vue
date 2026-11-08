@@ -4,7 +4,9 @@
       
       <!-- Breadcrumbs -->
       <div class="breadcrumb-trail">
-        <router-link to="/">Home</router-link>
+        <router-link v-if="currentUser.role === 'Seller'" to="/dashboard/seller">Artisan Dashboard</router-link>
+        <router-link v-else-if="currentUser.role === 'Administrator'" to="/dashboard/admin">Admin Dashboard</router-link>
+        <router-link v-else to="/dashboard/customer">Customer Dashboard</router-link>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">Account Profile</span>
       </div>
@@ -29,6 +31,13 @@
             class="btn btn-primary btn-sm"
           >
             ← Back to Admin Dashboard
+          </router-link>
+          <router-link 
+            v-else
+            to="/dashboard/customer" 
+            class="btn btn-primary btn-sm"
+          >
+            ← Back to Customer Dashboard
           </router-link>
           <button type="button" @click="handleLogout" class="btn btn-secondary btn-logout-main">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

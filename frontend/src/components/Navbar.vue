@@ -104,16 +104,14 @@
           <span>Artisan Dashboard</span>
         </router-link>
 
-        <button 
-          v-else 
-          type="button"
-          @click="handleLogout"
+        <router-link 
+          v-else-if="auth.isAuthenticated" 
+          to="/dashboard/customer" 
           class="btn-seller-link desktop-only-action"
-          style="background-color: transparent; border-color: #d1d5db; color: #5c524b;"
-          title="Sign out of your account"
+          style="background-color: var(--cm-forest, #3E5943); color: #ffffff;"
         >
-          <span>Sign Out</span>
-        </button>
+          <span>Customer Dashboard</span>
+        </router-link>
 
         <!-- Account / Profile Link (Visible when logged in) -->
         <router-link 
