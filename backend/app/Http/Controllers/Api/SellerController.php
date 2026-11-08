@@ -76,7 +76,12 @@ class SellerController extends Controller
 
         $orderItems = OrderItem::with('order')->where('seller_id', $sellerId)->get();
         $totalOrders = $orderItems->pluck('order_id')->unique()->count();
-        $totalSales = (float) $orderItems->sum('subtotal');
+        $validSalesItems = $orderItems->filter(function ($item) {
+            $itemStatus = strtolower($item->status ?? '');
+            $orderStatus = strtolower($item->order->status ?? '');
+            return !in_array($itemStatus, ['cancelled', 'refunded']) && !in_array($orderStatus, ['cancelled', 'refunded']);
+        });
+        $totalSales = (float) $validSalesItems->sum('subtotal');
 
         $sellerUser = \App\Models\User::find($sellerId);
         $commissionRate = $sellerUser && $sellerUser->subscription_plan === 'pro' ? 3.0 : 8.0;
