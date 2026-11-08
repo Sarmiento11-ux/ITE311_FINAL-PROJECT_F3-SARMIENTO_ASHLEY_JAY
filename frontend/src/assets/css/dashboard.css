@@ -266,6 +266,11 @@
     color: #F57F17;
 }
 
+.status-cancelled, .status-refunded {
+    background-color: #FFEBEE;
+    color: #C62828;
+}
+
 .status-low-stock, .status-lowstock {
     background-color: #FBE9E7;
     color: #D84315;
