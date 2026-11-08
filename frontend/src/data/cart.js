@@ -139,6 +139,14 @@ export const cart = reactive({
       return { success: false, requiresAuth: true, message: msg };
     }
 
+    if (authService.isAdmin()) {
+      const msg = 'Administrators cannot add items to cart or checkout. Please use a customer account to shop.';
+      state.toastMessage = msg;
+      state.showToast    = true;
+      setTimeout(() => { state.showToast = false; }, 3200);
+      return { success: false, message: msg };
+    }
+
     if (quantity < 1) return { success: false, message: 'Quantity must be at least 1.' };
 
     const availStock = Number(product.stock) || 0;

@@ -91,7 +91,7 @@ const routes = [
     path: '/checkout',
     name: 'checkout',
     component: CheckoutView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['customer'] }
   },
   {
     path: '/orders',

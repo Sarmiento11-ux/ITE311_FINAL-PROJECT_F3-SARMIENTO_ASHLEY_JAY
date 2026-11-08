@@ -198,6 +198,15 @@
             </router-link>
           </div>
 
+          <div v-else-if="auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin'" class="checkout-admin-prompt" style="padding: 14px; background: #FFF8E1; border: 1px solid #FFE082; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+            <p style="margin: 0; font-size: 0.88rem; color: #B78103; font-weight: 700;">
+              🛡️ Administrator Mode
+            </p>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: #6D4C41;">
+              Administrator accounts are not permitted to checkout or place orders.
+            </p>
+          </div>
+
           <router-link
             v-else
             to="/checkout"

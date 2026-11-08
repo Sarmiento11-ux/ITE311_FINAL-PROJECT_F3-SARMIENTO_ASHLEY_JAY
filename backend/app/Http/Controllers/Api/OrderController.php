@@ -79,6 +79,15 @@ class OrderController extends Controller
             'user_id'            => 'nullable|exists:users,id',
         ]);
 
+        // Administrators are not permitted to checkout or place orders
+        if ($request->user() && $request->user()->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Administrators are not permitted to place orders. Please use a customer account.',
+                'data'    => null,
+            ], 403);
+        }
+
         // Security: Always use the authenticated user's ID
         $userId = $request->user()?->id ?? $validated['user_id'] ?? null;
         if (!$userId) {
