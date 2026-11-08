@@ -43,9 +43,9 @@
           </div>
         </div>
 
-        <a href="#featured" class="btn btn-secondary">
+        <router-link to="/#artisan-stories" class="btn btn-secondary">
           Discover Artisan Stories ↗
-        </a>
+        </router-link>
       </div>
 
     </div>
