@@ -14,7 +14,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     try {
-      const token = sessionStorage.getItem('craftmarket_token');
+      const token = sessionStorage.getItem('craftmarket_token') || localStorage.getItem('craftmarket_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

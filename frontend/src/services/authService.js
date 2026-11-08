@@ -7,23 +7,12 @@ import apiClient from './api.js';
 const TOKEN_KEY = 'craftmarket_token';
 const USER_KEY  = 'craftmarket_user';
 
-function clearLegacyLocalStorage() {
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-// Clear any stale persistent storage on module load
-clearLegacyLocalStorage();
-
 function saveSession(user, token) {
-  clearLegacyLocalStorage();
   try {
     sessionStorage.setItem(TOKEN_KEY, token);
     sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
   } catch {
     // Ignore storage errors
   }
@@ -32,10 +21,11 @@ function saveSession(user, token) {
 }
 
 function clearSession() {
-  clearLegacyLocalStorage();
   try {
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   } catch {
     // Ignore storage errors
   }
@@ -43,9 +33,8 @@ function clearSession() {
 }
 
 function restoreSession() {
-  clearLegacyLocalStorage();
   try {
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
     if (token) {
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
@@ -146,7 +135,7 @@ export const authService = {
 
   getToken() {
     try {
-      return sessionStorage.getItem(TOKEN_KEY);
+      return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
     } catch {
       return null;
     }
@@ -154,7 +143,7 @@ export const authService = {
 
   getUser() {
     try {
-      const raw = sessionStorage.getItem(USER_KEY);
+      const raw = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
