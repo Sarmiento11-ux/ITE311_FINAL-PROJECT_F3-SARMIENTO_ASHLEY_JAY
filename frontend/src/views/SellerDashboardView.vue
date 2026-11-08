@@ -81,31 +81,31 @@
           <div class="dashboard-stats-grid">
             <DashboardStatCard 
               title="Total Products" 
-              :value="products.length" 
+              :value="isLoading ? '...' : products.length" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Orders Received" 
-              :value="orders.length" 
+              :value="isLoading ? '...' : orders.length" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
-              :value="pendingOrdersCount" 
+              :value="isLoading ? '...' : pendingOrdersCount" 
               icon="" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
-              :value="completedOrdersCount" 
+              :value="isLoading ? '...' : completedOrdersCount" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Revenue" 
-              :value="`₱${totalRevenue.toFixed(2)}`" 
+              :value="isLoading ? '...' : `₱${totalRevenue.toFixed(2)}`" 
               icon="" 
               bgClass="terracotta-bg" 
             />
@@ -151,7 +151,11 @@
                 </button>
               </div>
 
-              <SellerOrdersTable :orders="orders.slice(0, 3)" @order-updated="loadSellerData" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading recent customer orders...</p>
+              </div>
+              <SellerOrdersTable v-else :orders="orders.slice(0, 3)" @order-updated="loadSellerData" />
             </div>
 
             <!-- Products Quick View -->
@@ -166,7 +170,12 @@
                 </button>
               </div>
 
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading active craft inventory...</p>
+              </div>
               <SellerProductsTable 
+                v-else
                 :products="products.slice(0, 3)" 
                 @edit="openEditModal" 
                 @delete="deleteProduct" 
@@ -187,7 +196,12 @@
                 </button>
               </div>
 
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading complete product catalog...</p>
+              </div>
               <SellerProductsTable 
+                v-else
                 :products="products" 
                 @edit="openEditModal" 
                 @delete="deleteProduct" 
@@ -205,7 +219,11 @@
                 </div>
               </div>
 
-              <SellerOrdersTable :orders="orders" @order-updated="loadSellerData" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading order fulfillment list...</p>
+              </div>
+              <SellerOrdersTable v-else :orders="orders" @order-updated="loadSellerData" />
             </div>
           </div>
 
@@ -582,3 +600,23 @@ const handleCancelSubscription = async () => {
   }
 };
 </script>
+
+<style scoped>
+.dashboard-loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #7A6F68;
+}
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #E8DFD5;
+  border-top-color: #3E5943;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
