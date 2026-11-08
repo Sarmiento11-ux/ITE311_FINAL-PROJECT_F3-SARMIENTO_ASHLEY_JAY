@@ -380,18 +380,18 @@ const isSubmittingSubscription = ref(false);
 
 const seller = computed(() => {
   return auth.user.value || {
-    id: 2,
-    fullName: "Elena Bautista",
-    shopName: "Cordillera Weaves",
-    email: "artisan@example.com",
-    address: "14 Session Road, Baguio City, Benguet"
+    id: null,
+    fullName: "Artisan Maker",
+    shopName: "Handcrafted Workshop",
+    email: "",
+    address: ""
   };
 });
 
 const loadSellerData = async () => {
   isLoading.value = true;
   try {
-    const sellerId = seller.value.id || 2;
+    const sellerId = seller.value?.id || null;
     const [fetchedProducts, fetchedOrders, fetchedStats] = await Promise.all([
       sellerService.getProducts(sellerId),
       sellerService.getOrders(sellerId),
@@ -473,8 +473,12 @@ const closeProductModal = () => {
 const isUploadingProduct = ref(false);
 
 const handleSaveProduct = async (productData) => {
+  const sellerId = seller.value?.id;
+  if (!sellerId) {
+    alert('Please sign in to list or modify products in your workshop.');
+    return;
+  }
   isUploadingProduct.value = true;
-  const sellerId = seller.value.id || 2;
   const statusStr = (productData.status || '').toLowerCase();
   const dbStatus = (statusStr.includes('published') || statusStr.includes('active')) 
     ? 'active' 

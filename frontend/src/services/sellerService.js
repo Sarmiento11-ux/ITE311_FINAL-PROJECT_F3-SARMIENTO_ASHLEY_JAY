@@ -1,15 +1,13 @@
 import apiClient from './api.js';
-import { sellerProductsData, sellerOrdersData } from '../data/dashboardData.js';
 
 export const sellerService = {
   /**
    * Get products belonging to a seller.
    */
-  async getProducts(sellerId = 2) {
+  async getProducts(sellerId = null) {
     try {
-      const response = await apiClient.get('/seller/products', {
-        params: { seller_id: sellerId }
-      });
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/products', { params });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         return response.data.data.map(p => ({
           id: p.id,
@@ -30,17 +28,16 @@ export const sellerService = {
     } catch (err) {
       console.warn('[SellerService] Could not fetch seller products from API, using fallback.', err.message);
     }
-    return [...sellerProductsData];
+    return [];
   },
 
   /**
    * Get orders received by a seller.
    */
-  async getOrders(sellerId = 2) {
+  async getOrders(sellerId = null) {
     try {
-      const response = await apiClient.get('/seller/orders', {
-        params: { seller_id: sellerId }
-      });
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/orders', { params });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         return response.data.data.map(item => ({
           id: item.order?.id || item.id,
@@ -66,7 +63,7 @@ export const sellerService = {
     } catch (err) {
       console.warn('[SellerService] Could not fetch seller orders from API, using fallback.', err.message);
     }
-    return [...sellerOrdersData];
+    return [];
   },
 
   /**
@@ -83,11 +80,10 @@ export const sellerService = {
   /**
    * Get stats for seller dashboard cards.
    */
-  async getStats(sellerId = 2) {
+  async getStats(sellerId = null) {
     try {
-      const response = await apiClient.get('/seller/stats', {
-        params: { seller_id: sellerId }
-      });
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/stats', { params });
       if (response.data && response.data.success) {
         return response.data.data;
       }
