@@ -181,5 +181,31 @@ export const cmsService = {
         isFromCms: false
       }
     ];
+  },
+
+  /**
+   * 5. Get current configured endpoint.
+   */
+  getEndpoint() {
+    return WP_API_BASE;
+  },
+
+  /**
+   * 6. Live health check / ping to WordPress REST API.
+   */
+  async checkHealth() {
+    try {
+      const response = await wpClient.get('/posts', { params: { per_page: 1 } });
+      return {
+        online: response.status >= 200 && response.status < 300,
+        endpoint: WP_API_BASE,
+      };
+    } catch (err) {
+      return {
+        online: false,
+        endpoint: WP_API_BASE,
+        error: err.message || 'Connection offline',
+      };
+    }
   }
 };
