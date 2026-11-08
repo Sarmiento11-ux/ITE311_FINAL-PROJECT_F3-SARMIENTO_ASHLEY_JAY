@@ -181,17 +181,17 @@ const isLoading = ref(true);
 
 const customer = computed(() => {
   return auth.user.value || {
-    id: 1,
-    fullName: "Maria Clara Santos",
-    email: "maria@example.com",
-    address: "Unit 402 Sunshine Towers, Pasig City, Metro Manila"
+    id: null,
+    fullName: "CraftMarket Member",
+    email: "—",
+    address: "No shipping address provided"
   };
 });
 
 const loadOrders = async () => {
   isLoading.value = true;
   try {
-    const customerId = customer.value.id || 1;
+    const customerId = auth.user.value?.id || null;
     orders.value = await orderService.getCustomerOrders(customerId);
   } catch (err) {
     console.warn('Could not load orders via API, using fallback:', err);
