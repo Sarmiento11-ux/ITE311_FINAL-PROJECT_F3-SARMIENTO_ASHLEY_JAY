@@ -150,6 +150,16 @@ class AdminController extends Controller
 
         $totalOrders = Order::count();
 
+        // Count only completed/fulfilled non-cancelled orders for accurate AOV
+        $completedOrdersCount = Order::whereNotIn('status', ['cancelled', 'refunded'])
+            ->where(function ($q) {
+                $q->where('payment_status', 'paid')
+                  ->orWhereIn('status', ['confirmed', 'processing', 'shipped', 'delivered']);
+            })
+            ->count();
+
+        $averageOrderValue = $completedOrdersCount > 0 ? round($totalSales / $completedOrdersCount, 2) : 0;
+
         // 2. Order status summary
         $statusCounts = Order::select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
@@ -259,6 +269,8 @@ class AdminController extends Controller
             'data'    => [
                 'total_sales'           => round($totalSales, 2),
                 'total_orders'          => $totalOrders,
+                'completed_orders_count'=> $completedOrdersCount,
+                'average_order_value'   => $averageOrderValue,
                 'order_status_summary'  => $orderStatusSummary,
                 'payment_status_summary'=> $paymentStatusSummary,
                 'best_selling_products' => $bestSellingProducts,

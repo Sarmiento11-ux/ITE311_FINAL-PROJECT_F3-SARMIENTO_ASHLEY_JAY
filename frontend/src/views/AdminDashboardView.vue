@@ -853,7 +853,7 @@
                 <div class="metric-info">
                   <span class="metric-label">Average Order Value</span>
                   <strong class="metric-value">
-                    ₱{{ formatMoney(reports?.total_orders ? (reports.total_sales / reports.total_orders) : 0) }}
+                    ₱{{ formatMoney(reports?.average_order_value ?? (reports?.completed_orders_count ? (reports.total_sales / reports.completed_orders_count) : (reports?.total_orders ? (reports.total_sales / reports.total_orders) : 0))) }}
                   </strong>
                   <small class="metric-sub">Per completed transaction</small>
                 </div>
