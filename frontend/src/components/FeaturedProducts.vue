@@ -34,12 +34,18 @@
         </div>
       </div>
 
-      <div class="product-grid">
+      <div v-if="filteredProducts.length > 0" class="product-grid">
         <ProductCard 
           v-for="item in filteredProducts" 
           :key="item.id" 
           :product="item" 
         />
+      </div>
+      <div v-else class="empty-products-state" style="text-align: center; padding: 3rem 1rem; color: #7A6A60;">
+        <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">No artisan creations found for this filter.</p>
+        <button type="button" @click="currentTab = 'all'" class="btn btn-secondary" style="margin-top: 0.5rem;">
+          View All Pieces
+        </button>
       </div>
 
       <!-- Seller Recruitment CTA Banner -->
@@ -71,10 +77,14 @@ onMounted(async () => {
 
 const filteredProducts = computed(() => {
   if (currentTab.value === 'top-rated') {
-    return featuredList.value.filter(p => p.rating >= 4.9);
+    const withRating = featuredList.value.filter(p => Number(p.rating || 0) >= 4.0);
+    if (withRating.length > 0) {
+      return [...withRating].sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    }
+    return [...featuredList.value].sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
   }
   if (currentTab.value === 'under-500') {
-    return featuredList.value.filter(p => p.price <= 500);
+    return featuredList.value.filter(p => Number(p.price) <= 500);
   }
   return featuredList.value;
 });
