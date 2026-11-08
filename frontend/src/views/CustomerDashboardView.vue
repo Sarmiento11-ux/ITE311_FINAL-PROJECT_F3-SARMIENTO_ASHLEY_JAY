@@ -38,15 +38,22 @@
             <span>My Wishlist ({{ wishlist.totalCount }})</span>
           </router-link>
 
-          <router-link to="/products" class="dashboard-nav-item">
-            
-            <span>Browse Products</span>
-          </router-link>
-
           <router-link to="/profile" class="dashboard-nav-item">
-            
             <span>My Profile</span>
           </router-link>
+
+          <router-link to="/products" class="dashboard-nav-item" style="opacity: 0.85;">
+            <span>↗ Browse Marketplace</span>
+          </router-link>
+
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            @click="handleLogout"
+            style="color: #dc2626; margin-top: 14px;"
+          >
+            <span>Sign Out</span>
+          </button>
         </aside>
 
         <!-- Main Content Area -->
@@ -177,11 +184,21 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuth } from '../composables/useAuth.js';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import CustomerOrdersTable from '../components/CustomerOrdersTable.vue';
 import { orderService } from '../services/orderService.js';
 import { auth } from '../data/auth.js';
 import { wishlist } from '../data/wishlist.js';
+
+const router = useRouter();
+const { logout } = useAuth();
+
+const handleLogout = async () => {
+  await logout();
+  router.push('/login');
+};
 
 const currentTab = ref('overview');
 const orders = ref([]);

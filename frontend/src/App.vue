@@ -13,7 +13,6 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Navbar from './components/Navbar.vue';
 import Footer from './components/Footer.vue';
-import { authService } from './services/authService.js';
 
 const route = useRoute();
 const isDedicatedDashboard = computed(() => {
@@ -23,7 +22,10 @@ const isDedicatedDashboard = computed(() => {
   if (route.path.startsWith('/dashboard/seller')) {
     return true;
   }
-  if (route.path === '/profile' && (authService.isSeller() || authService.isAdmin())) {
+  if (route.path.startsWith('/dashboard/customer')) {
+    return true;
+  }
+  if (route.path === '/profile') {
     return true;
   }
   return false;
