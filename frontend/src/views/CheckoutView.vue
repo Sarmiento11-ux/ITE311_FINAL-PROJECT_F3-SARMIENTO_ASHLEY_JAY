@@ -341,8 +341,8 @@ onMounted(async () => {
   if (user) {
     form.fullName      = user.fullName || user.name || '';
     form.email         = user.email || '';
-    form.contactNumber = user.phone || user.contact_number || '+63 917 123 4567';
-    form.shippingAddress = user.address || 'Metro Manila, Philippines';
+    form.contactNumber = user.phone || user.contact_number || '';
+    form.shippingAddress = user.address || '';
   }
 });
 

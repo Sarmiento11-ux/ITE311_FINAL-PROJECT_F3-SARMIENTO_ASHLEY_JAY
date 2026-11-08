@@ -182,7 +182,7 @@
           </div>
 
           <!-- Auth-aware checkout button -->
-          <div v-if="!auth.isAuthenticated.value" class="checkout-login-prompt">
+          <div v-if="!auth.isAuthenticated" class="checkout-login-prompt">
             <p class="login-prompt-msg">
                <strong>Sign in required</strong> to place an order.
             </p>
