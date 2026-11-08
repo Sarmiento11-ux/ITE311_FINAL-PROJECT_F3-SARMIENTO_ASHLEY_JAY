@@ -51,13 +51,23 @@
             <h3 class="card-title">{{ post.title }}</h3>
             <p class="card-excerpt">{{ post.excerpt }}</p>
             <a
-              :href="post.isFromCms ? post.link : '/products'"
-              :target="post.isFromCms ? '_blank' : '_self'"
+              v-if="post.isFromCms"
+              :href="post.link"
+              target="_blank"
+              rel="noopener noreferrer"
               class="card-link"
             >
               Read Story
               <span class="card-link-arrow">→</span>
             </a>
+            <router-link
+              v-else
+              :to="getPostCategoryRoute(post.category)"
+              class="card-link"
+            >
+              Browse Related Crafts
+              <span class="card-link-arrow">→</span>
+            </router-link>
           </div>
         </article>
       </div>
@@ -85,6 +95,16 @@ const loading = ref(true);
 const posts = ref([]);
 
 const fallbackImg = 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80';
+
+function getPostCategoryRoute(category) {
+  const map = {
+    'Ceramic Arts': 'Ceramics & Pottery',
+    'Weaving Heritage': 'Woven Goods & Bags',
+    'Sustainable Living': 'Home Decor & Candles'
+  };
+  const catName = map[category] || category;
+  return `/products?category=${encodeURIComponent(catName)}`;
+}
 
 function handleImgError(event) {
   event.target.src = fallbackImg;
