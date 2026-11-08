@@ -1491,6 +1491,13 @@
                   {{ activeOrder?.payment_status }}
                 </span>
               </p>
+              <p>
+                <strong>Escrow Status:</strong> 
+                <span class="status-badge" :class="'badge-' + (activeOrder?.escrow_status || 'held')">
+                  {{ activeOrder?.escrow_status || 'held' }}
+                </span>
+                <span v-if="activeOrder?.escrow_status === 'released_to_seller'" style="margin-left: 6px; font-size: 0.75rem; color: #16a34a; font-weight: 600;">✓ Funds Released</span>
+              </p>
               <p v-if="activeOrder?.latest_payment?.payment_reference">
                 <strong>PayMongo Ref:</strong> <code>{{ activeOrder.latest_payment.payment_reference }}</code>
               </p>
@@ -1534,7 +1541,28 @@
           </div>
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <label style="font-weight: 600; font-size: 0.85rem; color: #4b5563;">Update Status:</label>
+            <select v-model="selectedNewStatus" class="form-select" style="min-width: 175px; padding: 6px 10px; font-size: 0.875rem;">
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered (Release Escrow)</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="refunded">Refunded</option>
+            </select>
+            <button 
+              type="button" 
+              class="btn btn-primary btn-sm" 
+              :disabled="isUpdatingOrderStatus || selectedNewStatus === activeOrder?.status"
+              @click="handleUpdateOrderStatus(activeOrder, selectedNewStatus)"
+            >
+              <span v-if="isUpdatingOrderStatus">Updating...</span>
+              <span v-else>Apply Status</span>
+            </button>
+          </div>
           <button type="button" class="btn btn-secondary" @click="showOrderModal = false">Close</button>
         </div>
       </div>
@@ -1637,6 +1665,8 @@ const categoryForm = reactive({
 
 const showOrderModal = ref(false);
 const activeOrder = ref(null);
+const selectedNewStatus = ref('pending');
+const isUpdatingOrderStatus = ref(false);
 
 // ─── Lifecycle & Tab Switching ───────────────────────────────────────────────
 onMounted(async () => {
@@ -1911,18 +1941,38 @@ const handleDeleteCategory = async (cat) => {
 // ─── Order Actions ───────────────────────────────────────────────────────────
 const openOrderDetailsModal = (o) => {
   activeOrder.value = o;
+  selectedNewStatus.value = o?.status || 'pending';
   showOrderModal.value = true;
 };
 
 const handleUpdateOrderStatus = async (order, newStatus) => {
+  if (!order) return;
+  isUpdatingOrderStatus.value = true;
   try {
     const res = await adminService.updateOrderStatus(order.id, newStatus);
     if (res && res.success) {
       order.status = newStatus;
+      if (newStatus === 'delivered') {
+        order.escrow_status = 'released_to_seller';
+        order.payment_status = 'paid';
+      } else if (newStatus === 'cancelled' || newStatus === 'refunded') {
+        order.escrow_status = order.payment_status === 'paid' ? 'refunded' : 'cancelled';
+        if (order.payment_status === 'paid') {
+          order.payment_status = 'refunded';
+        }
+      }
+      const matched = orders.value?.find(item => item.id === order.id);
+      if (matched) {
+        matched.status = order.status;
+        matched.escrow_status = order.escrow_status;
+        matched.payment_status = order.payment_status;
+      }
       showToast(`Order ${order.order_number} status updated to ${newStatus}. Customer notification email sent.`, 'alert-success');
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to update order status.', 'alert-danger');
+  } finally {
+    isUpdatingOrderStatus.value = false;
   }
 };
 
@@ -2351,10 +2401,10 @@ const fetchSubscriptionMetrics = async () => {
   font-weight: 600;
   text-transform: capitalize;
 }
-.badge-active, .badge-paid, .badge-delivered, .badge-confirmed { background: #e8f5e9; color: #2e7d32; }
-.badge-pending, .badge-processing, .badge-unpaid            { background: #fff8e1; color: #b78103; }
+.badge-active, .badge-paid, .badge-delivered, .badge-confirmed, .badge-released_to_seller { background: #e8f5e9; color: #2e7d32; }
+.badge-pending, .badge-processing, .badge-unpaid, .badge-held { background: #fff8e1; color: #b78103; }
 .badge-shipped                                             { background: #e3f2fd; color: #1565c0; }
-.badge-inactive, .badge-cancelled, .badge-out_of_stock     { background: #ffebee; color: #c62828; }
+.badge-inactive, .badge-cancelled, .badge-out_of_stock, .badge-refunded { background: #ffebee; color: #c62828; }
 
 .role-badge {
   display: inline-block;
