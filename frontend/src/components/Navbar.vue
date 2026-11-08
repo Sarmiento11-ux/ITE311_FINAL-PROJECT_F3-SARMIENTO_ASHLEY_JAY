@@ -122,18 +122,19 @@
           <span>Sign Out</span>
         </button>
 
-        <!-- Account / Profile Link -->
+        <!-- Account / Profile Link (Visible when logged in) -->
         <router-link 
-          :to="auth.isAuthenticated ? '/profile' : '/login'" 
+          v-if="auth.isAuthenticated"
+          to="/profile" 
           class="nav-icon-link desktop-only-action" 
-          :title="auth.isAuthenticated ? 'View My Profile' : 'User Account / Sign In'"
-          :aria-label="auth.isAuthenticated ? 'View My Profile' : 'Sign In to your account'"
+          title="View My Profile"
+          aria-label="View My Profile"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <span class="icon-text">{{ auth.isAuthenticated ? 'Profile' : 'Account' }}</span>
+          <span class="icon-text">Profile</span>
         </router-link>
         
         <!-- Customer Orders Link -->
@@ -267,10 +268,11 @@
             @click="closeMobileMenu"
           >Shopping Cart ({{ cart.totalCount }})</router-link>
           <router-link 
-            :to="auth.isAuthenticated ? '/profile' : '/login'" 
+            v-if="auth.isAuthenticated"
+            to="/profile" 
             class="mobile-nav-item"
             @click="closeMobileMenu"
-          >{{ auth.isAuthenticated ? 'My Profile' : 'Sign In' }}</router-link>
+          >My Profile</router-link>
 
           <div class="mobile-nav-divider"></div>
 
