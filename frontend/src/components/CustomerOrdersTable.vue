@@ -53,7 +53,7 @@
           <p><strong>Order Date:</strong> {{ selectedOrder.date }}</p>
           <p><strong>Total Amount:</strong> ₱{{ Number(selectedOrder.totalAmount).toFixed(2) }}</p>
           <p><strong>Payment Method:</strong> {{ selectedOrder.paymentMethod }}</p>
-          <p><strong>Tracking Number:</strong> <code>{{ selectedOrder.trackingNumber }}</code></p>
+          <p><strong>Tracking Number:</strong> <code v-if="selectedOrder.trackingNumber">{{ selectedOrder.trackingNumber }}</code><span v-else style="color: #7A6F68; font-style: italic;">Not yet assigned (Pending fulfillment)</span></p>
           <p><strong>Delivery Address:</strong> {{ selectedOrder.deliveryAddress }}</p>
           <p><strong>Current Status:</strong> <span class="status-pill" :class="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></p>
         </div>
