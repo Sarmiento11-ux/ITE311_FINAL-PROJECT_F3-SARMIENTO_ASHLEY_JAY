@@ -222,6 +222,7 @@ const loadOrders = async () => {
 
 onMounted(() => {
   loadOrders();
+  wishlist.loadWishlist(true);
 });
 
 const totalOrdersCount = computed(() => orders.value.length);
