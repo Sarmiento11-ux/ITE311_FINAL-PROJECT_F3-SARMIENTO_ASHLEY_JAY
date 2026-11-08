@@ -207,11 +207,19 @@ onMounted(() => {
 const totalOrdersCount = computed(() => orders.value.length);
 
 const pendingOrdersCount = computed(() => {
-  return orders.value.filter(o => o.status.toLowerCase().includes('pending') || o.status.toLowerCase().includes('transit')).length;
+  // Counts all active in-progress orders (pending, confirmed, processing, shipped/transit)
+  const activeStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'transit'];
+  return orders.value.filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return activeStatuses.some(status => s.includes(status));
+  }).length;
 });
 
 const completedOrdersCount = computed(() => {
-  return orders.value.filter(o => o.status.toLowerCase().includes('delivered')).length;
+  return orders.value.filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return s.includes('delivered') || s.includes('completed');
+  }).length;
 });
 
 const totalSpent = computed(() => {
