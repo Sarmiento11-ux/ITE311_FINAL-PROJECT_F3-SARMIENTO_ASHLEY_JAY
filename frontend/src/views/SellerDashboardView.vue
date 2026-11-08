@@ -179,6 +179,7 @@
                 :products="products.slice(0, 3)" 
                 @edit="openEditModal" 
                 @delete="deleteProduct" 
+                @add-product="openAddModal"
               />
             </div>
           </div>
@@ -205,6 +206,7 @@
                 :products="products" 
                 @edit="openEditModal" 
                 @delete="deleteProduct" 
+                @add-product="openAddModal"
               />
             </div>
           </div>
