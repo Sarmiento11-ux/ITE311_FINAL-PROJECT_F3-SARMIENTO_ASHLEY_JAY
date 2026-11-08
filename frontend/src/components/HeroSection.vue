@@ -29,20 +29,20 @@
           </a>
         </div>
 
-        <!-- Marketplace Proof Badges -->
+        <!-- Marketplace Proof Badges — counts loaded from API -->
         <div class="hero-stats">
           <div class="stat-item">
-            <span class="stat-number">120+</span>
+            <span class="stat-number">{{ marketStats.sellers }}</span>
             <span class="stat-label">Verified Artisans</span>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <span class="stat-number">1,800+</span>
+            <span class="stat-number">{{ marketStats.products }}</span>
             <span class="stat-label">Handcrafted Items</span>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <span class="stat-number">4.9 ★</span>
+            <span class="stat-number">{{ marketStats.rating }}</span>
             <span class="stat-label">Community Rating</span>
           </div>
         </div>
@@ -101,6 +101,13 @@ const heroContent = ref({
 // Featured seller pulled from real API data
 const featuredSeller = ref(null);
 
+// Real marketplace stats fetched from API
+const marketStats = ref({
+  sellers: '…',
+  products: '…',
+  rating: '…',
+});
+
 const FALLBACK_AVATAR = 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=120&q=80';
 
 function handleAvatarError(e) {
@@ -139,5 +146,34 @@ onMounted(async () => {
 
   // If API didn't return a seller object (normalized product already has flat seller name), show nothing
   // rather than show fake data — the v-if="featuredSeller" handles this gracefully
+
+  // Load real marketplace stats: seller count, product count, avg rating
+  try {
+    const [catRes, prodRes] = await Promise.all([
+      apiClient.get('/products', { params: { paginate: 0 } }),
+      apiClient.get('/products', { params: { paginate: 0 } }),
+    ]);
+
+    // Count unique sellers from product list
+    const products = prodRes.data?.data || [];
+    const sellerIds = new Set(products.map(p => p.seller_id).filter(Boolean));
+    const productCount = products.length;
+    const sellerCount = sellerIds.size || (products.length > 0 ? 1 : 0);
+
+    // Average rating across all products
+    const rated = products.filter(p => p.avg_rating && Number(p.avg_rating) > 0);
+    const avgRating = rated.length > 0
+      ? (rated.reduce((sum, p) => sum + Number(p.avg_rating), 0) / rated.length).toFixed(1)
+      : null;
+
+    marketStats.value = {
+      sellers: sellerCount > 0 ? `${sellerCount}+` : '—',
+      products: productCount > 0 ? `${productCount}+` : '—',
+      rating: avgRating ? `${avgRating} ★` : '—',
+    };
+  } catch (err) {
+    console.warn('[HeroSection] Could not load marketplace stats:', err);
+    marketStats.value = { sellers: '—', products: '—', rating: '—' };
+  }
 });
 </script>
