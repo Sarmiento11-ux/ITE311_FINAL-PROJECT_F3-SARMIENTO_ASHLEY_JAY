@@ -528,6 +528,15 @@
                           <button type="button" class="btn-action btn-view" @click="viewSellerDetails(s.id)">
                             View Shop
                           </button>
+                          <button 
+                            type="button" 
+                            class="btn-action" 
+                            :class="s.is_active ? 'btn-delete' : 'btn-view'"
+                            @click="toggleSellerActive(s)"
+                            :title="s.is_active ? 'Deactivate seller account' : 'Reactivate seller account'"
+                          >
+                            {{ s.is_active ? 'Deactivate' : 'Activate' }}
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1367,7 +1376,15 @@
           </div>
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            :class="activeSeller?.is_active ? 'btn-danger' : 'btn-primary'"
+            @click="toggleSellerActive(activeSeller); if (activeSeller) activeSeller.is_active = !activeSeller.is_active;"
+          >
+            {{ activeSeller?.is_active ? 'Deactivate Artisan Workshop' : 'Activate Artisan Workshop' }}
+          </button>
           <button type="button" class="btn btn-secondary" @click="showSellerDetailsModal = false">Close</button>
         </div>
       </div>
