@@ -449,7 +449,12 @@ const completedOrdersCount = computed(() => {
 
 const totalRevenue = computed(() => {
   if (liveStats.value?.total_sales !== undefined) return liveStats.value.total_sales;
-  return orders.value.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
+  return orders.value
+    .filter(o => {
+      const s = (o.status || o.rawStatus || '').toLowerCase();
+      return !s.includes('cancel') && !s.includes('refund');
+    })
+    .reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 });
 
 // Product Actions
