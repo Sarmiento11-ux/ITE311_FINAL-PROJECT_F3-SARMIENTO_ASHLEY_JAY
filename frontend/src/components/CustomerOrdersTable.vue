@@ -83,9 +83,10 @@ const openOrderDetails = (order) => {
 };
 
 const getStatusClass = (status) => {
-  const s = status.toLowerCase();
-  if (s.includes('delivered')) return 'status-delivered';
-  if (s.includes('transit')) return 'status-transit';
+  const s = (status || '').toLowerCase();
+  if (s.includes('delivered') || s.includes('complete')) return 'status-delivered';
+  if (s.includes('transit') || s.includes('shipped')) return 'status-transit';
+  if (s.includes('cancel') || s.includes('refund')) return 'status-cancelled';
   return 'status-pending';
 };
 </script>
