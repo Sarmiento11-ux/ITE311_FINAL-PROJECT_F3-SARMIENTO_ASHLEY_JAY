@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PayoutRequest;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Category;
@@ -50,6 +51,9 @@ class AdminController extends Controller
             ? (float) Order::where('escrow_status', 'released_to_seller')->sum('seller_payout')
             : 0.0;
 
+        $payoutsPending = (float) PayoutRequest::whereIn('status', ['pending', 'approved'])->sum('amount');
+        $payoutsPaid    = (float) PayoutRequest::where('status', 'paid')->sum('amount');
+
         return response()->json([
             'success' => true,
             'message' => 'Admin dashboard statistics retrieved successfully.',
@@ -65,6 +69,8 @@ class AdminController extends Controller
                 'commission_earned' => round($commissionEarned, 2),
                 'escrow_held'       => round($escrowHeld, 2),
                 'escrow_released'   => round($escrowReleased, 2),
+                'payouts_pending'   => round($payoutsPending, 2),
+                'payouts_paid'      => round($payoutsPaid, 2),
             ],
         ]);
     }
@@ -325,6 +331,13 @@ class AdminController extends Controller
             $query->where('is_active', filter_var($request->query('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
 
+        if ($request->filled('verification_status')) {
+            $status = $request->query('verification_status');
+            $query->whereHas('sellerProfile', function ($sq) use ($status) {
+                $sq->where('verification_status', $status);
+            });
+        }
+
         $sellers = $query->orderBy('created_at', 'desc')->get()->map(function ($s) {
             $totalSales = (float) OrderItem::where('seller_id', $s->id)
                 ->whereHas('order', function ($q) {
@@ -340,9 +353,13 @@ class AdminController extends Controller
                 'address'        => $s->address ?? $s->sellerProfile?->address,
                 'is_active'      => (bool) $s->is_active,
                 'shop_name'      => $s->sellerProfile?->shop_name ?? ($s->name . "'s Workshop"),
-                'bio'            => $s->sellerProfile?->bio,
+                'bio'            => $s->sellerProfile?->shop_description,
                 'products_count' => $s->products_count,
                 'total_sales'    => $totalSales,
+                'is_verified'    => (bool) ($s->sellerProfile?->is_verified ?? false),
+                'verification_status' => $s->sellerProfile?->verification_status ?? 'pending',
+                'verification_notes'  => $s->sellerProfile?->verification_notes,
+                'verified_at'         => $s->sellerProfile?->verified_at?->toISOString(),
                 'created_at'     => $s->created_at->format('M d, Y'),
             ];
         });
@@ -392,12 +409,257 @@ class AdminController extends Controller
                 'is_active'          => (bool) $seller->is_active,
                 'created_at'         => $seller->created_at->format('M d, Y'),
                 'shop_name'          => $seller->sellerProfile?->shop_name,
-                'bio'                => $seller->sellerProfile?->bio,
+                'bio'                => $seller->sellerProfile?->shop_description,
+                'is_verified'        => (bool) ($seller->sellerProfile?->is_verified ?? false),
+                'verification_status' => $seller->sellerProfile?->verification_status ?? 'pending',
+                'verification_notes'  => $seller->sellerProfile?->verification_notes,
+                'verified_at'         => $seller->sellerProfile?->verified_at?->toISOString(),
                 'products_count'     => $seller->products_count,
                 'total_sales'        => $totalSales,
                 'total_order_items'  => $totalOrderItems,
                 'products'           => $seller->products,
             ],
+        ]);
+    }
+
+    /**
+     * PATCH /api/admin/sellers/{id}/verification
+     * Approve, reject, or reset an artisan storefront application.
+     */
+    public function updateSellerVerification(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:approved,rejected,pending',
+            'notes'  => 'nullable|string|max:2000',
+        ]);
+
+        $seller = User::where('role', 'seller')->with('sellerProfile')->find($id);
+
+        if (!$seller) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Seller not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        $profile = $seller->sellerProfile;
+
+        if (!$profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This seller has no storefront profile to review.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $status = $validated['status'];
+        $profile->update([
+            'verification_status'      => $status,
+            'is_verified'              => $status === 'approved',
+            'verification_notes'       => $validated['notes'] ?? $profile->verification_notes,
+            'verification_reviewed_at' => now(),
+            'verified_at'              => $status === 'approved'
+                ? ($profile->verified_at ?? now())
+                : null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Artisan storefront {$status} successfully.",
+            'data'    => [
+                'id'                  => $seller->id,
+                'shop_name'           => $profile->shop_name,
+                'is_verified'         => (bool) $profile->fresh()->is_verified,
+                'verification_status' => $profile->fresh()->verification_status,
+                'verification_notes'  => $profile->fresh()->verification_notes,
+                'verified_at'         => $profile->fresh()->verified_at?->toISOString(),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/admin/payouts
+     * Audit seller payout requests and settlement balances.
+     */
+    public function payoutRequests(Request $request)
+    {
+        $query = PayoutRequest::with(['seller:id,name,email,sellerProfile'])
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        if ($request->filled('seller_id')) {
+            $query->where('seller_id', $request->query('seller_id'));
+        }
+
+        $requests = $query->get();
+
+        $summary = [
+            'pending_count'  => PayoutRequest::where('status', 'pending')->count(),
+            'pending_amount' => round((float) PayoutRequest::where('status', 'pending')->sum('amount'), 2),
+            'approved_count' => PayoutRequest::where('status', 'approved')->count(),
+            'approved_amount'=> round((float) PayoutRequest::where('status', 'approved')->sum('amount'), 2),
+            'paid_count'     => PayoutRequest::where('status', 'paid')->count(),
+            'paid_amount'    => round((float) PayoutRequest::where('status', 'paid')->sum('amount'), 2),
+            'rejected_count' => PayoutRequest::where('status', 'rejected')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payout requests retrieved successfully.',
+            'data'    => [
+                'summary'  => $summary,
+                'requests' => $requests,
+            ],
+        ]);
+    }
+
+    /**
+     * PATCH /api/admin/payouts/{id}
+     * Approve, reject, or mark an artisan payout as paid.
+     */
+    public function updatePayoutRequest(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'action'      => 'required|in:approve,reject,pay',
+            'admin_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $payout = PayoutRequest::with('seller:id,name,email')->find($id);
+
+        if (!$payout) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payout request not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        $action = $validated['action'];
+
+        if (in_array($payout->status, ['paid', 'rejected'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => "This payout request is already {$payout->status} and can no longer be changed.",
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($action === 'pay' && $payout->status !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only approved payout requests can be marked as paid.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $update = [
+            'admin_notes' => $validated['admin_notes'] ?? $payout->admin_notes,
+        ];
+
+        if ($action === 'approve') {
+            $update['status'] = 'approved';
+            $update['reviewed_at'] = now();
+            $message = 'Payout request approved. It is now queued for settlement.';
+        } elseif ($action === 'reject') {
+            $update['status'] = 'rejected';
+            $update['reviewed_at'] = now();
+            $message = 'Payout request rejected. The reserved amount is available again.';
+        } else {
+            $update['status'] = 'paid';
+            $update['paid_at'] = now();
+            $update['reviewed_at'] = $payout->reviewed_at ?? now();
+            $message = 'Payout marked as paid successfully.';
+        }
+
+        $payout->update($update);
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data'    => $payout->fresh(['seller:id,name,email']),
+        ]);
+    }
+
+    /**
+     * PATCH /api/admin/orders/{id}/escrow
+     * Manual financial audit action to release, hold, or refund order escrow.
+     */
+    public function releaseEscrow(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:release,hold,refund,cancel',
+            'notes'  => 'nullable|string|max:2000',
+        ]);
+
+        $order = Order::with('items')->find($id);
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        $action = $validated['action'];
+
+        if ($action === 'release' && $order->payment_status !== 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Escrow can only be released for orders that have been paid.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $orderUpdate = [];
+        $itemUpdate  = [];
+
+        if ($action === 'release') {
+            $orderUpdate = [
+                'escrow_status'      => 'released_to_seller',
+                'escrow_released_at' => $order->escrow_released_at ?? now(),
+            ];
+            $itemUpdate = [
+                'escrow_status'      => 'released_to_seller',
+                'escrow_released_at' => now(),
+            ];
+            $message = 'Escrow released to the artisan.';
+        } elseif ($action === 'hold') {
+            $orderUpdate = [
+                'escrow_status'      => 'held',
+                'escrow_released_at' => null,
+            ];
+            $itemUpdate = [
+                'escrow_status'      => 'held',
+                'escrow_released_at' => null,
+            ];
+            $message = 'Escrow funds placed back on hold.';
+        } elseif ($action === 'refund') {
+            $orderUpdate = [
+                'escrow_status'  => 'refunded',
+                'payment_status' => 'refunded',
+            ];
+            $itemUpdate = ['escrow_status' => 'refunded'];
+            $message = 'Escrow refunded to the customer.';
+        } else {
+            $orderUpdate = ['escrow_status' => 'cancelled'];
+            $itemUpdate  = ['escrow_status' => 'cancelled'];
+            $message = 'Escrow ledger marked as cancelled.';
+        }
+
+        DB::transaction(function () use ($order, $orderUpdate, $itemUpdate) {
+            $order->update($orderUpdate);
+            $order->items()->update($itemUpdate);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data'    => $order->fresh(['user:id,name,email', 'items.product', 'items.seller:id,name']),
         ]);
     }
 }

@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
+use App\Models\PayoutRequest;
 use App\Models\Product;
 use App\Models\SellerProfile;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SellerController extends Controller
 {
@@ -180,8 +182,17 @@ class SellerController extends Controller
         $order = $item->order;
 
         $updateData = ['status' => $newStatus];
-        if ($newStatus === 'shipped' && !empty($validated['tracking_number'])) {
-            $updateData['tracking_number'] = $validated['tracking_number'];
+        if ($newStatus === 'shipped') {
+            if (!empty($validated['tracking_number'])) {
+                $updateData['tracking_number'] = $validated['tracking_number'];
+            }
+            if (!$item->dispatch_code) {
+                $updateData['dispatch_code'] = $this->generateUniqueDispatchCode();
+            }
+            $updateData['dispatched_at'] = $item->dispatched_at ?? now();
+        }
+        if ($newStatus === 'delivered') {
+            $updateData['dispatch_confirmed_at'] = $item->dispatch_confirmed_at ?? now();
         }
 
         // Keep the escrow ledger in sync with the item's fulfillment state.
@@ -231,6 +242,298 @@ class SellerController extends Controller
             'message' => "Order item fulfillment updated to '{$newStatus}'.",
             'data'    => $item->fresh(['order.user:id,name', 'product']),
         ]);
+    }
+
+    /**
+     * GET /api/seller/payouts
+     * Show released earnings, reserved payouts, and the seller's payout history.
+     */
+    public function payouts(Request $request)
+    {
+        $user = $request->user();
+        $sellerId = $user->role === 'admin'
+            ? (int) $request->query('seller_id', $user->id)
+            : $user->id;
+
+        $requests = PayoutRequest::where('seller_id', $sellerId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payout ledger retrieved successfully.',
+            'data'    => array_merge($this->payoutSummary($sellerId), [
+                'requests' => $requests,
+            ]),
+        ]);
+    }
+
+    /**
+     * POST /api/seller/payouts
+     * Request a cash-out from escrow funds that have already been released.
+     */
+    public function requestPayout(Request $request)
+    {
+        $user = $request->user();
+        $sellerId = $user->role === 'admin'
+            ? (int) $request->input('seller_id', $user->id)
+            : $user->id;
+
+        $validated = $request->validate([
+            'amount'         => 'required|numeric|min:1|max:1000000',
+            'payout_method'  => 'nullable|string|max:100',
+            'account_name'   => 'nullable|string|max:150',
+            'account_number' => 'nullable|string|max:100',
+            'notes'          => 'nullable|string|max:2000',
+        ]);
+
+        $summary = $this->payoutSummary($sellerId);
+
+        if (round((float) $validated['amount'], 2) > $summary['available_balance']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Requested amount exceeds your available released escrow balance of ₱' . number_format($summary['available_balance'], 2) . '.',
+                'data'    => $summary,
+            ], 422);
+        }
+
+        $payout = PayoutRequest::create([
+            'seller_id'      => $sellerId,
+            'amount'         => round((float) $validated['amount'], 2),
+            'status'         => 'pending',
+            'payout_method'  => $validated['payout_method'] ?? null,
+            'account_name'   => $validated['account_name'] ?? null,
+            'account_number' => $validated['account_number'] ?? null,
+            'notes'          => $validated['notes'] ?? null,
+            'requested_at'   => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payout request submitted. An administrator will review it shortly.',
+            'data'    => array_merge($this->payoutSummary($sellerId), [
+                'request' => $payout,
+            ]),
+        ], 201);
+    }
+
+    /**
+     * DELETE /api/seller/payouts/{id}
+     * Cancel a payout request that is still pending review.
+     */
+    public function cancelPayout(Request $request, $id)
+    {
+        $user = $request->user();
+        $sellerId = $user->role === 'admin'
+            ? (int) $request->query('seller_id', $user->id)
+            : $user->id;
+
+        $payout = PayoutRequest::where('seller_id', $sellerId)->find($id);
+
+        if (!$payout) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payout request not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        if ($payout->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only pending payout requests can be cancelled.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $payout->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payout request cancelled.',
+            'data'    => $this->payoutSummary($sellerId),
+        ]);
+    }
+
+    /**
+     * POST /api/seller/order-items/{id}/dispatch-code
+     * Generate (or return) the QR dispatch payload for an order item.
+     */
+    public function generateDispatchCode(Request $request, $id)
+    {
+        $user = $request->user();
+        $item = OrderItem::with('order')->find($id);
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order item not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        if ($user->role !== 'admin' && $item->seller_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You can only dispatch your own craft items.',
+                'data'    => null,
+            ], 403);
+        }
+
+        if (in_array($item->status, ['delivered', 'cancelled'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A dispatch QR code cannot be generated for a completed or cancelled item.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $code = $item->dispatch_code ?: $this->generateUniqueDispatchCode();
+
+        if (!$item->dispatch_code) {
+            $item->update(['dispatch_code' => $code]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dispatch QR code ready.',
+            'data'    => [
+                'order_item_id' => $item->id,
+                'order_number'  => $item->order?->order_number,
+                'dispatch_code' => $code,
+                'qr_payload'    => json_encode([
+                    'type'          => 'craftmarket_dispatch',
+                    'order_item_id' => $item->id,
+                    'order_number'  => $item->order?->order_number,
+                    'dispatch_code' => $code,
+                ]),
+                'dispatched_at' => $item->dispatched_at?->toISOString(),
+                'dispatch_confirmed_at' => $item->dispatch_confirmed_at?->toISOString(),
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/seller/order-items/{id}/dispatch-confirm
+     * Confirm an artisan dispatch by scanning/verifying the QR dispatch code.
+     */
+    public function confirmDispatch(Request $request, $id)
+    {
+        $user = $request->user();
+        $item = OrderItem::with('order')->find($id);
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order item not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        if ($user->role !== 'admin' && $item->seller_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You can only confirm dispatch for your own craft items.',
+                'data'    => null,
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'dispatch_code'   => 'required|string|max:120',
+            'tracking_number' => 'nullable|string|max:120',
+        ]);
+
+        if (!$item->dispatch_code || !hash_equals($item->dispatch_code, $validated['dispatch_code'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid dispatch code. Please scan the QR code generated for this order item.',
+                'data'    => null,
+            ], 422);
+        }
+
+        if (in_array($item->status, ['delivered', 'cancelled'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This order item is already completed and cannot be dispatched again.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $update = [
+            'status'                => 'shipped',
+            'dispatched_at'         => $item->dispatched_at ?? now(),
+            'dispatch_confirmed_at' => now(),
+        ];
+
+        if (!empty($validated['tracking_number'])) {
+            $update['tracking_number'] = $validated['tracking_number'];
+        }
+
+        $item->update($update);
+
+        $order = $item->order;
+        if ($order && $order->status === 'pending') {
+            $order->update(['status' => 'processing']);
+            NotificationService::sendOrderStatusUpdate($order, 'processing');
+        }
+
+        NotificationService::sendSellerItemFulfillment($item->fresh());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dispatch confirmed via QR scan. The item is now marked as shipped.',
+            'data'    => $item->fresh(['order.user:id,name', 'product']),
+        ]);
+    }
+
+    /**
+     * Compute the seller's escrow earnings and payout balance.
+     */
+    private function payoutSummary(int $sellerId): array
+    {
+        $released = (float) OrderItem::where('seller_id', $sellerId)
+            ->where('escrow_status', 'released_to_seller')
+            ->sum('seller_payout');
+
+        $held = (float) OrderItem::where('seller_id', $sellerId)
+            ->where('escrow_status', 'held')
+            ->sum('seller_payout');
+
+        $reserved = (float) PayoutRequest::where('seller_id', $sellerId)
+            ->whereIn('status', ['pending', 'approved'])
+            ->sum('amount');
+
+        $paid = (float) PayoutRequest::where('seller_id', $sellerId)
+            ->where('status', 'paid')
+            ->sum('amount');
+
+        $available = max(0, round($released - $reserved - $paid, 2));
+
+        return [
+            'released_earnings' => round($released, 2),
+            'escrow_held'       => round($held, 2),
+            'reserved_amount'   => round($reserved, 2),
+            'paid_amount'       => round($paid, 2),
+            'available_balance' => $available,
+            'pending_count'     => PayoutRequest::where('seller_id', $sellerId)->where('status', 'pending')->count(),
+            'approved_count'    => PayoutRequest::where('seller_id', $sellerId)->where('status', 'approved')->count(),
+        ];
+    }
+
+    /**
+     * Generate a collision-free dispatch code for an order item.
+     */
+    private function generateUniqueDispatchCode(): string
+    {
+        for ($attempt = 0; $attempt < 20; $attempt++) {
+            $code = 'CM-DSP-' . strtoupper(Str::random(10));
+
+            if (!OrderItem::where('dispatch_code', $code)->exists()) {
+                return $code;
+            }
+        }
+
+        return 'CM-DSP-' . strtoupper(Str::random(20));
     }
 
     /**

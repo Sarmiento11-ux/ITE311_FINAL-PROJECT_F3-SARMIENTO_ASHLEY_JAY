@@ -22,17 +22,22 @@ class OrderItem extends Model
         'seller_payout',
         'escrow_status',
         'escrow_released_at',
+        'dispatch_code',
+        'dispatched_at',
+        'dispatch_confirmed_at',
     ];
 
     protected $casts = [
-        'unit_price'         => 'decimal:2',
-        'price'              => 'decimal:2',
-        'subtotal'           => 'decimal:2',
-        'quantity'           => 'integer',
-        'commission_rate'    => 'decimal:2',
-        'platform_fee'       => 'decimal:2',
-        'seller_payout'      => 'decimal:2',
-        'escrow_released_at' => 'datetime',
+        'unit_price'           => 'decimal:2',
+        'price'                => 'decimal:2',
+        'subtotal'             => 'decimal:2',
+        'quantity'             => 'integer',
+        'commission_rate'      => 'decimal:2',
+        'platform_fee'         => 'decimal:2',
+        'seller_payout'        => 'decimal:2',
+        'escrow_released_at'   => 'datetime',
+        'dispatched_at'        => 'datetime',
+        'dispatch_confirmed_at' => 'datetime',
     ];
 
     // ─── Relationships ─────────────────────────────────────────────

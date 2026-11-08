@@ -101,6 +101,24 @@ All responses follow a consistent JSON envelope:
 | `GET` | `/api/seller/orders?seller_id={id}` | Items ordered from this seller |
 | `GET` | `/api/seller/stats?seller_id={id}` | Summary counts: total sales, orders, products |
 | `GET` | `/api/seller/profile/{id}` | Seller shop profile |
+| `PATCH` | `/api/seller/order-items/{id}/status` | Update fulfillment status and tracking number |
+| `POST` | `/api/seller/order-items/{id}/dispatch-code` | Generate the QR dispatch payload/code for an order item |
+| `POST` | `/api/seller/order-items/{id}/dispatch-confirm` | Confirm dispatch by verifying the QR dispatch code |
+| `GET` | `/api/seller/payouts` | Released escrow earnings, reserved amount, and payout history |
+| `POST` | `/api/seller/payouts` | Request a payout from released escrow funds |
+| `DELETE` | `/api/seller/payouts/{id}` | Cancel a pending payout request |
+
+### 🛡️ Admin Oversight
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/admin/stats` | Marketplace overview including commission, escrow, and payout totals |
+| `GET` | `/api/admin/reports` | Sales, commission ledger, and escrow status breakdown |
+| `GET` | `/api/admin/sellers` | Seller list (`?verification_status=pending`) |
+| `GET` | `/api/admin/sellers/{id}` | Seller storefront and product details |
+| `PATCH` | `/api/admin/sellers/{id}/verification` | Approve, reject, or reset an artisan storefront |
+| `GET` | `/api/admin/payouts` | Audit seller payout requests and settlement summary |
+| `PATCH` | `/api/admin/payouts/{id}` | Approve, reject, or mark a payout request as paid |
+| `PATCH` | `/api/admin/orders/{id}/escrow` | Manually release, hold, refund, or cancel order escrow |
 
 ---
 
