@@ -272,7 +272,7 @@
                         <td>{{ order.user?.name || 'Customer' }}</td>
                         <td><strong>₱{{ formatMoney(order.total_amount) }}</strong></td>
                         <td>
-                          <span class="status-badge" :class="'badge-' + order.status.toLowerCase()">
+                          <span class="status-badge" :class="getStatusBadgeClass(order.status)">
                             {{ order.status }}
                           </span>
                         </td>
@@ -621,7 +621,7 @@
                         </span>
                       </td>
                       <td>
-                        <span class="status-badge" :class="'badge-' + (p.status || 'active').toLowerCase()">
+                        <span class="status-badge" :class="getStatusBadgeClass(p.status || 'active')">
                           {{ p.status === 'out_of_stock' ? 'Out of Stock' : (p.status || 'active').charAt(0).toUpperCase() + (p.status || 'active').slice(1) }}
                         </span>
                       </td>
@@ -791,7 +791,7 @@
                         </span>
                       </td>
                       <td>
-                        <span class="status-badge" :class="'badge-' + (o.status || 'pending').toLowerCase()">
+                        <span class="status-badge" :class="getStatusBadgeClass(o.status || 'pending')">
                           {{ (o.status || 'pending').charAt(0).toUpperCase() + (o.status || 'pending').slice(1) }}
                         </span>
                       </td>
@@ -943,7 +943,7 @@
 
               <div class="status-summary-grid">
                 <div v-for="(count, st) in reports?.order_status_summary || {}" :key="st" class="status-summary-card">
-                  <span class="status-badge" :class="'badge-' + st.toLowerCase()">{{ st }}</span>
+                  <span class="status-badge" :class="getStatusBadgeClass(st)">{{ st }}</span>
                   <strong class="status-count-val">{{ count }}</strong>
                   <span class="status-count-lbl">orders</span>
                 </div>
@@ -1371,7 +1371,7 @@
                   <td>₱{{ formatMoney(p.price) }}</td>
                   <td>{{ p.stock }} units</td>
                   <td>
-                    <span class="status-badge" :class="'badge-' + p.status">{{ p.status }}</span>
+                    <span class="status-badge" :class="getStatusBadgeClass(p.status)">{{ p.status }}</span>
                   </td>
                 </tr>
                 <tr v-if="!activeSeller?.products?.length">
@@ -1499,7 +1499,7 @@
               </p>
               <p>
                 <strong>Escrow Status:</strong> 
-                <span class="status-badge" :class="'badge-' + (activeOrder?.escrow_status || 'held')">
+                <span class="status-badge" :class="getStatusBadgeClass(activeOrder?.escrow_status || 'held')">
                   {{ activeOrder?.escrow_status || 'held' }}
                 </span>
                 <span v-if="activeOrder?.escrow_status === 'released_to_seller'" style="margin-left: 6px; font-size: 0.75rem; color: #16a34a; font-weight: 600;">✓ Funds Released</span>
@@ -1537,7 +1537,7 @@
                   <td>{{ item.quantity }}</td>
                   <td><strong>₱{{ formatMoney(item.subtotal) }}</strong></td>
                   <td>
-                    <span class="status-badge" :class="'badge-' + (item.status || 'pending')">
+                    <span class="status-badge" :class="getStatusBadgeClass(item.status || 'pending')">
                       {{ item.status || 'pending' }}
                     </span>
                   </td>
@@ -1632,6 +1632,12 @@ const fallbackCatImg = 'https://images.unsplash.com/photo-1565193566173-7a0ee3db
 const handleImgError = (event, fallback = fallbackImg) => {
   event.target.onerror = null;
   event.target.src = fallback;
+};
+
+const getStatusBadgeClass = (status) => {
+  if (!status) return 'badge-pending';
+  const clean = String(status).toLowerCase().trim().replace(/[\s_]+/g, '-');
+  return `badge-${clean}`;
 };
 
 // Current admin user info
@@ -2426,10 +2432,10 @@ const fetchSubscriptionMetrics = async () => {
   font-weight: 600;
   text-transform: capitalize;
 }
-.badge-active, .badge-paid, .badge-delivered, .badge-confirmed, .badge-released_to_seller { background: #e8f5e9; color: #2e7d32; }
+.badge-active, .badge-paid, .badge-delivered, .badge-confirmed, .badge-released_to_seller, .badge-released-to-seller { background: #e8f5e9; color: #2e7d32; }
 .badge-pending, .badge-processing, .badge-unpaid, .badge-held { background: #fff8e1; color: #b78103; }
-.badge-shipped                                             { background: #e3f2fd; color: #1565c0; }
-.badge-inactive, .badge-cancelled, .badge-out_of_stock, .badge-refunded { background: #ffebee; color: #c62828; }
+.badge-shipped, .badge-in-transit                         { background: #e3f2fd; color: #1565c0; }
+.badge-inactive, .badge-cancelled, .badge-out_of_stock, .badge-out-of-stock, .badge-refunded { background: #ffebee; color: #c62828; }
 
 .role-badge {
   display: inline-block;
