@@ -134,7 +134,7 @@
                 <div class="loading-spinner"></div>
                 <p>Loading your orders and purchase history…</p>
               </div>
-              <CustomerOrdersTable v-else :orders="orders.slice(0, 3)" />
+              <CustomerOrdersTable v-else :orders="orders.slice(0, 3)" @order-updated="loadOrders" />
             </div>
 
             <!-- Browse CTA Banner -->
@@ -163,7 +163,7 @@
                 <div class="loading-spinner"></div>
                 <p>Loading complete order history…</p>
               </div>
-              <CustomerOrdersTable v-else :orders="orders" />
+              <CustomerOrdersTable v-else :orders="orders" @order-updated="loadOrders" />
             </div>
           </div>
 

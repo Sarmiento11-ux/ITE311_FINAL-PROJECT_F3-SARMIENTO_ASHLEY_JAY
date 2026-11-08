@@ -87,7 +87,19 @@
           <p><strong>Current Status:</strong> <span class="status-pill" :class="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></p>
         </div>
 
-        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: flex-end;">
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <button 
+              v-if="selectedOrder.status && selectedOrder.status.toLowerCase() === 'pending'"
+              type="button" 
+              class="btn btn-sm" 
+              style="background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; font-weight: 600;"
+              :disabled="cancelling"
+              @click="handleCancelOrder(selectedOrder)"
+            >
+              {{ cancelling ? 'Cancelling…' : 'Cancel Order' }}
+            </button>
+          </div>
           <button type="button" class="btn btn-secondary btn-sm" @click="selectedOrder = null">Close</button>
         </div>
       </div>
@@ -97,6 +109,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { orderService } from '../services/orderService.js';
 
 defineProps({
   orders: {
@@ -105,7 +118,28 @@ defineProps({
   }
 });
 
+const emit = defineEmits(['order-updated']);
+
 const selectedOrder = ref(null);
+const cancelling = ref(false);
+
+const handleCancelOrder = async (order) => {
+  if (!confirm(`Are you sure you want to cancel order ${order.orderNumber || order.id}?`)) {
+    return;
+  }
+  cancelling.value = true;
+  try {
+    await orderService.cancelOrder(order.id);
+    order.status = 'Cancelled';
+    alert('Order cancelled successfully.');
+    selectedOrder.value = null;
+    emit('order-updated');
+  } catch (err) {
+    alert(err.response?.data?.message || 'Could not cancel order. Please try again.');
+  } finally {
+    cancelling.value = false;
+  }
+};
 
 const openOrderDetails = (order) => {
   selectedOrder.value = order;
