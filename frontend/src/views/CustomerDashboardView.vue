@@ -141,7 +141,7 @@
             <div class="products-cta-banner" style="margin-top: 10px;">
               <div class="banner-text">
                 <h3>Looking for more authentic creations?</h3>
-                <p>Support over 120+ local weavers, potters, and woodworkers across the Philippines.</p>
+                <p>Support independent local artisans, weavers, and craftmakers across the Philippines.</p>
               </div>
               <router-link to="/products" class="btn btn-primary">
                 Browse Marketplace Catalog ↗
