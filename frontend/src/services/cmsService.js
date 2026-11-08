@@ -38,7 +38,7 @@ export const cmsService = {
     }
 
     return {
-      text: 'Free nationwide shipping on handcrafted orders over ₱1,500 • Support 120+ local makers',
+      text: 'Free nationwide shipping on handcrafted orders over ₱1,500 • Direct Maker Support',
       isFromCms: false,
       date: new Date().toISOString()
     };

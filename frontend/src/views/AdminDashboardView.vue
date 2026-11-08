@@ -1145,7 +1145,10 @@
                   </div>
                 </div>
                 <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #C25E3E;">
-                  <em>"Free nationwide shipping on handcrafted orders over ₱1,500 • Direct Maker Support"</em>
+                  <em>"{{ cmsAnnouncement?.text || 'Free nationwide shipping on handcrafted orders over ₱1,500 • Direct Maker Support' }}"</em>
+                  <div v-if="cmsAnnouncement?.isFromCms" style="margin-top: 6px; font-size: 0.75rem; color: #16a34a; font-weight: 600;">
+                    ✓ Live from WordPress Announcement Post
+                  </div>
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Posts tagged <code>announcement</code>.</small>
@@ -1165,7 +1168,10 @@
                 </div>
                 <div style="padding: 16px; background: #FAF8F5; border-radius: 8px; margin: 16px; font-size: 0.88rem; color: #423B36; border-left: 3px solid #2F4533;">
                   <strong>Homepage Hero, About Us & Heritage Stories</strong>
-                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">Cultural storytelling pages published in WordPress and rendered headless on Vue.js storefront.</p>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #7A6F68;">
+                    <span v-if="cmsArticles.length > 0">{{ cmsArticles.length }} published cultural articles retrieved dynamically from WordPress headless REST API.</span>
+                    <span v-else>Cultural storytelling pages published in WordPress and rendered headless on Vue.js storefront.</span>
+                  </p>
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Pages (<code>homepage</code>, <code>about-us</code>) and Posts.</small>
@@ -1588,12 +1594,26 @@ const { logout } = useAuth();
 const currentTab = ref(route.query.tab || 'dashboard');
 const cmsStatus = ref({ checked: false, online: false, checking: false });
 const wpEndpoint = computed(() => cmsService.getEndpoint());
+const cmsAnnouncement = ref(null);
+const cmsArticles = ref([]);
 
 const checkCmsConnection = async () => {
   cmsStatus.value.checking = true;
   try {
     const res = await cmsService.checkHealth();
     cmsStatus.value = { checked: true, online: res.online, checking: false };
+    if (res.online) {
+      const [ann, posts] = await Promise.allSettled([
+        cmsService.getLatestAnnouncement(),
+        cmsService.getBlogPosts()
+      ]);
+      if (ann.status === 'fulfilled' && ann.value) {
+        cmsAnnouncement.value = ann.value;
+      }
+      if (posts.status === 'fulfilled' && Array.isArray(posts.value)) {
+        cmsArticles.value = posts.value;
+      }
+    }
   } catch {
     cmsStatus.value = { checked: true, online: false, checking: false };
   }
