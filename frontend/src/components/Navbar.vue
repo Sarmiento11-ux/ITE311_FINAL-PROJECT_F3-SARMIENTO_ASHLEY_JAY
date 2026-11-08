@@ -4,7 +4,7 @@
     <div class="container announcement-content">
       <span class="announcement-pill">{{ isFromCms ? 'CMS Notice' : 'Community Notice' }}</span>
       <p class="announcement-text" v-html="announcementText"></p>
-      <router-link to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
+      <router-link v-if="!auth.isAuthenticated" to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
     </div>
   </aside>
 
