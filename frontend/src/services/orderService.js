@@ -39,7 +39,7 @@ export const orderService = {
             paymentMethod: order.payment_method || 'Cash on Delivery',
             shippingAddress: order.shipping_address || 'Registered Address',
             deliveryAddress: order.shipping_address || 'Registered Address',
-            trackingNumber: order.tracking_number || `CM-TRK-${String(order.id).padStart(6, '0')}`,
+            trackingNumber: order.tracking_number || null,
             items: order.items || [],
             isFromApi: true,
           };
@@ -48,7 +48,7 @@ export const orderService = {
     } catch (err) {
       console.warn('[OrderService] Could not fetch customer orders from API, using fallback.', err.message);
     }
-    return customerOrdersData;
+    return [];
   },
 
   /**
