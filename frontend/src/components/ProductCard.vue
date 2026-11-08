@@ -10,7 +10,7 @@
         >
       </router-link>
       <span v-if="product.badge" class="product-tag" :class="tagClass">{{ product.badge }}</span>
-      <WishlistButton :product="product" variant="icon" size="sm" class="btn-wishlist" />
+      <WishlistButton v-if="isCustomer" :product="product" variant="icon" size="sm" class="btn-wishlist" />
     </div>
     
     <div class="product-details">
@@ -68,6 +68,10 @@ const props = defineProps({
     type: Object,
     required: true
   }
+});
+
+const isCustomer = computed(() => {
+  return authService.isAuthenticated() && (authService.getRole() === 'customer' || authService.isCustomer());
 });
 
 const tagClass = computed(() => {
