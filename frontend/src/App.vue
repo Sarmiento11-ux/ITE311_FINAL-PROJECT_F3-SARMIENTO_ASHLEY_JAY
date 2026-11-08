@@ -17,9 +17,16 @@ import { authService } from './services/authService.js';
 
 const route = useRoute();
 const isDedicatedDashboard = computed(() => {
-  return route.path.startsWith('/dashboard/admin') || 
-         route.path.startsWith('/admin') ||
-         route.path.startsWith('/dashboard/seller');
+  if (route.path.startsWith('/dashboard/admin') || route.path.startsWith('/admin')) {
+    return true;
+  }
+  if (route.path.startsWith('/dashboard/seller')) {
+    return true;
+  }
+  if (route.path === '/profile' && (authService.isSeller() || authService.isAdmin())) {
+    return true;
+  }
+  return false;
 });
 </script>
 

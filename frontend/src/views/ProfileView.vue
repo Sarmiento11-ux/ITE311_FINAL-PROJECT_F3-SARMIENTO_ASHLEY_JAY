@@ -15,14 +15,30 @@
           <span class="section-eyebrow">ACCOUNT MANAGEMENT</span>
           <h1 class="profile-page-title">Personal Profile & Settings</h1>
         </div>
-        <button type="button" @click="handleLogout" class="btn btn-secondary btn-logout-main">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          <span>Sign Out</span>
-        </button>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <router-link 
+            v-if="currentUser.role === 'Seller'" 
+            to="/dashboard/seller" 
+            class="btn btn-primary btn-sm"
+          >
+            ← Back to Artisan Dashboard
+          </router-link>
+          <router-link 
+            v-else-if="currentUser.role === 'Administrator'" 
+            to="/dashboard/admin" 
+            class="btn btn-primary btn-sm"
+          >
+            ← Back to Admin Dashboard
+          </router-link>
+          <button type="button" @click="handleLogout" class="btn btn-secondary btn-logout-main">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
 
       <!-- Main Profile Layout Grid -->
@@ -67,8 +83,8 @@
                 <li>Financial Escrow & Commission Audits</li>
                 <li>WordPress CMS Announcement Publishing</li>
               </ul>
-              <router-link to="/dashboard/seller" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
-                Open Artisan Portal Demo →
+              <router-link to="/dashboard/admin" class="btn btn-primary btn-sm" style="width: 100%; text-align: center;">
+                Open Admin Dashboard →
               </router-link>
             </div>
 
