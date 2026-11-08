@@ -113,7 +113,7 @@
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Member Since:</span>
-                  <span>March 2026</span>
+                  <span>{{ memberSince }}</span>
                 </div>
               </div>
             </div>
@@ -194,6 +194,18 @@ const customer = computed(() => {
     email: "—",
     address: "No shipping address provided"
   };
+});
+
+const memberSince = computed(() => {
+  const dateStr = customer.value?.created_at;
+  if (!dateStr) return '2026';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '2026';
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } catch {
+    return '2026';
+  }
 });
 
 const loadOrders = async () => {
