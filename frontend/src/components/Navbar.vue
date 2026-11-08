@@ -4,7 +4,7 @@
     <div class="container announcement-content">
       <span class="announcement-pill">{{ isFromCms ? 'CMS Notice' : 'Community Notice' }}</span>
       <p class="announcement-text" v-html="safeAnnouncementText"></p>
-      <router-link to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
+      <router-link v-if="!auth.isAuthenticated" to="/register?role=seller" class="announcement-link">Sell with us ↗</router-link>
     </div>
   </aside>
 
@@ -70,8 +70,8 @@
           Seller Portal
         </router-link>
         <router-link 
-          v-else-if="auth.isAuthenticated" 
-          to="/dashboard/customer" 
+          v-else-if="isCustomer" 
+          to="/orders" 
           class="nav-link"
           active-class="active"
         >
@@ -83,9 +83,18 @@
 
       <!-- User Actions -->
       <div class="header-actions">
-        <!-- "Become a Seller" / Dashboard links (hidden on small mobile to save space) -->
+        <!-- Primary Auth / Dashboard links -->
         <router-link 
-          v-if="auth.isAuthenticated && (auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin')" 
+          v-if="!auth.isAuthenticated" 
+          to="/login" 
+          class="btn-seller-link desktop-only-action"
+          style="background-color: var(--cm-forest, #2D4A3E); color: #ffffff;"
+        >
+          <span>Log In</span>
+        </router-link>
+
+        <router-link 
+          v-else-if="auth.user.value?.role === 'Administrator' || auth.user.value?.rawRole === 'admin'" 
           to="/dashboard/admin" 
           class="btn-seller-link desktop-only-action"
           style="background-color: var(--cm-terracotta, #c25e3e); color: #ffffff;"
@@ -94,21 +103,24 @@
         </router-link>
 
         <router-link 
-          v-else-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
-          to="/register?role=seller" 
-          class="btn-seller-link desktop-only-action"
-        >
-          <span>Become a Seller</span>
-        </router-link>
-        
-        <router-link 
-          v-else 
+          v-else-if="auth.user.value?.rawRole === 'seller' || auth.user.value?.role === 'Seller'" 
           to="/dashboard/seller" 
           class="btn-seller-link desktop-only-action"
           style="background-color: var(--cm-forest, #3E5943); color: #ffffff;"
         >
           <span>Artisan Dashboard</span>
         </router-link>
+
+        <button 
+          v-else 
+          type="button"
+          @click="handleLogout"
+          class="btn-seller-link desktop-only-action"
+          style="background-color: transparent; border-color: #d1d5db; color: #5c524b;"
+          title="Sign out of your account"
+        >
+          <span>Sign Out</span>
+        </button>
 
         <!-- Account / Profile Link -->
         <router-link 
@@ -126,7 +138,7 @@
         
         <!-- Customer Orders Link -->
         <router-link 
-          v-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
+          v-if="isCustomer" 
           to="/orders" 
           class="nav-icon-link desktop-only-action" 
           title="My Orders"
@@ -140,7 +152,7 @@
         </router-link>
 
         <!-- Wishlist Link (always visible) -->
-        <router-link to="/wishlist" class="nav-icon-link wishlist-pill" title="My Wishlist" aria-label="My Wishlist">
+        <router-link v-if="isCustomer" to="/wishlist" class="nav-icon-link wishlist-pill" title="My Wishlist" aria-label="My Wishlist">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
@@ -148,7 +160,7 @@
         </router-link>
 
         <!-- Cart Link (always visible) -->
-        <router-link to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart" aria-label="Shopping Cart">
+        <router-link v-if="isCustomer" to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart" aria-label="Shopping Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -237,11 +249,23 @@
 
           <!-- Account / Orders -->
           <router-link 
-            v-if="auth.isAuthenticated && (auth.user.value?.rawRole === 'customer' || auth.user.value?.role === 'Customer')" 
+            v-if="isCustomer" 
             to="/orders" 
             class="mobile-nav-item"
             @click="closeMobileMenu"
           >My Orders</router-link>
+          <router-link 
+            v-if="isCustomer" 
+            to="/wishlist" 
+            class="mobile-nav-item"
+            @click="closeMobileMenu"
+          >My Wishlist ({{ wishlist.totalCount }})</router-link>
+          <router-link 
+            v-if="isCustomer" 
+            to="/cart" 
+            class="mobile-nav-item"
+            @click="closeMobileMenu"
+          >Shopping Cart ({{ cart.totalCount }})</router-link>
           <router-link 
             :to="auth.isAuthenticated ? '/profile' : '/login'" 
             class="mobile-nav-item"
@@ -254,18 +278,25 @@
           <div class="mobile-drawer-cta">
             <router-link 
               v-if="!auth.isAuthenticated" 
+              to="/login" 
+              class="btn btn-primary"
+              style="width: 100%; justify-content: center;"
+              @click="closeMobileMenu"
+            >Log In →</router-link>
+            <router-link 
+              v-if="!auth.isAuthenticated" 
               to="/register" 
               class="btn btn-secondary"
               style="width: 100%; justify-content: center;"
               @click="closeMobileMenu"
             >Create Account</router-link>
-            <router-link 
-              v-if="!auth.isAuthenticated || (auth.user.value?.rawRole !== 'seller' && auth.user.value?.role !== 'Seller')" 
-              to="/register?role=seller" 
-              class="btn btn-primary"
+            <button 
+              v-else 
+              type="button"
+              class="btn btn-secondary"
               style="width: 100%; justify-content: center;"
-              @click="closeMobileMenu"
-            >Become a Seller ↗</router-link>
+              @click="() => { handleLogout(); closeMobileMenu(); }"
+            >Sign Out</button>
           </div>
 
         </nav>
@@ -284,6 +315,12 @@ import { auth } from '../data/auth.js';
 import { cmsService } from '../services/cmsService.js';
 
 const router = useRouter();
+const isCustomer = computed(() => {
+  if (!auth.isAuthenticated || !auth.user.value) return false;
+  const role = (auth.user.value.rawRole || auth.user.value.role || '').toLowerCase();
+  return role === 'customer';
+});
+
 const route = useRoute();
 const searchQuery = ref('');
 const announcementText = ref('Free shipping on local artisan orders over ₱1,500 | <strong>Support 120+ Verified Local Makers</strong>');
@@ -329,6 +366,11 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
+};
+
+const handleLogout = async () => {
+  await auth.logout();
+  router.push('/login');
 };
 </script>
 

@@ -15,6 +15,7 @@ class ArtisanSubscription extends Model
         'amount',
         'billing_cycle',
         'payment_method',
+        'checkout_session_id',
         'status',
         'starts_at',
         'expires_at',

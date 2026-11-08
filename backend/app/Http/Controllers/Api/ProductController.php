@@ -478,6 +478,17 @@ class ProductController extends Controller
             ], 403);
         }
 
+        // Protect order history: If product was ever ordered, archive instead of cascading delete
+        $hasOrders = \App\Models\OrderItem::where('product_id', $product->id)->exists();
+        if ($hasOrders) {
+            $product->update(['status' => 'archived']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Product has existing order history. Listing was safely archived instead of deleted to protect customer records.',
+                'data'    => $product,
+            ]);
+        }
+
         // Clean up stored image file from disk
         $this->cleanupPhysicalImage($product->raw_image_path);
 

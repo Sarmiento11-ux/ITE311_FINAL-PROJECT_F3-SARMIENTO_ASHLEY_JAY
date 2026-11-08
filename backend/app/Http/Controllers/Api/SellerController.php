@@ -76,9 +76,24 @@ class SellerController extends Controller
 
         $orderItems = OrderItem::with('order')->where('seller_id', $sellerId)->get();
         $totalOrders = $orderItems->pluck('order_id')->unique()->count();
-        $totalSales = $orderItems->sum('subtotal');
+        $validSalesItems = $orderItems->filter(function ($item) {
+            $itemStatus = strtolower($item->status ?? '');
+            $orderStatus = strtolower($item->order->status ?? '');
+            return !in_array($itemStatus, ['cancelled', 'refunded']) && !in_array($orderStatus, ['cancelled', 'refunded']);
+        });
+        $totalSales = (float) $validSalesItems->sum('subtotal');
 
-        $pendingOrders = $orderItems->filter(fn($item) => $item->status === 'pending' || ($item->order && $item->order->status === 'pending'))->pluck('order_id')->unique()->count();
+        $sellerUser = \App\Models\User::find($sellerId);
+        $commissionRate = $sellerUser && $sellerUser->subscription_plan === 'pro' ? 3.0 : 8.0;
+        $platformFee = round($totalSales * ($commissionRate / 100), 2);
+        $netEarnings = round($totalSales - $platformFee, 2);
+
+        $pendingStatuses = ['pending', 'confirmed', 'processing', 'shipped'];
+        $pendingOrders = $orderItems->filter(function ($item) use ($pendingStatuses) {
+            $itemStatus = strtolower($item->status ?? '');
+            $orderStatus = strtolower($item->order->status ?? '');
+            return in_array($itemStatus, $pendingStatuses) || in_array($orderStatus, $pendingStatuses);
+        })->pluck('order_id')->unique()->count();
         $completedOrders = $orderItems->filter(fn($item) => $item->status === 'delivered')->pluck('order_id')->unique()->count();
 
         return response()->json([
@@ -88,7 +103,10 @@ class SellerController extends Controller
                 'total_products'    => $totalProducts,
                 'active_products'   => $activeProducts,
                 'total_orders'      => $totalOrders,
-                'total_sales'       => (float) $totalSales,
+                'total_sales'       => $totalSales,
+                'commission_rate'   => $commissionRate,
+                'platform_fee'      => $platformFee,
+                'net_earnings'      => $netEarnings,
                 'pending_orders'    => $pendingOrders,
                 'completed_orders'  => $completedOrders,
             ],
@@ -124,7 +142,8 @@ class SellerController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
+            'status'          => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
+            'tracking_number' => 'nullable|string|max:120',
         ]);
 
         $newStatus = $validated['status'];
@@ -144,7 +163,11 @@ class SellerController extends Controller
             ], 422);
         }
 
-        $item->update(['status' => $newStatus]);
+        $updateData = ['status' => $newStatus];
+        if ($newStatus === 'shipped' && !empty($validated['tracking_number'])) {
+            $updateData['tracking_number'] = $validated['tracking_number'];
+        }
+        $item->update($updateData);
 
         // Send fulfillment update notification
         NotificationService::sendSellerItemFulfillment($item);
@@ -153,9 +176,9 @@ class SellerController extends Controller
         $order = $item->order;
         if ($order) {
             $prevOrderStatus = $order->status;
-            $allItems = $order->items;
+            $allItems = $order->items()->get();
             $allDelivered = $allItems->every(fn($i) => $i->status === 'delivered');
-            $anyCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
+            $allCancelled = $allItems->every(fn($i) => $i->status === 'cancelled');
 
             if ($allDelivered) {
                 $order->update([
@@ -164,7 +187,7 @@ class SellerController extends Controller
                     'payment_status' => 'paid',
                 ]);
                 NotificationService::sendOrderStatusUpdate($order, 'delivered');
-            } elseif ($anyCancelled) {
+            } elseif ($allCancelled) {
                 $order->update(['status' => 'cancelled']);
                 NotificationService::sendOrderStatusUpdate($order, 'cancelled');
             } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {

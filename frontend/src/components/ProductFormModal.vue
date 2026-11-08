@@ -104,6 +104,7 @@
           <div class="form-group">
             <label class="form-label">Category <span class="required">*</span></label>
             <select v-model="formData.category" class="form-input" required>
+              <option value="" disabled>Select craft category...</option>
               <option value="Ceramics & Pottery">Ceramics & Pottery</option>
               <option value="Woven Goods & Bags">Woven Goods & Bags</option>
               <option value="Artisan Jewelry">Artisan Jewelry</option>
@@ -226,7 +227,7 @@ const validationError = ref('');
 const formData = reactive({
   id: null,
   name: '',
-  category: 'Ceramics & Pottery',
+  category: '',
   price: 450,
   stock: 10,
   status: 'Published',
@@ -364,6 +365,11 @@ const formatFileSize = (bytes) => {
 
 const handleSubmit = () => {
   validationError.value = '';
+
+  if (!formData.category) {
+    validationError.value = 'Please select a valid craft category for your listing.';
+    return;
+  }
 
   // Category ID resolution
   const categoryMap = {

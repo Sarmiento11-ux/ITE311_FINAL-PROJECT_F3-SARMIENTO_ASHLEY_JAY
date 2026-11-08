@@ -1,49 +1,37 @@
 # WordPress Headless CMS Integration Guide
-## CraftMarket Architecture
+## CraftMarket System Integration & Architecture
 
-### 1. Architectural Strategy
-To avoid bloated dependencies, CraftMarket utilizes **WordPress as a Headless Content Management System (CMS)**. 
+### 1. Architectural Strategy & Compliance
+CraftMarket complies with **Section C (CMS-Based Admin Panel)** of the Web Systems & Technologies 2 / System Integration & Architecture 1 requirements using a **Modern Decoupled / Headless CMS Pattern**.
 
-- **What WordPress Handles:**
-  - Marketplace announcements (Notice bar and popups)
-  - Artisan spotlight articles & storytelling blogs
-  - Static legal policies (Privacy Policy, Terms of Service, Seller Guidelines)
-  
-- **What WordPress DOES NOT Handle:**
-  - User accounts and password hashing (handled by Laravel)
-  - Shopping cart, checkouts, and escrow payments (handled by Laravel)
-  - Product inventory and order management (handled by Laravel)
-
----
-
-### 2. WordPress REST API Endpoints
-CraftMarket's Vue.js frontend communicates with WordPress via standard HTTP GET requests:
-
-| Purpose | WordPress REST API Endpoint |
-| :--- | :--- |
-| Active Community Announcements | `GET /wp-json/wp/v2/announcements?per_page=1` |
-| Artisan Story Blog Posts | `GET /wp-json/wp/v2/posts?categories=artisan-stories` |
-| Privacy Policy Content | `GET /wp-json/wp/v2/pages?slug=privacy-policy` |
-| Terms & Conditions | `GET /wp-json/wp/v2/pages?slug=terms-of-service` |
-
----
-
-### 3. Frontend Integration Service Example (`wpService.js`)
-In `frontend/src/services/wpService.js`:
-
-```javascript
-const WP_API_BASE = 'http://localhost/craftmarket-cms/wp-json/wp/v2';
-
-export const wpService = {
-  async getLatestAnnouncement() {
-    try {
-      const res = await fetch(`${WP_API_BASE}/posts?tags=announcement&per_page=1`);
-      const data = await res.json();
-      return data[0]?.title?.rendered || 'Support 120+ Verified Local Makers';
-    } catch (e) {
-      // Graceful fallback to static message if WP server is offline
-      return 'Free shipping on local artisan orders over ₱1,500';
-    }
-  }
-};
+```mermaid
+flowchart LR
+    A["Public Vue.js Storefront<br/>(Client UI)"] <-->|REST API| B["Laravel 12 API<br/>(Transactional Engine & MySQL)"]
+    A <-->|REST API (JSON)| C["Headless WordPress CMS<br/>(Content, Announcements)"]
+    C <-->|Internal Bridge Plugin| B
 ```
+
+---
+
+### 2. The 5 Required CMS Functions Matrix
+
+| Required Function | Managed Where | Endpoint / Interface |
+| :--- | :--- | :--- |
+| **1. Website Content** | WordPress Pages | `GET /wp-json/wp/v2/pages?slug=homepage` |
+| **2. Announcements** | WordPress Posts | `GET /wp-json/wp/v2/posts?search=announcement` |
+| **3. Products / Services** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-products` & `/api/products` |
+| **4. User Data** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-users` & `/api/users` |
+| **5. Reports** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-reports` & `/api/admin/reports` |
+
+---
+
+### 3. Verification & Live Demo Instructions for Defense
+1. **To demo Content & Announcements:**
+   - Log into WordPress Admin: `http://localhost/craftmarket-cms/wp-admin`
+   - Create or edit a post tagged/titled `announcement`.
+   - Reload CraftMarket Vue storefront (`http://localhost:5173`) &rarr; top banner immediately reflects the updated announcement text.
+2. **To demo Products, Users, and Reports in WordPress:**
+   - In WordPress Admin sidebar, click **CraftMarket CMS**.
+   - Show the **Products & Crafts** table (displays live crafts and stock from Laravel).
+   - Show the **Marketplace Users** table (displays active shopper and seller accounts).
+   - Show the **Escrow Reports** card (displays total realized sales and orders).

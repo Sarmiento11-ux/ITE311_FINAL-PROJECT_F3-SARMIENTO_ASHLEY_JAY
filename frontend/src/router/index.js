@@ -136,7 +136,14 @@ router.beforeEach((to, from, next) => {
     return next({ name: 'profile' });
   }
 
-  // 3. Route has role restriction and user's role is not allowed → send to home
+  // 3. Admin lockdown: Admin exclusively operates inside the Admin Dashboard
+  if (isAuth && role === 'admin') {
+    if (to.name !== 'admin-dashboard') {
+      return next({ name: 'admin-dashboard' });
+    }
+  }
+
+  // 4. Route has role restriction and user's role is not allowed → send to home
   if (to.meta.roles && to.meta.roles.length > 0 && isAuth) {
     if (!to.meta.roles.includes(role)) {
       // Redirect users away from unauthorized dashboards

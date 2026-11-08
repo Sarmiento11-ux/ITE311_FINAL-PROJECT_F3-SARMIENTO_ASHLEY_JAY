@@ -30,15 +30,9 @@
             <span>Dashboard</span>
           </button>
 
-          <button 
-            type="button" 
-            class="dashboard-nav-item" 
-            :class="{ active: currentTab === 'orders' }"
-            @click="currentTab = 'orders'"
-          >
-            
+          <router-link to="/orders" class="dashboard-nav-item">
             <span>My Orders ({{ orders.length }})</span>
-          </button>
+          </router-link>
 
           <router-link to="/wishlist" class="dashboard-nav-item">
             <span>My Wishlist ({{ wishlist.totalCount }})</span>
@@ -62,25 +56,25 @@
           <div class="dashboard-stats-grid">
             <DashboardStatCard 
               title="Total Orders" 
-              :value="totalOrdersCount" 
+              :value="isLoading ? '…' : totalOrdersCount" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
-              :value="pendingOrdersCount" 
+              :value="isLoading ? '…' : pendingOrdersCount" 
               icon="" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
-              :value="completedOrdersCount" 
+              :value="isLoading ? '…' : completedOrdersCount" 
               icon="" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Spent" 
-              :value="`₱${totalSpent.toFixed(2)}`" 
+              :value="isLoading ? '…' : `₱${totalSpent.toFixed(2)}`" 
               icon="" 
               bgClass="terracotta-bg" 
             />
@@ -109,11 +103,17 @@
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Default Shipping Address:</span>
-                  <span>{{ customer.address }}</span>
+                  <span v-if="customer.address">{{ customer.address }}</span>
+                  <span v-else style="color: #7A6F68; font-style: italic;">
+                    No address set.
+                    <router-link to="/profile" style="color: #3E5943; font-weight: 600; text-decoration: underline; margin-left: 4px;">
+                      Add delivery address ↗
+                    </router-link>
+                  </span>
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Member Since:</span>
-                  <span>March 2026</span>
+                  <span>{{ memberSince }}</span>
                 </div>
               </div>
             </div>
@@ -125,19 +125,23 @@
                   <h3 class="panel-heading">Recent Orders</h3>
                   <p class="panel-subheading">Track current order progress with fair-trade escrow protection.</p>
                 </div>
-                <button type="button" @click="currentTab = 'orders'" class="btn btn-secondary btn-sm">
+                <router-link to="/orders" class="btn btn-secondary btn-sm">
                   View All Orders →
-                </button>
+                </router-link>
               </div>
 
-              <CustomerOrdersTable :orders="orders.slice(0, 3)" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading your orders and purchase history…</p>
+              </div>
+              <CustomerOrdersTable v-else :orders="orders.slice(0, 3)" @order-updated="loadOrders" />
             </div>
 
             <!-- Browse CTA Banner -->
             <div class="products-cta-banner" style="margin-top: 10px;">
               <div class="banner-text">
                 <h3>Looking for more authentic creations?</h3>
-                <p>Support over 120+ local weavers, potters, and woodworkers across the Philippines.</p>
+                <p>Support independent local artisans, weavers, and craftmakers across the Philippines.</p>
               </div>
               <router-link to="/products" class="btn btn-primary">
                 Browse Marketplace Catalog ↗
@@ -155,7 +159,11 @@
                 </div>
               </div>
 
-              <CustomerOrdersTable :orders="orders" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading complete order history…</p>
+              </div>
+              <CustomerOrdersTable v-else :orders="orders" @order-updated="loadOrders" />
             </div>
           </div>
 
@@ -181,17 +189,29 @@ const isLoading = ref(true);
 
 const customer = computed(() => {
   return auth.user.value || {
-    id: 1,
-    fullName: "Maria Clara Santos",
-    email: "maria@example.com",
-    address: "Unit 402 Sunshine Towers, Pasig City, Metro Manila"
+    id: null,
+    fullName: "CraftMarket Member",
+    email: "—",
+    address: "No shipping address provided"
   };
+});
+
+const memberSince = computed(() => {
+  const dateStr = customer.value?.created_at;
+  if (!dateStr) return '2026';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '2026';
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } catch {
+    return '2026';
+  }
 });
 
 const loadOrders = async () => {
   isLoading.value = true;
   try {
-    const customerId = customer.value.id || 1;
+    const customerId = auth.user.value?.id || null;
     orders.value = await orderService.getCustomerOrders(customerId);
   } catch (err) {
     console.warn('Could not load orders via API, using fallback:', err);
@@ -202,19 +222,50 @@ const loadOrders = async () => {
 
 onMounted(() => {
   loadOrders();
+  wishlist.loadWishlist(true);
 });
 
 const totalOrdersCount = computed(() => orders.value.length);
 
 const pendingOrdersCount = computed(() => {
-  return orders.value.filter(o => o.status.toLowerCase().includes('pending') || o.status.toLowerCase().includes('transit')).length;
+  // Counts all active in-progress orders (pending, confirmed, processing, shipped/transit)
+  const activeStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'transit'];
+  return orders.value.filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return activeStatuses.some(status => s.includes(status));
+  }).length;
 });
 
 const completedOrdersCount = computed(() => {
-  return orders.value.filter(o => o.status.toLowerCase().includes('delivered')).length;
+  return orders.value.filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return s.includes('delivered') || s.includes('completed');
+  }).length;
 });
 
 const totalSpent = computed(() => {
-  return orders.value.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  return orders.value
+    .filter(o => !['cancelled', 'refunded'].includes(o.status?.toLowerCase()))
+    .reduce((acc, curr) => acc + curr.totalAmount, 0);
 });
 </script>
+
+<style scoped>
+.dashboard-loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #7A6F68;
+}
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #E8DFD5;
+  border-top-color: #3E5943;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>

@@ -10,7 +10,7 @@
         >
       </router-link>
       <span v-if="product.badge" class="product-tag" :class="tagClass">{{ product.badge }}</span>
-      <WishlistButton :product="product" variant="icon" size="sm" class="btn-wishlist" />
+      <WishlistButton v-if="isCustomer" :product="product" variant="icon" size="sm" class="btn-wishlist" />
     </div>
     
     <div class="product-details">
@@ -57,7 +57,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { cart } from '../data/cart.js';
+import { authService } from '../services/authService.js';
 import WishlistButton from './WishlistButton.vue';
 import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
 
@@ -66,6 +68,10 @@ const props = defineProps({
     type: Object,
     required: true
   }
+});
+
+const isCustomer = computed(() => {
+  return authService.isAuthenticated() && (authService.getRole() === 'customer' || authService.isCustomer());
 });
 
 const tagClass = computed(() => {
@@ -83,7 +89,14 @@ const handleImgError = (e) => {
   e.target.src = defaultPlaceholder;
 };
 
+const router = useRouter();
+
 const handleAddToCart = () => {
+  if (!authService.isAuthenticated()) {
+    alert('Please log in or create an account to add items to your shopping cart.');
+    router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
+    return;
+  }
   cart.addToCart(props.product, 1);
 };
 </script>

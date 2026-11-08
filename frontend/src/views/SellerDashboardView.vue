@@ -6,7 +6,7 @@
       <div class="dashboard-header-banner">
         <div class="dashboard-welcome">
           <span class="section-eyebrow">ARTISAN MERCHANT PORTAL</span>
-          <h1>Welcome to {{ seller.fullName }}!</h1>
+          <h1>Welcome to your Artisan Portal, {{ seller.fullName }}!</h1>
           <p>Manage your handmade craft listings, review customer orders, and track your escrow payouts.</p>
         </div>
 
@@ -59,6 +59,15 @@
             <span>Customer Reviews ({{ reviews.length }})</span>
           </button>
 
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'subscription' }"
+            @click="currentTab = 'subscription'"
+          >
+            <span>Artisan Pro Tier ⭐</span>
+          </button>
+
           <router-link to="/profile" class="dashboard-nav-item">
             
             <span>My Profile</span>
@@ -72,32 +81,32 @@
           <div class="dashboard-stats-grid">
             <DashboardStatCard 
               title="Total Products" 
-              :value="products.length" 
-              icon="" 
+              :value="isLoading ? '...' : products.length" 
+              icon="products" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Orders Received" 
-              :value="orders.length" 
-              icon="" 
+              :value="isLoading ? '...' : orders.length" 
+              icon="orders" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
-              :value="pendingOrdersCount" 
-              icon="" 
+              :value="isLoading ? '...' : pendingOrdersCount" 
+              icon="pending" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
-              :value="completedOrdersCount" 
-              icon="" 
+              :value="isLoading ? '...' : completedOrdersCount" 
+              icon="completed" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Revenue" 
-              :value="`₱${totalRevenue.toFixed(2)}`" 
-              icon="" 
+              :value="isLoading ? '...' : `₱${totalRevenue.toFixed(2)}`" 
+              icon="money" 
               bgClass="terracotta-bg" 
             />
           </div>
@@ -117,19 +126,18 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; font-size: 0.9rem;">
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop / Brand Name:</span>
-                  <strong>{{ seller.fullName }}</strong>
+                  <strong>{{ seller.shopName || seller.fullName }}</strong>
                 </div>
-                <div>
-                  <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Craft Discipline:</span>
-                  <strong>Ceramics & Pottery</strong>
-                </div>
-                <div>
+                                <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Workshop Location:</span>
-                  <span>{{ seller.address }}</span>
+                  <span v-if="seller.address">{{ seller.address }}</span>
+                  <span v-else style="color: #9E8F85; font-style: italic;">
+                    Not set (<router-link to="/profile" style="color: #C25E3E; text-decoration: underline;">Add location</router-link>)
+                  </span>
                 </div>
                 <div>
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Escrow Payout Rate:</span>
-                  <span style="color: #2E7D32; font-weight: 600;">92% Direct Maker Payout</span>
+                  <span style="color: #2E7D32; font-weight: 600;">{{ subscriptionData?.is_pro ? '97% Direct Maker Payout (Pro Tier)' : '92% Direct Maker Payout (Basic Tier)' }}</span>
                 </div>
               </div>
             </div>
@@ -146,7 +154,11 @@
                 </button>
               </div>
 
-              <SellerOrdersTable :orders="orders.slice(0, 3)" @order-updated="loadSellerData" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading recent customer orders...</p>
+              </div>
+              <SellerOrdersTable v-else :orders="orders.slice(0, 3)" @order-updated="loadSellerData" />
             </div>
 
             <!-- Products Quick View -->
@@ -161,10 +173,16 @@
                 </button>
               </div>
 
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading active craft inventory...</p>
+              </div>
               <SellerProductsTable 
+                v-else
                 :products="products.slice(0, 3)" 
                 @edit="openEditModal" 
                 @delete="deleteProduct" 
+                @add-product="openAddModal"
               />
             </div>
           </div>
@@ -182,10 +200,16 @@
                 </button>
               </div>
 
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading complete product catalog...</p>
+              </div>
               <SellerProductsTable 
+                v-else
                 :products="products" 
                 @edit="openEditModal" 
                 @delete="deleteProduct" 
+                @add-product="openAddModal"
               />
             </div>
           </div>
@@ -200,7 +224,11 @@
                 </div>
               </div>
 
-              <SellerOrdersTable :orders="orders" @order-updated="loadSellerData" />
+              <div v-if="isLoading" class="dashboard-loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading order fulfillment list...</p>
+              </div>
+              <SellerOrdersTable v-else :orders="orders" @order-updated="loadSellerData" />
             </div>
           </div>
 
@@ -245,6 +273,87 @@
             </div>
           </div>
 
+        
+          <!-- Tab 5: Artisan Subscription & Growth Tier -->
+          <div v-else-if="currentTab === 'subscription'">
+            <div class="dashboard-panel-card">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Artisan Membership & Subscription</h3>
+                  <p class="panel-subheading">Choose the right tier to scale your craft workshop with lower commission and premium marketplace tools.</p>
+                </div>
+                <span class="status-pill" :class="subscriptionData?.is_pro ? 'status-delivered' : 'status-transit'">
+                  {{ subscriptionData?.is_pro ? '⭐ Artisan Pro Active' : 'Basic Free Tier' }}
+                </span>
+              </div>
+
+              <!-- Plan Comparison Grid -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px;">
+                
+                <!-- Plan 1: Basic Plan -->
+                <div style="border: 1px solid #E8DFD5; border-radius: 12px; padding: 24px; background: #FAF8F5;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7A6F68; font-weight: 700;">STARTER</span>
+                  <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2F4533;">Basic Artisan</h4>
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #2D2420; margin-bottom: 12px;">₱0 <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ month</span></div>
+                  <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">Ideal for emerging crafts makers starting to showcase handmade items online.</p>
+                  
+                  <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                    <li>✓ <strong>8%</strong> Platform Escrow Commission</li>
+                    <li>✓ Up to <strong>10 Active</strong> Craft Listings</li>
+                    <li>✓ Standard Marketplace Search Placement</li>
+                    <li>✓ Standard Community Support</li>
+                  </ul>
+
+                  <button 
+                    v-if="subscriptionData?.is_pro"
+                    type="button" 
+                    class="btn btn-secondary" 
+                    style="width: 100%; justify-content: center;"
+                    @click="handleCancelSubscription"
+                    :disabled="isSubmittingSubscription"
+                  >
+                    {{ isSubmittingSubscription ? 'Switching...' : 'Switch to Basic' }}
+                  </button>
+                  <div v-else style="padding: 10px; text-align: center; font-size: 0.85rem; color: #7A6F68; background: #EFE8DE; border-radius: 6px; font-weight: 600;">
+                    ✓ Current Active Plan
+                  </div>
+                </div>
+
+                <!-- Plan 2: Artisan Pro -->
+                <div style="border: 2px solid #C25E3E; border-radius: 12px; padding: 24px; background: #FFF; box-shadow: 0 8px 24px rgba(194, 94, 62, 0.08); position: relative;">
+                  <span style="position: absolute; top: -12px; right: 20px; background: #C25E3E; color: #FFF; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">RECOMMENDED</span>
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #C25E3E; font-weight: 700;">PRO SCALE</span>
+                  <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2D2420;">Artisan Pro ⭐</h4>
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #C25E3E; margin-bottom: 12px;">₱299 <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ month</span></div>
+                  <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">For passionate artisans who want to maximize earnings with minimal commission.</p>
+
+                  <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                    <li>✓ <strong>3%</strong> Ultra-Low Commission (Keep 97% Payout!)</li>
+                    <li>✓ <strong>Unlimited</strong> Craft Listings & Workshops</li>
+                    <li>✓ Featured Placement on Marketplace Homepage</li>
+                    <li>✓ Real-Time Analytics & Escrow Priority</li>
+                  </ul>
+
+                  <button 
+                    v-if="!subscriptionData?.is_pro"
+                    type="button" 
+                    class="btn btn-primary" 
+                    style="width: 100%; justify-content: center; background: #C25E3E; border-color: #C25E3E;"
+                    @click="handleUpgradeSubscription"
+                    :disabled="isSubmittingSubscription"
+                  >
+                    {{ isSubmittingSubscription ? 'Upgrading...' : 'Upgrade to Artisan Pro (₱299/mo) →' }}
+                  </button>
+                  <div v-else style="padding: 10px; text-align: center; font-size: 0.85rem; color: #2E7D32; background: #E8F0EA; border-radius: 6px; font-weight: 700;">
+                    ⭐ Artisan Pro Active
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
         </section>
 
       </div>
@@ -266,6 +375,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import SellerProductsTable from '../components/SellerProductsTable.vue';
 import SellerOrdersTable from '../components/SellerOrdersTable.vue';
@@ -274,6 +384,8 @@ import ProductRating from '../components/ProductRating.vue';
 import { sellerService } from '../services/sellerService.js';
 import { getSellerReviews } from '../services/reviewService.js';
 import { subscriptionService } from '../services/subscriptionService.js';
+
+const route = useRoute();
 import { auth } from '../data/auth.js';
 
 const currentTab = ref('overview');
@@ -291,18 +403,18 @@ const isSubmittingSubscription = ref(false);
 
 const seller = computed(() => {
   return auth.user.value || {
-    id: 2,
-    fullName: "Elena Bautista",
-    shopName: "Cordillera Weaves",
-    email: "artisan@example.com",
-    address: "14 Session Road, Baguio City, Benguet"
+    id: null,
+    fullName: "Artisan Maker",
+    shopName: "Handcrafted Workshop",
+    email: "",
+    address: ""
   };
 });
 
 const loadSellerData = async () => {
   isLoading.value = true;
   try {
-    const sellerId = seller.value.id || 2;
+    const sellerId = seller.value?.id || null;
     const [fetchedProducts, fetchedOrders, fetchedStats] = await Promise.all([
       sellerService.getProducts(sellerId),
       sellerService.getOrders(sellerId),
@@ -333,13 +445,27 @@ const loadSellerData = async () => {
   }
 };
 
-onMounted(() => {
-  loadSellerData();
+onMounted(async () => {
+  await loadSellerData();
+  if (route.query.payment === 'success') {
+    try {
+      const vRes = await subscriptionService.verifySession(route.query.session_id);
+      if (vRes?.success) {
+        alert(vRes.message || 'Payment confirmed! Welcome to Artisan Pro!');
+        await loadSellerData();
+      }
+    } catch (e) {
+      console.warn('Subscription payment verification:', e);
+    }
+  }
 });
 
 const pendingOrdersCount = computed(() => {
   if (liveStats.value?.pending_orders !== undefined) return liveStats.value.pending_orders;
-  return orders.value.filter(o => o.status.toLowerCase().includes('pending') || o.status.toLowerCase().includes('transit')).length;
+  return orders.value.filter(o => {
+    const s = (o.status || o.rawStatus || '').toLowerCase();
+    return s.includes('pending') || s.includes('transit') || s.includes('shipped') || s.includes('confirm') || s.includes('process');
+  }).length;
 });
 
 const completedOrdersCount = computed(() => {
@@ -349,11 +475,24 @@ const completedOrdersCount = computed(() => {
 
 const totalRevenue = computed(() => {
   if (liveStats.value?.total_sales !== undefined) return liveStats.value.total_sales;
-  return orders.value.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
+  return orders.value
+    .filter(o => {
+      const s = (o.status || o.rawStatus || '').toLowerCase();
+      return !s.includes('cancel') && !s.includes('refund');
+    })
+    .reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 });
 
 // Product Actions
 const openAddModal = () => {
+  const isPro = !!subscriptionData.value?.is_pro;
+  const listingLimit = subscriptionData.value?.listing_limit || 10;
+  if (!isPro && products.value.length >= listingLimit) {
+    if (confirm(`You have reached the ${listingLimit}-product limit for the Basic Artisan plan.\n\nWould you like to explore Artisan Pro to unlock unlimited craft listings?`)) {
+      currentTab.value = 'subscription';
+    }
+    return;
+  }
   editingProduct.value = null;
   isEditMode.value = false;
   showProductModal.value = true;
@@ -373,8 +512,12 @@ const closeProductModal = () => {
 const isUploadingProduct = ref(false);
 
 const handleSaveProduct = async (productData) => {
+  const sellerId = seller.value?.id;
+  if (!sellerId) {
+    alert('Please sign in to list or modify products in your workshop.');
+    return;
+  }
   isUploadingProduct.value = true;
-  const sellerId = seller.value.id || 2;
   const statusStr = (productData.status || '').toLowerCase();
   const dbStatus = (statusStr.includes('published') || statusStr.includes('active')) 
     ? 'active' 
@@ -427,10 +570,12 @@ const deleteProduct = async (productId) => {
     try {
       await sellerService.deleteProduct(productId);
       products.value = products.value.filter(p => p.id !== productId);
-      alert(' Product listing removed successfully.');
+      alert('Product listing removed successfully.');
+      await loadSellerData();
     } catch (err) {
-      console.warn('API delete fallback:', err);
-      products.value = products.value.filter(p => p.id !== productId);
+      console.error('API delete error:', err);
+      const errMsg = err.response?.data?.message || err.message || 'Unable to delete product listing. Please try again.';
+      alert(`Failed to delete product: ${errMsg}`);
     }
   }
 };
@@ -441,7 +586,11 @@ const handleUpgradeSubscription = async () => {
   }
   isSubmittingSubscription.value = true;
   try {
-    const res = await subscriptionService.upgradeToPro('GCash / Online Wallet');
+    const res = await subscriptionService.upgradeToPro('PayMongo Online');
+    if (res && res.checkout_url) {
+      window.location.href = res.checkout_url;
+      return;
+    }
     alert(res.message || 'Upgraded to Artisan Pro successfully!');
     await loadSellerData();
   } catch (err) {
@@ -467,3 +616,23 @@ const handleCancelSubscription = async () => {
   }
 };
 </script>
+
+<style scoped>
+.dashboard-loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #7A6F68;
+}
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #E8DFD5;
+  border-top-color: #3E5943;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>

@@ -71,7 +71,8 @@ const iconSize = computed(() => {
 
 const handleToggle = async () => {
   if (!authService.isAuthenticated()) {
-    // Redirect to login if user is a guest
+    // Alert guest and redirect to login
+    alert('Please log in or create an account to save items to your favorites.');
     router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
     return;
   }

@@ -5,7 +5,7 @@ const WP_API_BASE = import.meta.env.VITE_WP_API_BASE_URL || 'http://localhost/cr
 
 const wpClient = axios.create({
   baseURL: WP_API_BASE,
-  timeout: 5000,
+  timeout: 1500,
   headers: {
     'Accept': 'application/json',
   },

@@ -1,15 +1,13 @@
 import apiClient from './api.js';
-import { sellerProductsData, sellerOrdersData } from '../data/dashboardData.js';
 
 export const sellerService = {
   /**
    * Get products belonging to a seller.
    */
-  async getProducts(sellerId = 2) {
+  async getProducts(sellerId = null) {
     try {
-      const response = await apiClient.get('/seller/products', {
-        params: { seller_id: sellerId }
-      });
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/products', { params });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         return response.data.data.map(p => ({
           id: p.id,
@@ -30,17 +28,16 @@ export const sellerService = {
     } catch (err) {
       console.warn('[SellerService] Could not fetch seller products from API, using fallback.', err.message);
     }
-    return [...sellerProductsData];
+    return [];
   },
 
   /**
    * Get orders received by a seller.
    */
-  async getOrders(sellerId = 2) {
+  async getOrders(sellerId = null) {
     try {
-      const response = await apiClient.get('/seller/orders', {
-        params: { seller_id: sellerId }
-      });
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/orders', { params });
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         return response.data.data.map(item => ({
           id: item.order?.id || item.id,
@@ -48,8 +45,10 @@ export const sellerService = {
           orderNumber: item.order?.order_number || `CM-${item.id}`,
           customerName: item.order?.user?.name || 'Valued Customer',
           productName: item.product_name,
+          product: item.product_name, // Map both for backward and forward compatibility
           quantity: item.quantity,
           totalAmount: parseFloat(item.subtotal),
+          payoutStatus: item.order?.payment_status === 'paid' ? 'Paid (Escrow Released)' : 'Awaiting Payment',
           status: (item.status || item.order?.status || 'pending').charAt(0).toUpperCase() + (item.status || item.order?.status || 'pending').slice(1),
           rawStatus: item.status || 'pending',
           orderDate: new Date(item.created_at).toLocaleDateString('en-US', {
@@ -64,28 +63,27 @@ export const sellerService = {
     } catch (err) {
       console.warn('[SellerService] Could not fetch seller orders from API, using fallback.', err.message);
     }
-    return [...sellerOrdersData];
+    return [];
   },
 
   /**
    * Update the fulfillment status of a specific order item.
    * PATCH /api/seller/order-items/{id}/status
    */
-  async updateOrderItemStatus(orderItemId, status) {
-    const response = await apiClient.patch(`/seller/order-items/${orderItemId}/status`, {
-      status: status.toLowerCase()
-    });
+  async updateOrderItemStatus(orderItemId, status, trackingNumber = null) {
+    const payload = { status: status.toLowerCase() };
+    if (trackingNumber) payload.tracking_number = trackingNumber;
+    const response = await apiClient.patch(`/seller/order-items/${orderItemId}/status`, payload);
     return response.data;
   },
 
   /**
    * Get stats for seller dashboard cards.
    */
-  async getStats(sellerId = 2) {
+  async getStats(sellerId = null) {
     try {
-      const response = await apiClient.get('/seller/stats', {
-        params: { seller_id: sellerId }
-      });
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/stats', { params });
       if (response.data && response.data.success) {
         return response.data.data;
       }

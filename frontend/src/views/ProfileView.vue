@@ -38,14 +38,10 @@
             </div>
 
             <h2 class="profile-card-name">{{ currentUser.fullName }}</h2>
-            <p class="profile-card-username">@{{ currentUser.username }}</p>
-
             <!-- Role Badge -->
             <div class="role-badge-wrapper">
               <span class="role-badge" :class="roleBadgeClass">{{ currentUser.role }}</span>
             </div>
-
-            <p class="profile-bio-text">{{ currentUser.bio }}</p>
 
             <div class="profile-meta-list">
               <div class="meta-item">
@@ -139,17 +135,6 @@
                   >
                 </div>
 
-                <div class="form-group">
-                  <label for="editUsername" class="form-label">Username <span class="required">*</span></label>
-                  <input 
-                    type="text" 
-                    id="editUsername" 
-                    v-model="editForm.username" 
-                    class="form-input" 
-                    :disabled="!isEditing" 
-                    required
-                  >
-                </div>
               </div>
 
               <div class="form-row-2col">
@@ -186,17 +171,6 @@
                   class="form-input" 
                   :disabled="!isEditing"
                 >
-              </div>
-
-              <div class="form-group">
-                <label for="editBio" class="form-label">About / Craft Bio</label>
-                <textarea 
-                  id="editBio" 
-                  v-model="editForm.bio" 
-                  class="form-input textarea-bio" 
-                  rows="3" 
-                  :disabled="!isEditing"
-                ></textarea>
               </div>
 
               <!-- Form Actions (Visible when editing) -->

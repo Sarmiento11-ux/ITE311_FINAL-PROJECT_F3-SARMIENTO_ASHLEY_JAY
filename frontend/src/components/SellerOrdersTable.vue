@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="table-responsive-wrapper">
+    <div v-if="orders.length > 0" class="table-responsive-wrapper">
       <table class="dashboard-table">
         <thead>
           <tr>
@@ -15,9 +15,9 @@
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.id">
-            <td><strong>{{ order.id }}</strong></td>
+            <td><strong>{{ order.orderNumber || order.id }}</strong></td>
             <td>{{ order.customerName }}</td>
-            <td>{{ order.product }}</td>
+            <td>{{ order.product || order.productName }}</td>
             <td>{{ order.quantity }}</td>
             <td><strong>₱{{ Number(order.totalAmount).toFixed(2) }}</strong></td>
             <td>
@@ -39,6 +39,15 @@
       </table>
     </div>
 
+    <!-- Empty Orders State -->
+    <div v-else class="empty-orders-state" style="text-align: center; padding: 3rem 1.5rem; background: #FAF6F0; border-radius: 8px; border: 1px dashed #D9CFC4; margin-top: 8px;">
+      <div style="font-size: 2.2rem; margin-bottom: 12px;">📋</div>
+      <h4 style="font-size: 1.15rem; color: #2C221E; margin-bottom: 6px; font-weight: 700;">No customer orders received yet</h4>
+      <p style="color: #7A6F68; font-size: 0.92rem; max-width: 440px; margin: 0 auto; line-height: 1.5;">
+        Once shoppers order your handmade creations, their orders and fulfillment dispatches will appear here.
+      </p>
+    </div>
+
     <!-- Seller Order Modal with Status Dispatch Update -->
     <div v-if="activeOrder" class="modal-overlay" @click.self="activeOrder = null">
       <div class="modal-dialog-box">
@@ -49,7 +58,7 @@
 
         <div style="font-size: 0.9rem; line-height: 1.7; color: #423B36;">
           <p><strong>Customer Name:</strong> {{ activeOrder.customerName }}</p>
-          <p><strong>Product:</strong> {{ activeOrder.product }} (Quantity: {{ activeOrder.quantity }})</p>
+          <p><strong>Product:</strong> {{ activeOrder.product || activeOrder.productName }} (Quantity: {{ activeOrder.quantity }})</p>
           <p><strong>Order Date:</strong> {{ activeOrder.orderDate }}</p>
           <p><strong>Total Transaction:</strong> ₱{{ Number(activeOrder.totalAmount).toFixed(2) }}</p>
           <p><strong>Shipping Address:</strong> {{ activeOrder.shippingAddress }}</p>
@@ -67,6 +76,21 @@
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
             </select>
+          </div>
+
+          <!-- Tracking number field: visible only when marking as Shipped -->
+          <div v-if="selectedStatus === 'shipped'" style="margin-top: 12px; padding: 12px; background-color: #F0F7FF; border-radius: 8px; border: 1px solid #BFDBFE;">
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; color: #1E40AF;">
+              Courier Tracking Number:
+            </label>
+            <input
+              type="text"
+              v-model="trackingNumber"
+              placeholder="e.g. JRS-1234567890 / LBC-98765"
+              class="form-input"
+              style="padding: 8px; font-size: 0.88rem;"
+            >
+            <small style="color: #6B7280; font-size: 0.78rem;">Enter the tracking reference from your courier so the customer can monitor delivery.</small>
           </div>
 
           <div v-if="statusFeedback" style="margin-top: 10px; font-size: 0.84rem;" :style="{ color: feedbackIsError ? '#c25e3e' : '#2e7d32' }">
@@ -103,12 +127,14 @@ const selectedStatus = ref('pending');
 const isSaving = ref(false);
 const statusFeedback = ref('');
 const feedbackIsError = ref(false);
+const trackingNumber = ref('');
 
 const openOrderModal = (order) => {
   activeOrder.value = order;
   selectedStatus.value = (order.rawStatus || order.status || 'pending').toLowerCase();
   statusFeedback.value = '';
   feedbackIsError.value = false;
+  trackingNumber.value = '';
 };
 
 const saveStatus = async () => {
@@ -120,7 +146,7 @@ const saveStatus = async () => {
 
   try {
     const itemId = activeOrder.value.orderItemId || activeOrder.value.id;
-    const res = await sellerService.updateOrderItemStatus(itemId, selectedStatus.value);
+    const res = await sellerService.updateOrderItemStatus(itemId, selectedStatus.value, trackingNumber.value.trim() || null);
 
     if (res && res.success) {
       activeOrder.value.status = selectedStatus.value.charAt(0).toUpperCase() + selectedStatus.value.slice(1);

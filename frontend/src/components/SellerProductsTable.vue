@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="table-responsive-wrapper">
+    <div v-if="products.length > 0" class="table-responsive-wrapper">
       <table class="dashboard-table">
         <thead>
           <tr>
@@ -59,10 +59,24 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Empty Products State -->
+    <div v-else class="empty-products-state" style="text-align: center; padding: 3rem 1.5rem; background: #FAF6F0; border-radius: 8px; border: 1px dashed #D9CFC4; margin-top: 8px;">
+      <div style="font-size: 2.2rem; margin-bottom: 12px;">🎨</div>
+      <h4 style="font-size: 1.15rem; color: #2C221E; margin-bottom: 6px; font-weight: 700;">No craft listings in your workshop yet</h4>
+      <p style="color: #7A6F68; font-size: 0.92rem; max-width: 440px; margin: 0 auto 18px; line-height: 1.5;">
+        Showcase your handcrafted creations, pottery, textiles, or woodwork to conscious buyers nationwide.
+      </p>
+      <button type="button" @click="$emit('add-product')" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+        + Add Your First Craft Item
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
+import defaultPlaceholder from '../assets/images/craft-placeholder.svg';
+
 defineProps({
   products: {
     type: Array,
@@ -70,12 +84,17 @@ defineProps({
   }
 });
 
-defineEmits(['edit', 'delete']);
+defineEmits(['edit', 'delete', 'add-product']);
+
+const handleImgError = (e) => {
+  e.target.src = defaultPlaceholder;
+};
 
 const getStatusClass = (status) => {
-  const s = status.toLowerCase();
-  if (s.includes('published')) return 'status-published';
-  if (s.includes('low')) return 'status-low-stock';
+  if (!status) return 'status-draft';
+  const s = String(status).toLowerCase();
+  if (s.includes('published') || s.includes('active')) return 'status-published';
+  if (s.includes('low') || s.includes('out')) return 'status-low-stock';
   return 'status-draft';
 };
 </script>

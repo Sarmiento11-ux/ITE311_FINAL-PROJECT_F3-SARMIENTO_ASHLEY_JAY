@@ -107,13 +107,24 @@
                 <span>Fulfillment: <strong>Doorstep Courier Delivery</strong></span>
               </div>
 
-              <button
-                type="button"
-                class="btn btn-secondary btn-sm"
-                @click="openDetailsModal(order)"
-              >
-                View Full Order Receipt
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button
+                  v-if="(order.status || '').toLowerCase() === 'pending'"
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  style="color: #c25e3e; border-color: #e8dfd5;"
+                  @click="handleCancelOrder(order)"
+                >
+                  Cancel Order
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  @click="openDetailsModal(order)"
+                >
+                  View Full Order Receipt
+                </button>
+              </div>
             </div>
           </div>
         </article>
@@ -177,7 +188,7 @@
                 <span>{{ Number(selectedOrder.totalAmount) >= 1500 ? 'FREE (₱0.00)' : '₱150.00' }}</span>
               </div>
               <div class="receipt-sum-total">
-                <span>Total Amount Due on Delivery:</span>
+                <span>{{ (selectedOrder.paymentMethod || '').toLowerCase().includes('cash') ? 'Total Amount Due on Delivery:' : 'Total Transaction Amount (Paid Online):' }}</span>
                 <span class="total-highlight">₱{{ Number(selectedOrder.totalAmount).toFixed(2) }}</span>
               </div>
             </div>
@@ -202,6 +213,22 @@ const isLoading = ref(true);
 const selectedOrder = ref(null);
 
 const fallbackImg = 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=400&q=80';
+
+const handleCancelOrder = async (order) => {
+  const num = order.orderNumber || `CM-${order.id}`;
+  if (!confirm(`Are you sure you want to cancel Order ${num}? The reserved items will be released back to the artisan.`)) {
+    return;
+  }
+  try {
+    const res = await orderService.cancelOrder(order.id);
+    if (res && res.success) {
+      order.status = 'Cancelled';
+      alert(`Order ${num} has been cancelled successfully.`);
+    }
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to cancel order.');
+  }
+};
 
 onMounted(async () => {
   isLoading.value = true;

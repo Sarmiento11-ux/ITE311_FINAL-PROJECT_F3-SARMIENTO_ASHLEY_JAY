@@ -74,10 +74,14 @@ class ProductReviewController extends Controller
         // 3. Find a qualifying delivered/completed order item for this customer + product
         $orderItem = OrderItem::query()
             ->where('product_id', $productId)
-            ->whereHas('order', fn($q) => $q
-                ->where('user_id', $user->id)
-                ->whereIn('status', ['delivered', 'completed'])
-            )
+            ->where(function ($query) use ($user) {
+                $query->where('status', 'delivered')
+                      ->orWhereHas('order', fn($q) => $q
+                          ->where('user_id', $user->id)
+                          ->whereIn('status', ['delivered', 'completed'])
+                      );
+            })
+            ->whereHas('order', fn($q) => $q->where('user_id', $user->id))
             ->first();
 
         if (!$orderItem) {

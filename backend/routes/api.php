@@ -53,6 +53,12 @@ Route::get('/products/{id}',    [ProductController::class, 'show']);
 // Product reviews: publicly readable, auth required to write
 Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
 
+// Headless WordPress CMS Bridge Routes (allows local CMS to synchronize users & reports)
+Route::prefix('cms-bridge')->group(function () {
+    Route::get('/users',   [\App\Http\Controllers\Api\UserController::class, 'index']);
+    Route::get('/reports', [\App\Http\Controllers\Api\AdminController::class, 'reports']);
+});
+
 // ─── Authenticated Routes (any logged-in user) ───────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -73,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ─── Artisan Subscription & Tiers ───────────────────────────────────────
     Route::get('/seller/subscription',              [SubscriptionController::class, 'getCurrentSubscription']);
     Route::post('/seller/subscription/upgrade',     [SubscriptionController::class, 'upgradeToPro']);
+    Route::get('/seller/subscription/verify',       [SubscriptionController::class, 'verifyPaymongoSession']);
     Route::post('/seller/subscription/cancel',      [SubscriptionController::class, 'cancelSubscription']);
 
     // ─── Customer: Shopping Cart (persistent MySQL cart) ────────────────
@@ -90,10 +97,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/wishlist/{productId}',      [WishlistController::class, 'destroy']);
     Route::delete('/wishlist',                  [WishlistController::class, 'clear']);
 
-    // ─── Customer: Orders (own orders only — enforced in controller) ──────
+    // ─── Customer / Admin: Orders & Status Updates (access rules enforced in controller) ──────
     Route::get('/orders',              [OrderController::class, 'index']);
     Route::get('/orders/{id}',         [OrderController::class, 'show']);
     Route::post('/orders',             [OrderController::class, 'store']);
+    Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 
     // ─── Customer: Payments (PayMongo checkout sessions) ─────────────────
     Route::post('/payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
@@ -140,8 +148,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 ->defaults('productId', 0);
         });
 
-        // Admin order management & status updates
-        Route::patch('/orders/{id}/status',       [OrderController::class, 'updateStatus']);
 
         // Admin category CRUD
         Route::post('/categories',                [CategoryController::class, 'store']);

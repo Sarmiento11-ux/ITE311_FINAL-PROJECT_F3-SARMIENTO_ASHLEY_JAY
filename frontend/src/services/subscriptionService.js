@@ -26,6 +26,14 @@ export const subscriptionService = {
   },
 
   /**
+   * Verify PayMongo session status after hosted checkout redirect.
+   */
+  async verifySession(sessionId = null) {
+    const res = await api.get('/seller/subscription/verify', { params: { session_id: sessionId } });
+    return res.data;
+  },
+
+  /**
    * Cancel subscription (switch back to Basic Free tier).
    */
   async cancelSubscription() {
