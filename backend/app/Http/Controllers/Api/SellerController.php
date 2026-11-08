@@ -88,7 +88,12 @@ class SellerController extends Controller
         $platformFee = round($totalSales * ($commissionRate / 100), 2);
         $netEarnings = round($totalSales - $platformFee, 2);
 
-        $pendingOrders = $orderItems->filter(fn($item) => $item->status === 'pending' || ($item->order && $item->order->status === 'pending'))->pluck('order_id')->unique()->count();
+        $pendingStatuses = ['pending', 'confirmed', 'processing', 'shipped'];
+        $pendingOrders = $orderItems->filter(function ($item) use ($pendingStatuses) {
+            $itemStatus = strtolower($item->status ?? '');
+            $orderStatus = strtolower($item->order->status ?? '');
+            return in_array($itemStatus, $pendingStatuses) || in_array($orderStatus, $pendingStatuses);
+        })->pluck('order_id')->unique()->count();
         $completedOrders = $orderItems->filter(fn($item) => $item->status === 'delivered')->pluck('order_id')->unique()->count();
 
         return response()->json([

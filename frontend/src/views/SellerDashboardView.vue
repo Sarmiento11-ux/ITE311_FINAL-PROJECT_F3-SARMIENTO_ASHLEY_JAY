@@ -457,7 +457,10 @@ onMounted(async () => {
 
 const pendingOrdersCount = computed(() => {
   if (liveStats.value?.pending_orders !== undefined) return liveStats.value.pending_orders;
-  return orders.value.filter(o => o.status.toLowerCase().includes('pending') || o.status.toLowerCase().includes('transit')).length;
+  return orders.value.filter(o => {
+    const s = (o.status || o.rawStatus || '').toLowerCase();
+    return s.includes('pending') || s.includes('transit') || s.includes('shipped') || s.includes('confirm') || s.includes('process');
+  }).length;
 });
 
 const completedOrdersCount = computed(() => {
