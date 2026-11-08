@@ -4,9 +4,7 @@
 
       <!-- Breadcrumbs -->
       <div class="breadcrumb-trail">
-        <router-link to="/">Home</router-link>
-        <span class="breadcrumb-separator">/</span>
-        <router-link to="/dashboard/customer">Dashboard</router-link>
+        <router-link to="/dashboard/customer">Customer Dashboard</router-link>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">My Orders</span>
       </div>

@@ -28,6 +28,12 @@ const isDedicatedDashboard = computed(() => {
   if (route.path === '/profile') {
     return true;
   }
+  if (route.path === '/orders') {
+    return true;
+  }
+  if (route.path === '/wishlist') {
+    return true;
+  }
   return false;
 });
 </script>

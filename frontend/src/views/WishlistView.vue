@@ -4,9 +4,7 @@
       
       <!-- Breadcrumb Navigation -->
       <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-        <router-link to="/">Home</router-link>
-        <span class="sep">/</span>
-        <router-link to="/products">Catalog</router-link>
+        <router-link to="/dashboard/customer">Customer Dashboard</router-link>
         <span class="sep">/</span>
         <span class="current">My Wishlist</span>
       </nav>
@@ -21,8 +19,12 @@
           </p>
         </div>
 
-        <div v-if="wishlist.items.length > 0" class="header-actions">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <router-link to="/dashboard/customer" class="btn btn-primary btn-sm">
+            ← Back to Customer Dashboard
+          </router-link>
           <button
+            v-if="wishlist.items.length > 0"
             type="button"
             class="btn btn-outline-danger btn-sm"
             @click="handleClearWishlist"
