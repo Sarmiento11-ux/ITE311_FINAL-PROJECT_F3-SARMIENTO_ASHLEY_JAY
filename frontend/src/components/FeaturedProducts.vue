@@ -48,8 +48,19 @@
         </button>
       </div>
 
-      <!-- Seller Recruitment CTA Banner -->
-      <div class="products-cta-banner">
+      <!-- Seller Dashboard Quick Access for logged-in Sellers -->
+      <div v-if="isSeller" class="products-cta-banner">
+        <div class="banner-text">
+          <h3>Manage your artisan workshop</h3>
+          <p>Check your active orders, update inventory stock, and track customer earnings.</p>
+        </div>
+        <router-link to="/dashboard/seller" class="btn btn-primary" id="sellers">
+          Go to Artisan Dashboard →
+        </router-link>
+      </div>
+
+      <!-- Seller Recruitment CTA Banner for guests & non-sellers -->
+      <div v-else class="products-cta-banner">
         <div class="banner-text">
           <h3>Are you a local creator or craftsman?</h3>
           <p>Open your CraftMarket stall today. No setup fees, low commission, direct client reach.</p>
@@ -67,6 +78,13 @@
 import { ref, computed, onMounted } from 'vue';
 import ProductCard from './ProductCard.vue';
 import { productService } from '../services/productService.js';
+import { auth } from '../data/auth.js';
+
+const isSeller = computed(() => {
+  if (!auth.isAuthenticated || !auth.user.value) return false;
+  const role = (auth.user.value.rawRole || auth.user.value.role || '').toLowerCase();
+  return role === 'seller';
+});
 
 const currentTab = ref('all');
 const featuredList = ref([]);
