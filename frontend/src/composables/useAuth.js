@@ -1,11 +1,13 @@
 import { reactive, computed } from 'vue';
 import { cart } from '../data/cart.js';
 import { wishlist } from '../data/wishlist.js';
+import { auth } from '../data/auth.js';
 import { authService } from '../services/authService.js';
 
 // ─── Reactive global auth state ───────────────────────────────────────────────
-// This is the single source of truth for authentication state in Vue.
 // Components read from here; authService handles all API communication.
+// `data/auth.js` keeps a normalized mirror of the user for header/nav
+// components, so every session change is synced there as well.
 
 const state = reactive({
   user: authService.getUser(),   // hydrate from sessionStorage on page load
@@ -35,6 +37,7 @@ export const useAuth = () => {
     try {
       const { user } = await authService.login(email, password);
       state.user = user;
+      auth.setUser(user);
       cart.loadCart(true);
       wishlist.loadWishlist(true);
       return user;
@@ -56,6 +59,7 @@ export const useAuth = () => {
     try {
       const { user } = await authService.register(data);
       state.user = user;
+      auth.setUser(user);
       return user;
     } catch (err) {
       const msg = err.response?.data?.message
@@ -79,6 +83,7 @@ export const useAuth = () => {
       state.user    = null;
       state.error   = null;
       state.loading = false;
+      auth.setUser(null);
       cart.reset();
       wishlist.reset();
     }
@@ -92,6 +97,7 @@ export const useAuth = () => {
     try {
       const user = await authService.fetchMe();
       state.user = user;
+      auth.setUser(user);
     } catch {
       // Token may have expired — clear session
       await logout();
@@ -107,6 +113,7 @@ export const useAuth = () => {
     try {
       const user = await authService.updateProfile(data);
       state.user = user;
+      auth.setUser(user);
       return user;
     } catch (err) {
       const msg = err.response?.data?.message || 'Profile update failed.';

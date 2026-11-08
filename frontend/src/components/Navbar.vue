@@ -221,7 +221,7 @@
           <!-- Primary Pages -->
           <router-link to="/" class="mobile-nav-item" exact-active-class="active" @click="closeMobileMenu">Home</router-link>
           <router-link to="/products" class="mobile-nav-item" active-class="active" @click="closeMobileMenu">Shop All Crafts</router-link>
-          <router-link to="/#categories" class="mobile-nav-item":class="{ active: route.path === '/' && route.hash === '#categories' }" @click="closeMobileMenu"> Categories</router-link>
+          <router-link to="/#categories" class="mobile-nav-item" :class="{ active: route.path === '/' && route.hash === '#categories' }" @click="closeMobileMenu">Categories</router-link>
           <a href="/#how-it-works" class="mobile-nav-item" @click="closeMobileMenu">How It Works</a>
           <a href="/#about" class="mobile-nav-item" @click="closeMobileMenu">Our Story</a>
 
