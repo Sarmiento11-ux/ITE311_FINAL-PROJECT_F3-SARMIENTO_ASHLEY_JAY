@@ -97,10 +97,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/wishlist/{productId}',      [WishlistController::class, 'destroy']);
     Route::delete('/wishlist',                  [WishlistController::class, 'clear']);
 
-    // ─── Customer: Orders (own orders only — enforced in controller) ──────
+    // ─── Customer / Admin: Orders & Status Updates (access rules enforced in controller) ──────
     Route::get('/orders',              [OrderController::class, 'index']);
     Route::get('/orders/{id}',         [OrderController::class, 'show']);
     Route::post('/orders',             [OrderController::class, 'store']);
+    Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 
     // ─── Customer: Payments (PayMongo checkout sessions) ─────────────────
     Route::post('/payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
@@ -147,8 +148,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 ->defaults('productId', 0);
         });
 
-        // Admin order management & status updates
-        Route::patch('/orders/{id}/status',       [OrderController::class, 'updateStatus']);
 
         // Admin category CRUD
         Route::post('/categories',                [CategoryController::class, 'store']);
