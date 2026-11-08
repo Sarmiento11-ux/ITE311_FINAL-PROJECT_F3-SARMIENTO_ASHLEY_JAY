@@ -61,14 +61,7 @@
         >
           Admin Panel
         </router-link>
-        <router-link 
-          v-else-if="auth.isAuthenticated && (auth.user.value?.role === 'Seller' || auth.user.value?.rawRole === 'seller')" 
-          to="/dashboard/seller" 
-          class="nav-link"
-          active-class="active"
-        >
-          Seller Portal
-        </router-link>
+
         <router-link 
           v-else-if="isCustomer" 
           to="/orders" 

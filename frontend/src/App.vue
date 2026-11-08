@@ -1,10 +1,10 @@
 <template>
   <div id="craftmarket-app">
-    <Navbar v-if="!isAdminView" />
-    <div id="main-content" :class="{ 'admin-fullscreen-layout': isAdminView }">
+    <Navbar v-if="!isDedicatedDashboard" />
+    <div id="main-content" :class="{ 'admin-fullscreen-layout': isDedicatedDashboard }">
       <router-view />
     </div>
-    <Footer v-if="!isAdminView" />
+    <Footer v-if="!isDedicatedDashboard" />
   </div>
 </template>
 
@@ -16,8 +16,10 @@ import Footer from './components/Footer.vue';
 import { authService } from './services/authService.js';
 
 const route = useRoute();
-const isAdminView = computed(() => {
-  return route.path.startsWith('/dashboard/admin') || route.path.startsWith('/admin');
+const isDedicatedDashboard = computed(() => {
+  return route.path.startsWith('/dashboard/admin') || 
+         route.path.startsWith('/admin') ||
+         route.path.startsWith('/dashboard/seller');
 });
 </script>
 
