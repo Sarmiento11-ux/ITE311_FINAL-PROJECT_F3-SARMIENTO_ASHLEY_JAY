@@ -6,7 +6,7 @@
       <div class="dashboard-header-banner">
         <div class="dashboard-welcome">
           <span class="section-eyebrow">CUSTOMER PORTAL</span>
-          <h1>Welcome back, {{ customer.fullName }}! </h1>
+          <h1>Welcome back, {{ customer.fullName }}!</h1>
           <p>Track your handcrafted orders, browse independent artisans, and manage your delivery details.</p>
         </div>
 
@@ -74,25 +74,25 @@
             <DashboardStatCard 
               title="Total Orders" 
               :value="isLoading ? '…' : totalOrdersCount" 
-              icon="" 
+              icon="orders" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Pending Orders" 
               :value="isLoading ? '…' : pendingOrdersCount" 
-              icon="" 
+              icon="pending" 
               bgClass="amber-bg" 
             />
             <DashboardStatCard 
               title="Completed Orders" 
               :value="isLoading ? '…' : completedOrdersCount" 
-              icon="" 
+              icon="completed" 
               bgClass="forest-bg" 
             />
             <DashboardStatCard 
               title="Total Spent" 
               :value="isLoading ? '…' : `₱${totalSpent.toFixed(2)}`" 
-              icon="" 
+              icon="money" 
               bgClass="terracotta-bg" 
             />
           </div>

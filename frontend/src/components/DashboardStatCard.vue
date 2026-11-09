@@ -68,6 +68,7 @@ const props = defineProps({
 });
 
 const iconKey = computed(() => {
+  if (props.icon) return props.icon;
   const t = (props.title || '').toLowerCase();
   if (t.includes('pending')) return 'pending';
   if (t.includes('completed')) return 'completed';

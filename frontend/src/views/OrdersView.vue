@@ -179,11 +179,11 @@
             <div class="receipt-summary-box">
               <div class="receipt-sum-line">
                 <span>Items Subtotal:</span>
-                <span>₱{{ (Number(selectedOrder.totalAmount) - (Number(selectedOrder.totalAmount) >= 1500 ? 0 : 150)).toFixed(2) }}</span>
+                <span>₱{{ (selectedOrder.subtotal != null ? Number(selectedOrder.subtotal) : (selectedOrder.items && selectedOrder.items.length > 0 ? selectedOrder.items.reduce((acc, i) => acc + Number(i.subtotal || 0), 0) : (Number(selectedOrder.totalAmount) - (selectedOrder.shippingFee != null ? Number(selectedOrder.shippingFee) : (Number(selectedOrder.totalAmount) >= 1500 ? 0 : 150))))).toFixed(2) }}</span>
               </div>
               <div class="receipt-sum-line">
                 <span>Shipping Fee:</span>
-                <span>{{ Number(selectedOrder.totalAmount) >= 1500 ? 'FREE (₱0.00)' : '₱150.00' }}</span>
+                <span>{{ (selectedOrder.shippingFee != null ? Number(selectedOrder.shippingFee) : (Number(selectedOrder.totalAmount) >= 1500 ? 0 : 150)) === 0 ? 'FREE (₱0.00)' : `₱${(selectedOrder.shippingFee != null ? Number(selectedOrder.shippingFee) : 150).toFixed(2)}` }}</span>
               </div>
               <div class="receipt-sum-total">
                 <span>{{ (selectedOrder.paymentMethod || '').toLowerCase().includes('cash') ? 'Total Amount Due on Delivery:' : 'Total Transaction Amount (Paid Online):' }}</span>

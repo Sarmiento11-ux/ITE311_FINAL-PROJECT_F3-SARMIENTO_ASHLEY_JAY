@@ -70,12 +70,12 @@
 
             <div class="profile-meta-list">
               <div class="meta-item">
-                <span class="meta-icon">️</span>
+                <span class="meta-icon">✉️</span>
                 <span>{{ currentUser.email }}</span>
               </div>
               <div class="meta-item">
-                
-                <span>{{ currentUser.address }}</span>
+                <span class="meta-icon">📍</span>
+                <span>{{ currentUser.address || 'No delivery address provided' }}</span>
               </div>
             </div>
           </div>
