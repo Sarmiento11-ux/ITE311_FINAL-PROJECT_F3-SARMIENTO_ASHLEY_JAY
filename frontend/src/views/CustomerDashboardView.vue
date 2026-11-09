@@ -142,9 +142,9 @@
                   <h3 class="panel-heading">Recent Orders</h3>
                   <p class="panel-subheading">Track current order progress with fair-trade escrow protection.</p>
                 </div>
-                <router-link to="/orders" class="btn btn-secondary btn-sm">
+                <button type="button" @click="currentTab = 'orders'" class="btn btn-secondary btn-sm">
                   View All Orders →
-                </router-link>
+                </button>
               </div>
 
               <div v-if="isLoading" class="dashboard-loading-state">
@@ -152,17 +152,6 @@
                 <p>Loading your orders and purchase history…</p>
               </div>
               <CustomerOrdersTable v-else :orders="orders.slice(0, 3)" @order-updated="loadOrders" />
-            </div>
-
-            <!-- Browse CTA Banner -->
-            <div class="products-cta-banner" style="margin-top: 10px;">
-              <div class="banner-text">
-                <h3>Looking for more authentic creations?</h3>
-                <p>Support independent local artisans, weavers, and craftmakers across the Philippines.</p>
-              </div>
-              <router-link to="/products" class="btn btn-primary">
-                Browse Marketplace Catalog ↗
-              </router-link>
             </div>
           </div>
 
