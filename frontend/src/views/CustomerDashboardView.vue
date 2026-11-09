@@ -48,6 +48,15 @@
             <span>My Wishlist ({{ wishlist.totalCount }})</span>
           </button>
 
+          <button
+            type="button"
+            class="dashboard-nav-item"
+            :class="{ active: currentTab === 'cart' }"
+            @click="currentTab = 'cart'"
+          >
+            <span>My Cart ({{ cart.totalCount }})</span>
+          </button>
+
           <router-link to="/profile" class="dashboard-nav-item">
             <span>My Profile</span>
           </router-link>
@@ -216,6 +225,102 @@
             </div>
           </div>
 
+          <!-- Tab 4: Shopping Cart -->
+          <div v-else-if="currentTab === 'cart'">
+            <div class="dashboard-panel-card">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Shopping Cart</h3>
+                  <p class="panel-subheading">Manage your selected handcrafted crafts and proceed to secure checkout.</p>
+                </div>
+                <router-link to="/cart" class="btn btn-secondary btn-sm">Full Cart View ↗</router-link>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="cart.items.length === 0" style="text-align: center; padding: 2.5rem 1rem; color: #7A6F68;">
+                <div style="font-size: 2.2rem; margin-bottom: 10px;">🛍️</div>
+                <h4 style="color: #2C221E; font-size: 1.1rem; margin-bottom: 6px;">Your cart is empty</h4>
+                <p style="margin-bottom: 16px; font-size: 0.92rem;">Discover authentic handcrafted pottery, textiles, and woodcrafts to add to your basket.</p>
+                <router-link to="/products" class="btn btn-primary btn-sm">Browse Marketplace →</router-link>
+              </div>
+
+              <!-- Cart Items List -->
+              <div v-else style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                <div
+                  v-for="item in cart.items"
+                  :key="item.id || item.productId"
+                  style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; background: #FAF6F0; border-radius: 8px; border: 1px solid #E8DFD5; flex-wrap: wrap;"
+                >
+                  <div style="display: flex; align-items: center; gap: 12px; min-width: 200px; flex: 1;">
+                    <img
+                      :src="item.image || 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=80&q=80'"
+                      :alt="item.title || item.name"
+                      style="width: 54px; height: 54px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid #E8DFD5;"
+                      @error="$event.target.src='https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=80&q=80'"
+                    >
+                    <div>
+                      <strong style="font-size: 0.92rem; display: block; color: #2C221E;">{{ item.title || item.name }}</strong>
+                      <span style="font-size: 0.8rem; color: #7A6F68; display: block;">Artisan: {{ item.seller || 'Artisan Maker' }}</span>
+                      <span style="font-size: 0.82rem; color: #3E5943; font-weight: 600;">₱{{ Number(item.price).toFixed(2) }} each</span>
+                    </div>
+                  </div>
+
+                  <!-- Quantity Controls & Subtotal -->
+                  <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="display: flex; align-items: center; border: 1px solid #D9CFC4; border-radius: 6px; overflow: hidden; background: #ffffff;">
+                      <button 
+                        type="button" 
+                        @click="cart.updateQuantity(item.id || item.productId, item.quantity - 1)" 
+                        style="border: none; background: transparent; padding: 4px 10px; cursor: pointer; font-size: 0.95rem; color: #423B36;"
+                        title="Decrease quantity"
+                      >−</button>
+                      <span style="padding: 4px 8px; font-weight: 600; font-size: 0.88rem; min-width: 24px; text-align: center;">{{ item.quantity }}</span>
+                      <button 
+                        type="button" 
+                        @click="cart.updateQuantity(item.id || item.productId, item.quantity + 1)" 
+                        style="border: none; background: transparent; padding: 4px 10px; cursor: pointer; font-size: 0.95rem; color: #423B36;"
+                        :disabled="item.quantity >= item.stock"
+                        title="Increase quantity"
+                      >+</button>
+                    </div>
+
+                    <strong style="color: #2C221E; font-size: 0.95rem; min-width: 80px; text-align: right;">
+                      ₱{{ ((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2) }}
+                    </strong>
+
+                    <button 
+                      type="button" 
+                      @click="cart.removeItem(item.id || item.productId)" 
+                      style="border: none; background: transparent; color: #C25E3E; cursor: pointer; padding: 4px 8px; font-size: 1rem;"
+                      title="Remove from cart"
+                    >🗑️</button>
+                  </div>
+                </div>
+
+                <!-- Cart Footer Summary & Checkout CTA -->
+                <div style="margin-top: 10px; padding: 16px 18px; background: #ffffff; border: 1px solid #E8DFD5; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                  <div>
+                    <span style="font-size: 0.85rem; color: #7A6F68; display: block;">Estimated Basket Subtotal:</span>
+                    <strong style="font-size: 1.35rem; color: #2C221E;">₱{{ cart.subtotal.toFixed(2) }}</strong>
+                    <span style="display: block; font-size: 0.8rem; color: #3E5943; margin-top: 2px;">
+                      🛡️ Fair-Trade Escrow Guaranteed
+                    </span>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <router-link to="/cart" class="btn btn-secondary btn-sm">
+                      Full Cart Details
+                    </router-link>
+                    <router-link to="/checkout" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                      <span>Proceed to Checkout</span>
+                      <span>→</span>
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </section>
 
       </div>
@@ -233,6 +338,7 @@ import CustomerOrdersTable from '../components/CustomerOrdersTable.vue';
 import { orderService } from '../services/orderService.js';
 import { auth } from '../data/auth.js';
 import { wishlist } from '../data/wishlist.js';
+import { cart } from '../data/cart.js';
 
 const router = useRouter();
 const { logout } = useAuth();
@@ -282,6 +388,7 @@ const loadOrders = async () => {
 onMounted(() => {
   loadOrders();
   wishlist.loadWishlist(true);
+  cart.loadCart(true);
 });
 
 const totalOrdersCount = computed(() => orders.value.length);

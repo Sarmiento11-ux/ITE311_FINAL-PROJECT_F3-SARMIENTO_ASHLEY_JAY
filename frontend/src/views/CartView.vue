@@ -4,9 +4,7 @@
 
       <!-- Breadcrumbs -->
       <div class="breadcrumb-trail">
-        <router-link to="/">Home</router-link>
-        <span class="breadcrumb-separator">/</span>
-        <router-link to="/products">Catalog</router-link>
+        <router-link to="/dashboard/customer">Customer Dashboard</router-link>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">Shopping Cart</span>
       </div>
@@ -16,15 +14,20 @@
           <span class="section-eyebrow">YOUR CRAFT BASKET</span>
           <h1 class="cart-page-title">Shopping Cart</h1>
         </div>
-        <button
-          v-if="cart.items.length > 0"
-          type="button"
-          @click="clearAll"
-          class="btn-text-danger"
-          title="Remove all items from your basket"
-        >
-          Clear Cart
-        </button>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <router-link to="/dashboard/customer" class="btn btn-primary btn-sm">
+            ← Back to Customer Dashboard
+          </router-link>
+          <button
+            v-if="cart.items.length > 0"
+            type="button"
+            @click="clearAll"
+            class="btn-text-danger"
+            title="Remove all items from your basket"
+          >
+            Clear Cart
+          </button>
+        </div>
       </div>
 
       <!-- Notification Toast / Error Banner -->
