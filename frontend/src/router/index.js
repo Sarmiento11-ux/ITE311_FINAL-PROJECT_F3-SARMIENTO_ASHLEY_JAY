@@ -58,7 +58,7 @@ const routes = [
     path: '/dashboard/customer',
     name: 'customer-dashboard',
     component: CustomerDashboardView,
-    meta: { requiresAuth: true, roles: ['customer', 'admin'] }
+    meta: { requiresAuth: true, roles: ['customer'] }
   },
   {
     path: '/dashboard/seller',
@@ -80,12 +80,13 @@ const routes = [
     path: '/wishlist',
     name: 'wishlist',
     component: WishlistView,
-    meta: { requiresAuth: true, roles: ['customer', 'admin'] }
+    meta: { requiresAuth: true, roles: ['customer'] }
   },
   {
     path: '/cart',
     name: 'cart',
-    component: CartView
+    component: CartView,
+    meta: { requiresAuth: true, roles: ['customer'] }
   },
   {
     path: '/checkout',
@@ -97,13 +98,13 @@ const routes = [
     path: '/orders',
     name: 'orders',
     component: OrdersView,
-    meta: { requiresAuth: true, roles: ['customer', 'admin'] }
+    meta: { requiresAuth: true, roles: ['customer'] }
   },
   {
     path: '/payment/status',
     name: 'payment-status',
     component: PaymentStatusView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['customer'] }
   }
 ];
 

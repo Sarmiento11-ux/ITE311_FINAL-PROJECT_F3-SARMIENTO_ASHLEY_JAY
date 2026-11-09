@@ -15,9 +15,14 @@
           <h1 class="orders-page-title">My Orders & Purchase History</h1>
           <p class="orders-page-subtitle">Track fulfillment progress, view artisan details, and access receipts.</p>
         </div>
-        <router-link to="/products" class="btn btn-secondary btn-sm">
-          Browse More Crafts →
-        </router-link>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <router-link to="/dashboard/customer" class="btn btn-primary btn-sm">
+            ← Back to Customer Dashboard
+          </router-link>
+          <router-link to="/products" class="btn btn-secondary btn-sm">
+            Browse More Crafts →
+          </router-link>
+        </div>
       </div>
 
       <!-- Loading State -->

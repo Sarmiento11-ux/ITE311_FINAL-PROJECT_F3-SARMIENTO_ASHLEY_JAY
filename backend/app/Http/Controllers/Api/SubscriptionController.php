@@ -14,6 +14,9 @@ use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
+    const PRO_MONTHLY_PRICE_PHP = 299.00;
+    const PRO_MONTHLY_CENTAVOS  = 29900;
+
     /**
      * PayMongo API base URL.
      */
@@ -59,8 +62,8 @@ class SubscriptionController extends Controller
             [
                 'id' => 'pro',
                 'name' => 'Artisan Pro',
-                'price' => 299,
-                'price_formatted' => '₱299',
+                'price' => (int) self::PRO_MONTHLY_PRICE_PHP,
+                'price_formatted' => '₱' . ((int) self::PRO_MONTHLY_PRICE_PHP),
                 'billing_period' => 'per month',
                 'commission_rate' => 3.0,
                 'commission_text' => 'Only 3% commission (Save 5%!)',
@@ -101,6 +104,26 @@ class SubscriptionController extends Controller
         }
 
         $activeProductsCount = Product::where('seller_id', $user->id)->count();
+
+        // Check if seller has an active Artisan Pro subscription record
+        $latestActivePro = ArtisanSubscription::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>=', Carbon::now());
+            })
+            ->latest()
+            ->first();
+
+        if ($latestActivePro && ($user->subscription_plan !== 'pro' || $user->subscription_status !== 'active')) {
+            $user->update([
+                'subscription_plan'       => 'pro',
+                'subscription_status'     => 'active',
+                'subscription_expires_at' => $latestActivePro->expires_at,
+                'commission_rate'         => 3.00,
+                'listing_limit'           => null,
+            ]);
+            $user->refresh();
+        }
 
         $plan = $user->subscription_plan ?: 'basic';
         $limit = $user->listing_limit !== null ? (int)$user->listing_limit : ($plan === 'basic' ? 10 : null);
@@ -188,7 +211,7 @@ class SubscriptionController extends Controller
                             'line_items'           => [
                                 [
                                     'currency'    => 'PHP',
-                                    'amount'      => 29900, // ₱299.00 in centavos
+                                    'amount'      => self::PRO_MONTHLY_CENTAVOS, // ₱299.00 in centavos
                                     'name'        => 'CraftMarket Artisan Pro Monthly Membership',
                                     'quantity'    => 1,
                                     'description' => 'Unlimited craft listings, 3% commission, and Pro Artisan badge',
@@ -216,7 +239,7 @@ class SubscriptionController extends Controller
                 ArtisanSubscription::create([
                     'user_id'             => $user->id,
                     'plan_name'           => 'Artisan Pro',
-                    'amount'              => 299.00,
+                    'amount'              => self::PRO_MONTHLY_PRICE_PHP,
                     'billing_cycle'       => 'monthly',
                     'payment_method'      => 'PayMongo Online',
                     'checkout_session_id' => $sessionId,
@@ -242,8 +265,15 @@ class SubscriptionController extends Controller
             }
         }
 
-        // Sandbox / Local fallback when live PayMongo credentials are not provided
-        $paymentMethod = $request->input('payment_method', 'GCash / Online Wallet');
+        // Sandbox / Local fallback: Allowed only in local environment or with explicit test simulation
+        if (!app()->environment('local', 'testing') && !$request->boolean('is_test_simulated')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Online payment verification via PayMongo is required to activate an Artisan Pro membership.',
+            ], 422);
+        }
+
+        $paymentMethod = $request->input('payment_method', 'Sandbox Simulation (Local Test)');
         $expiresAt = Carbon::now()->addMonth();
 
         DB::beginTransaction();
@@ -259,7 +289,7 @@ class SubscriptionController extends Controller
             $record = ArtisanSubscription::create([
                 'user_id'        => $user->id,
                 'plan_name'      => 'Artisan Pro',
-                'amount'         => 299.00,
+                'amount'         => self::PRO_MONTHLY_PRICE_PHP,
                 'billing_cycle'  => 'monthly',
                 'payment_method' => $paymentMethod . ' (Sandbox)',
                 'status'         => 'active',
@@ -429,15 +459,45 @@ class SubscriptionController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         }
 
+        // Active Pro subscriptions: status is active and not expired
+        $activeProUserIds = ArtisanSubscription::where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>=', Carbon::now());
+            })
+            ->pluck('user_id')
+            ->unique()
+            ->toArray();
+
+        // Synchronize seller user records whose subscription is actively Pro
+        if (!empty($activeProUserIds)) {
+            User::whereIn('id', $activeProUserIds)
+                ->where('role', 'seller')
+                ->where('subscription_plan', '!=', 'pro')
+                ->update([
+                    'subscription_plan'       => 'pro',
+                    'subscription_status'     => 'active',
+                    'commission_rate'         => 3.00,
+                    'listing_limit'           => null,
+                ]);
+        }
+
         $totalSellers = User::where('role', 'seller')->count();
-        $proSellersCount = User::where('role', 'seller')->where('subscription_plan', 'pro')->count();
-        $basicSellersCount = $totalSellers - $proSellersCount;
+        $proSellersCount = User::where('role', 'seller')
+            ->where(function ($q) use ($activeProUserIds) {
+                $q->where('subscription_plan', 'pro')
+                  ->orWhereIn('id', $activeProUserIds);
+            })
+            ->count();
+
+        // Guard: pro count is at least the number of active subscriptions
+        $proSellersCount = max($proSellersCount, count($activeProUserIds));
+        $basicSellersCount = max(0, $totalSellers - $proSellersCount);
 
         // Monthly Recurring Revenue = Active Pro Sellers * ₱299
         $mrr = $proSellersCount * 299.00;
 
         // Total subscription revenue collected all-time
-        $allTimeSubscriptionRevenue = ArtisanSubscription::sum('amount');
+        $allTimeSubscriptionRevenue = (float) ArtisanSubscription::sum('amount');
 
         // Recent subscribers list
         $recentSubscriptions = ArtisanSubscription::with('user:id,name,email')

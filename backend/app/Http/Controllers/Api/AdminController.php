@@ -149,33 +149,56 @@ class AdminController extends Controller
 
     /**
      * GET /api/admin/reports
-     * Comprehensive reports: sales, best sellers, active sellers, status breakdown.
+     * Comprehensive reports: sales, best sellers, active sellers, status breakdown with period filtering.
      */
-    public function reports()
+    public function reports(Request $request)
     {
+        $period = $request->query('period', 'all');
+        $startDate = match ($period) {
+            'today' => now()->startOfDay(),
+            'week'  => now()->subDays(7)->startOfDay(),
+            'month' => now()->subDays(30)->startOfDay(),
+            'year'  => now()->subDays(365)->startOfDay(),
+            default => null,
+        };
+
         // 1. Total Sales & Orders
-        $totalSales = (float) Order::whereNotIn('status', ['cancelled'])
+        $salesQuery = Order::whereNotIn('status', ['cancelled'])
             ->where(function ($q) {
                 $q->where('payment_status', 'paid')
                   ->orWhereIn('status', ['confirmed', 'processing', 'shipped', 'delivered']);
-            })
-            ->sum('total_amount');
+            });
 
-        $totalOrders = Order::count();
+        $ordersQuery = Order::query();
+
+        if ($startDate) {
+            $salesQuery->where('created_at', '>=', $startDate);
+            $ordersQuery->where('created_at', '>=', $startDate);
+        }
+
+        $totalSales = (float) $salesQuery->sum('total_amount');
+        $totalOrders = $ordersQuery->count();
 
         // Count only completed/fulfilled non-cancelled orders for accurate AOV
-        $completedOrdersCount = Order::whereNotIn('status', ['cancelled', 'refunded'])
+        $completedQuery = Order::whereNotIn('status', ['cancelled', 'refunded'])
             ->where(function ($q) {
                 $q->where('payment_status', 'paid')
                   ->orWhereIn('status', ['confirmed', 'processing', 'shipped', 'delivered']);
-            })
-            ->count();
+            });
 
+        if ($startDate) {
+            $completedQuery->where('created_at', '>=', $startDate);
+        }
+
+        $completedOrdersCount = $completedQuery->count();
         $averageOrderValue = $completedOrdersCount > 0 ? round($totalSales / $completedOrdersCount, 2) : 0;
 
         // 2. Order status summary
-        $statusCounts = Order::select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
+        $statusQuery = Order::select('status', DB::raw('count(*) as count'));
+        if ($startDate) {
+            $statusQuery->where('created_at', '>=', $startDate);
+        }
+        $statusCounts = $statusQuery->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
 
@@ -186,8 +209,11 @@ class AdminController extends Controller
         }
 
         // 3. Payment status summary
-        $paymentStatusSummary = Order::select('payment_status', DB::raw('count(*) as count'))
-            ->groupBy('payment_status')
+        $paymentQuery = Order::select('payment_status', DB::raw('count(*) as count'));
+        if ($startDate) {
+            $paymentQuery->where('created_at', '>=', $startDate);
+        }
+        $paymentStatusSummary = $paymentQuery->groupBy('payment_status')
             ->pluck('count', 'payment_status')
             ->toArray();
 
@@ -198,8 +224,11 @@ class AdminController extends Controller
                 DB::raw('SUM(quantity) as total_sold'),
                 DB::raw('SUM(subtotal) as total_revenue')
             )
-            ->whereHas('order', function ($q) {
+            ->whereHas('order', function ($q) use ($startDate) {
                 $q->whereNotIn('status', ['cancelled']);
+                if ($startDate) {
+                    $q->where('created_at', '>=', $startDate);
+                }
             })
             ->groupBy('product_id', 'product_name')
             ->orderBy('total_sold', 'desc')
@@ -292,6 +321,7 @@ class AdminController extends Controller
             'success' => true,
             'message' => 'Reports data generated successfully.',
             'data'    => [
+                'period'                 => $period,
                 'total_sales'           => round($totalSales, 2),
                 'total_orders'          => $totalOrders,
                 'completed_orders_count'=> $completedOrdersCount,
@@ -484,7 +514,7 @@ class AdminController extends Controller
      */
     public function payoutRequests(Request $request)
     {
-        $query = PayoutRequest::with(['seller:id,name,email,sellerProfile'])
+        $query = PayoutRequest::with(['seller.sellerProfile'])
             ->orderBy('created_at', 'desc');
 
         if ($request->filled('status')) {
@@ -498,13 +528,14 @@ class AdminController extends Controller
         $requests = $query->get();
 
         $summary = [
-            'pending_count'  => PayoutRequest::where('status', 'pending')->count(),
-            'pending_amount' => round((float) PayoutRequest::where('status', 'pending')->sum('amount'), 2),
-            'approved_count' => PayoutRequest::where('status', 'approved')->count(),
-            'approved_amount'=> round((float) PayoutRequest::where('status', 'approved')->sum('amount'), 2),
-            'paid_count'     => PayoutRequest::where('status', 'paid')->count(),
-            'paid_amount'    => round((float) PayoutRequest::where('status', 'paid')->sum('amount'), 2),
-            'rejected_count' => PayoutRequest::where('status', 'rejected')->count(),
+            'pending_count'   => PayoutRequest::where('status', 'pending')->count(),
+            'pending_amount'  => round((float) PayoutRequest::where('status', 'pending')->sum('amount'), 2),
+            'approved_count'  => PayoutRequest::where('status', 'approved')->count(),
+            'approved_amount' => round((float) PayoutRequest::where('status', 'approved')->sum('amount'), 2),
+            'paid_count'      => PayoutRequest::where('status', 'paid')->count(),
+            'paid_amount'     => round((float) PayoutRequest::where('status', 'paid')->sum('amount'), 2),
+            'rejected_count'  => PayoutRequest::where('status', 'rejected')->count(),
+            'rejected_amount' => round((float) PayoutRequest::where('status', 'rejected')->sum('amount'), 2),
         ];
 
         return response()->json([

@@ -50,24 +50,15 @@
             </div>
             <h3 class="card-title">{{ post.title }}</h3>
             <p class="card-excerpt">{{ post.excerpt }}</p>
-            <a
-              v-if="post.isFromCms"
-              :href="post.link"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
               class="card-link"
+              style="background: none; border: none; cursor: pointer; padding: 0; font: inherit;"
+              @click="openStoryModal(post)"
             >
               Read Story
               <span class="card-link-arrow">→</span>
-            </a>
-            <router-link
-              v-else
-              :to="getPostCategoryRoute(post.category)"
-              class="card-link"
-            >
-              Browse Related Crafts
-              <span class="card-link-arrow">→</span>
-            </router-link>
+            </button>
           </div>
         </article>
       </div>
@@ -84,6 +75,35 @@
       </div>
 
     </div>
+
+    <!-- In-App Story Reader Modal -->
+    <div v-if="activeStory" class="story-modal-backdrop" @click.self="activeStory = null">
+      <div class="story-modal-box">
+        <button type="button" class="btn-close-story" @click="activeStory = null">✕</button>
+        <div class="story-modal-header">
+          <span class="card-category-pill" style="position: static; margin-bottom: 8px; display: inline-block;">{{ activeStory.category }}</span>
+          <h2 style="font-size: 1.35rem; color: #2C221E; margin-bottom: 6px;">{{ activeStory.title }}</h2>
+          <div style="font-size: 0.82rem; color: #7A6F68; margin-bottom: 14px;">
+            <span>{{ activeStory.date }}</span>
+            <span v-if="activeStory.author"> • By {{ activeStory.author }}</span>
+            <span v-if="activeStory.readTime"> • {{ activeStory.readTime }}</span>
+          </div>
+        </div>
+        <div class="story-modal-body">
+          <img :src="activeStory.image" :alt="activeStory.title" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">
+          <p style="font-size: 0.95rem; line-height: 1.7; color: #423B36; white-space: pre-line;">{{ activeStory.content || activeStory.excerpt }}</p>
+        </div>
+        <div class="story-modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 16px; border-top: 1px solid #efe8de;">
+          <a v-if="activeStory.isFromCms && activeStory.link && activeStory.link !== '#'" :href="activeStory.link" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #3E5943; text-decoration: underline;">
+            View on CMS Source ↗
+          </a>
+          <router-link v-else :to="getPostCategoryRoute(activeStory.category)" class="btn btn-primary btn-sm" @click="activeStory = null">
+            Browse {{ activeStory.category }} Crafts →
+          </router-link>
+          <button type="button" class="btn btn-secondary btn-sm" @click="activeStory = null">Close</button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -93,6 +113,11 @@ import { cmsService } from '../services/cmsService.js';
 
 const loading = ref(true);
 const posts = ref([]);
+const activeStory = ref(null);
+
+function openStoryModal(post) {
+  activeStory.value = post;
+}
 
 const fallbackImg = 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80';
 
@@ -346,5 +371,49 @@ onMounted(async () => {
   font-size: 3rem;
   display: block;
   margin-bottom: 1rem;
+}
+
+/* ─── In-App Story Reader Modal ─── */
+.story-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+}
+.story-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 620px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  padding: 24px;
+  position: relative;
+}
+.btn-close-story {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #faf6f0;
+  border: 1px solid #efe8de;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: #7A6F68;
+}
+.btn-close-story:hover {
+  background: #efe8de;
+  color: #2C221E;
 }
 </style>

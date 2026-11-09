@@ -11,6 +11,20 @@ const wpClient = axios.create({
   },
 });
 
+/**
+ * Robust HTML entity decoding and tag stripping using the browser DOM parser.
+ * Protects against XSS injection from external CMS or user-supplied content.
+ */
+function sanitizeHtmlText(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  try {
+    const doc = new DOMParser().parseFromString(raw, 'text/html');
+    return (doc.body.textContent || '').trim();
+  } catch {
+    return raw.replace(/<[^>]+>/g, '').trim();
+  }
+}
+
 export const cmsService = {
   /**
    * 1. Retrieve the latest community announcement.
@@ -24,7 +38,7 @@ export const cmsService = {
       if (Array.isArray(response.data) && response.data.length > 0) {
         const item = response.data[0];
         // Strip HTML tags from rendered content if necessary
-        const text = item.title?.rendered || item.content?.rendered?.replace(/<[^>]+>/g, '').trim();
+        const text = sanitizeHtmlText(item.title?.rendered || item.content?.rendered);
         if (text) {
           return {
             text,
@@ -56,8 +70,8 @@ export const cmsService = {
         const page = response.data[0];
         return {
           eyebrow: 'SUPPORT LOCAL ARTISANS & CULTURAL HERITAGE',
-          title: page.title?.rendered || 'Discover Unique Filipino Craftsmanship',
-          description: page.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() || 
+          title: sanitizeHtmlText(page.title?.rendered) || 'Discover Unique Filipino Craftsmanship',
+          description: sanitizeHtmlText(page.excerpt?.rendered) || 
             'Connect directly with independent local weavers, potters, woodworkers, and jewelers across the Philippine archipelago.',
           ctaText: 'Explore Handmade Products',
           ctaLink: '/products',
@@ -129,7 +143,8 @@ export const cmsService = {
           return {
             id: p.id,
             title: p.title?.rendered || 'Artisan Story',
-            excerpt: p.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() || '',
+            excerpt: sanitizeHtmlText(p.excerpt?.rendered) || '',
+            content: sanitizeHtmlText(p.content?.rendered) || sanitizeHtmlText(p.excerpt?.rendered) || '',
             date: new Date(p.date).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',

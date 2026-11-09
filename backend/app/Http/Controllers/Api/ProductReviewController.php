@@ -226,8 +226,20 @@ class ProductReviewController extends Controller
      */
     public function adminIndex(Request $request)
     {
-        $reviews = ProductReview::with(['user:id,name', 'product:id,name'])
-            ->orderByDesc('created_at')
+        $query = ProductReview::with(['user:id,name', 'product:id,name']);
+
+        if ($request->filled('rating') && $request->rating !== 'all') {
+            $rating = (int) $request->rating;
+            if ($rating >= 1 && $rating <= 5) {
+                $query->where('rating', $rating);
+            }
+        }
+
+        if ($request->query('low') === '1') {
+            $query->whereIn('rating', [1, 2]);
+        }
+
+        $reviews = $query->orderByDesc('created_at')
             ->paginate(50);
 
         return response()->json([

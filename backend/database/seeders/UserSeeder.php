@@ -44,12 +44,16 @@ class UserSeeder extends Seeder
         $seller = User::updateOrCreate(
             ['email' => 'artisan@example.com'],
             [
-                'name'     => 'Elena Bautista',
-                'password' => Hash::make('password'),
-                'role'     => 'seller',
-                'phone'    => '+63 920 987 6543',
-                'address'  => '14 Session Road, Baguio City, Benguet',
-                'avatar'   => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+                'name'                => 'Elena Bautista',
+                'password'            => Hash::make('password'),
+                'role'                => 'seller',
+                'phone'               => '+63 920 987 6543',
+                'address'             => '14 Session Road, Baguio City, Benguet',
+                'avatar'              => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+                'subscription_plan'   => 'pro',
+                'subscription_status' => 'active',
+                'commission_rate'     => 3.00,
+                'listing_limit'       => null,
             ]
         );
 

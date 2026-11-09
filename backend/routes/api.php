@@ -136,6 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/payouts',                  [SellerController::class, 'payouts']);
         Route::post('/payouts',                 [SellerController::class, 'requestPayout']);
         Route::delete('/payouts/{id}',          [SellerController::class, 'cancelPayout']);
+        Route::post('/verification-request',    [SellerController::class, 'requestVerification']);
     });
 
     // ─── Admin: Full administrative endpoints (strictly role:admin) ──────
@@ -165,8 +166,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Admin user management & activation
         Route::get('/users',                      [UserController::class, 'index']);
+        Route::post('/users',                     [UserController::class, 'store']);
         Route::get('/users/{id}',                 [UserController::class, 'show']);
         Route::put('/users/{id}',                 [UserController::class, 'update']);
+        Route::delete('/users/{id}',              [UserController::class, 'destroy']);
         Route::patch('/users/{id}/toggle-active',  [UserController::class, 'toggleActive']);
     });
 

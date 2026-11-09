@@ -12,8 +12,8 @@ export const adminService = {
     return response.data?.data || { recent_orders: [], recent_users: [], activities: [] };
   },
 
-  async getReports() {
-    const response = await apiClient.get('/admin/reports');
+  async getReports(params = {}) {
+    const response = await apiClient.get('/admin/reports', { params });
     return response.data?.data || null;
   },
 
@@ -28,8 +28,18 @@ export const adminService = {
     return response.data?.data || null;
   },
 
+  async createUser(data) {
+    const response = await apiClient.post('/users', data);
+    return response.data;
+  },
+
   async updateUser(id, data) {
     const response = await apiClient.put(`/users/${id}`, data);
+    return response.data;
+  },
+
+  async deleteUser(id) {
+    const response = await apiClient.delete(`/users/${id}`);
     return response.data;
   },
 
@@ -124,8 +134,8 @@ export const adminService = {
   },
 
   // ─── Reviews Oversight & Moderation ─────────────────────────────────────
-  async getReviews() {
-    const response = await apiClient.get('/admin/reviews');
+  async getReviews(params = {}) {
+    const response = await apiClient.get('/admin/reviews', { params });
     return response.data?.data || [];
   },
 

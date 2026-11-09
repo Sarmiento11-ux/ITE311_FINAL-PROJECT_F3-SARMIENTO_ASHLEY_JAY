@@ -289,6 +289,7 @@ const handleRegister = async () => {
   try {
     const payload = {
       name: form.fullName.trim(),
+      username: form.username.trim(),
       email: form.email.trim().toLowerCase(),
       password: form.password,
       password_confirmation: form.confirmPassword,

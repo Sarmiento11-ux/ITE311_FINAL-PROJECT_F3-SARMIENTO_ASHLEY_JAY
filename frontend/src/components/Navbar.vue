@@ -61,15 +61,6 @@
         >
           Admin Panel
         </router-link>
-
-        <router-link 
-          v-else-if="isCustomer" 
-          to="/orders" 
-          class="nav-link"
-          active-class="active"
-        >
-          My Orders
-        </router-link>
         <a href="/#how-it-works" class="nav-link">How It Works</a>
         <a href="/#about" class="nav-link">Our Story</a>
       </nav>
@@ -111,54 +102,6 @@
           style="background-color: var(--cm-forest, #3E5943); color: #ffffff;"
         >
           <span>Customer Dashboard</span>
-        </router-link>
-
-        <!-- Account / Profile Link (Visible when logged in) -->
-        <router-link 
-          v-if="auth.isAuthenticated"
-          to="/profile" 
-          class="nav-icon-link desktop-only-action" 
-          title="View My Profile"
-          aria-label="View My Profile"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span class="icon-text">Profile</span>
-        </router-link>
-        
-        <!-- Customer Orders Link -->
-        <router-link 
-          v-if="isCustomer" 
-          to="/orders" 
-          class="nav-icon-link desktop-only-action" 
-          title="My Orders"
-          aria-label="View my orders"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-          </svg>
-          <span class="icon-text">Orders</span>
-        </router-link>
-
-        <!-- Wishlist Link (always visible) -->
-        <router-link v-if="isCustomer" to="/wishlist" class="nav-icon-link wishlist-pill" title="My Wishlist" aria-label="My Wishlist">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-          <span v-if="wishlist.totalCount > 0" class="wishlist-count" aria-label="{{ wishlist.totalCount }} items in wishlist">{{ wishlist.totalCount }}</span>
-        </router-link>
-
-        <!-- Cart Link (always visible) -->
-        <router-link v-if="isCustomer" to="/cart" class="nav-icon-link cart-pill" title="Shopping Cart" aria-label="Shopping Cart">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-          </svg>
-          <span class="cart-count" aria-label="{{ cart.totalCount }} items in cart">{{ cart.totalCount }}</span>
         </router-link>
 
         <!-- Mobile Hamburger Toggle -->
@@ -239,32 +182,6 @@
             @click="closeMobileMenu"
           >Customer Dashboard</router-link>
 
-          <!-- Account / Orders -->
-          <router-link 
-            v-if="isCustomer" 
-            to="/orders" 
-            class="mobile-nav-item"
-            @click="closeMobileMenu"
-          >My Orders</router-link>
-          <router-link 
-            v-if="isCustomer" 
-            to="/wishlist" 
-            class="mobile-nav-item"
-            @click="closeMobileMenu"
-          >My Wishlist ({{ wishlist.totalCount }})</router-link>
-          <router-link 
-            v-if="isCustomer" 
-            to="/cart" 
-            class="mobile-nav-item"
-            @click="closeMobileMenu"
-          >Shopping Cart ({{ cart.totalCount }})</router-link>
-          <router-link 
-            v-if="auth.isAuthenticated"
-            to="/profile" 
-            class="mobile-nav-item"
-            @click="closeMobileMenu"
-          >My Profile</router-link>
-
           <div class="mobile-nav-divider"></div>
 
           <!-- CTA Buttons -->
@@ -303,7 +220,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import DOMPurify from 'dompurify';
 import { cart } from '../data/cart.js';
-import { wishlist } from '../data/wishlist.js';
 import { auth } from '../data/auth.js';
 import { cmsService } from '../services/cmsService.js';
 

@@ -20,7 +20,9 @@ function normalizeUser(u) {
     phone: u.phone || u.contact_number || null,
     address: u.address || null,
     bio: u.bio || (rawRole === 'seller' ? 'Independent craftmaker and local handmade artisan.' : 'Conscious supporter of local handmade crafts.'),
-    shopName: u.seller_profile?.shop_name || u.sellerProfile?.shop_name || u.shopName || (u.name + "'s Workshop")
+    shopName: u.seller_profile?.shop_name || u.sellerProfile?.shop_name || u.shop_name || u.shopName || (u.name + "'s Workshop"),
+    shopDescription: u.seller_profile?.shop_description || u.sellerProfile?.shop_description || u.shop_description || '',
+    contactNumber: u.seller_profile?.contact_number || u.sellerProfile?.contact_number || u.contact_number || u.phone || ''
   };
 }
 
@@ -46,10 +48,13 @@ export const auth = {
     try {
       const res = await authService.updateProfile({
         name: updatedData.fullName || updatedData.name,
-        phone: updatedData.phone,
+        username: updatedData.username,
+        phone: updatedData.phone || updatedData.contactNumber,
         address: updatedData.address,
         avatar: updatedData.avatar,
-        shop_name: updatedData.shopName
+        shop_name: updatedData.shopName || updatedData.shop_name,
+        shop_description: updatedData.shopDescription || updatedData.shop_description || updatedData.bio,
+        contact_number: updatedData.contactNumber || updatedData.contact_number || updatedData.phone
       });
       state.user = normalizeUser(res);
       return state.user;

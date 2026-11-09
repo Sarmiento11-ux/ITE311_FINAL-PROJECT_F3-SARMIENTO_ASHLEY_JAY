@@ -3,11 +3,21 @@
     <!-- 1. CATALOG HERO / BREADCRUMB -->
     <section class="catalog-hero">
       <div class="container">
-        <nav class="breadcrumb-trail" aria-label="Breadcrumb">
-          <router-link to="/">Home</router-link>
-          <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-current">Product Catalog</span>
-        </nav>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+          <nav class="breadcrumb-trail" aria-label="Breadcrumb" style="margin-bottom: 0;">
+            <router-link to="/">Home</router-link>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Product Catalog</span>
+          </nav>
+          <router-link 
+            v-if="isCustomer" 
+            to="/dashboard/customer" 
+            class="btn btn-secondary btn-sm"
+            style="background: #ffffff; border: 1px solid #efe8de; color: #2F4533; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.06);"
+          >
+            ← Back to Customer Dashboard
+          </router-link>
+        </div>
 
         <div class="catalog-header-text">
           <span class="section-eyebrow">ARTISAN SHOP</span>
@@ -69,15 +79,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, nextTick } from 'vue';
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ProductSearch from '../components/ProductSearch.vue';
 import CategoryFilter from '../components/CategoryFilter.vue';
 import ProductGrid from '../components/ProductGrid.vue';
 import { productService } from '../services/productService.js';
+import { auth } from '../data/auth.js';
 
 const route = useRoute();
 const router = useRouter();
+
+const isCustomer = computed(() => {
+  return auth.user.value?.role === 'Customer' || auth.user.value?.rawRole === 'customer';
+});
 
 // ── State ──────────────────────────────────────────────
 const products = ref([]);

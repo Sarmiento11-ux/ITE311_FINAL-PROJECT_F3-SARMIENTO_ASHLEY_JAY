@@ -72,9 +72,29 @@ class CartController extends Controller
             'quantity'   => 'nullable|integer|min:1',
         ]);
 
-        $userId = $request->user()->id;
+        $user = $request->user();
+
+        // Administrators are not permitted to add items to cart
+        if ($user->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Administrators are not permitted to add products to a shopping cart. Please use a customer account.',
+                'data'    => null,
+            ], 403);
+        }
+
+        $userId = $user->id;
         $product = Product::findOrFail($validated['product_id']);
         $quantityToAdd = $validated['quantity'] ?? 1;
+
+        // Prevent sellers from buying their own items
+        if ($product->seller_id === $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot add your own artisan craft piece to your shopping cart.',
+                'data'    => null,
+            ], 422);
+        }
 
         if ($product->stock <= 0) {
             return response()->json([

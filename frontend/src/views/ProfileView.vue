@@ -198,6 +198,46 @@
                 >
               </div>
 
+              <!-- Artisan Workshop Fields (Only for Seller Role) -->
+              <div v-if="currentUser.role === 'Seller'" style="margin-top: 20px; padding-top: 18px; border-top: 1px solid #efe8de;">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #2F4533; margin-bottom: 12px;">Artisan Workshop & Storefront Details</h4>
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="editShopName" class="form-label">Storefront / Shop Name</label>
+                    <input 
+                      type="text" 
+                      id="editShopName" 
+                      v-model="editForm.shopName" 
+                      class="form-input" 
+                      :disabled="!isEditing"
+                      placeholder="e.g. Cordillera Weaves Studio"
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label for="editContactNumber" class="form-label">Workshop Contact Number</label>
+                    <input 
+                      type="tel" 
+                      id="editContactNumber" 
+                      v-model="editForm.contactNumber" 
+                      class="form-input" 
+                      :disabled="!isEditing"
+                      placeholder="e.g. 0917-123-4567"
+                    >
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="editShopDesc" class="form-label">Workshop Story & Artisan Bio</label>
+                  <textarea 
+                    id="editShopDesc" 
+                    v-model="editForm.shopDescription" 
+                    rows="3" 
+                    class="form-input" 
+                    :disabled="!isEditing"
+                    placeholder="Tell shoppers about your craft lineage, materials, and workshop..."
+                  ></textarea>
+                </div>
+              </div>
+
               <!-- Form Actions (Visible when editing) -->
               <div v-if="isEditing" class="edit-actions-row">
                 <button type="button" @click="cancelEdit" class="btn btn-secondary">Cancel</button>

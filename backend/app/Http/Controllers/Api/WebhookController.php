@@ -29,7 +29,9 @@ class WebhookController extends Controller
         $webhookSecret = config('services.paymongo.webhook_secret');
         $signatureHeader = $request->header('paymongo-signature');
 
-        if ($webhookSecret && $webhookSecret !== 'whsec_REPLACE_WITH_YOUR_WEBHOOK_SECRET') {
+        $isConfiguredSecret = $webhookSecret && $webhookSecret !== 'whsec_REPLACE_WITH_YOUR_WEBHOOK_SECRET';
+
+        if ($isConfiguredSecret) {
             if (!$signatureHeader) {
                 Log::warning('[Webhook] Missing PayMongo signature header.');
                 return response()->json(['error' => 'Missing signature'], 400);
@@ -39,6 +41,9 @@ class WebhookController extends Controller
                 Log::warning('[Webhook] PayMongo signature verification failed.');
                 return response()->json(['error' => 'Invalid signature'], 401);
             }
+        } elseif (!app()->environment('local', 'testing')) {
+            Log::warning('[Webhook] Webhook endpoint called without configured webhook secret in non-local environment.');
+            return response()->json(['error' => 'Webhook secret unconfigured'], 403);
         }
 
         // ── 2. Parse event ─────────────────────────────────────────────────────

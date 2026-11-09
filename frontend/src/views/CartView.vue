@@ -212,7 +212,7 @@
 
           <router-link
             v-else
-            to="/checkout"
+            to="/dashboard/customer?tab=checkout"
             class="btn btn-primary btn-checkout-main"
           >
             <span>Proceed to Checkout</span>

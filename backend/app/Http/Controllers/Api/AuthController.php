@@ -20,6 +20,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name'                  => 'required|string|max:255',
+            'username'              => 'nullable|string|min:3|max:50|unique:users,username',
             'email'                 => 'required|email|unique:users,email',
             'password'              => ['required', 'confirmed', Password::min(6)],
             'role'                  => 'nullable|in:customer,seller',
@@ -35,6 +36,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'name'     => $validated['name'],
+            'username' => $validated['username'] ?? null,
             'email'    => $validated['email'],
             'password' => $validated['password'], // hashed automatically via cast
             'role'     => $role,
@@ -159,10 +161,11 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'    => 'sometimes|string|max:255',
-            'phone'   => 'nullable|string|max:50',
-            'address' => 'nullable|string|max:500',
-            'avatar'  => 'nullable|string|max:500',
+            'name'     => 'sometimes|string|max:255',
+            'username' => 'nullable|string|min:3|max:50|unique:users,username,' . $user->id,
+            'phone'    => 'nullable|string|max:50',
+            'address'  => 'nullable|string|max:500',
+            'avatar'   => 'nullable|string|max:500',
             // Seller profile fields
             'shop_name'        => 'nullable|string|max:255',
             'shop_description' => 'nullable|string',
@@ -171,10 +174,11 @@ class AuthController extends Controller
 
         // Update base user fields
         $user->update(array_filter([
-            'name'    => $validated['name'] ?? null,
-            'phone'   => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'avatar'  => $validated['avatar'] ?? null,
+            'name'     => $validated['name'] ?? null,
+            'username' => $validated['username'] ?? null,
+            'phone'    => $validated['phone'] ?? null,
+            'address'  => $validated['address'] ?? null,
+            'avatar'   => $validated['avatar'] ?? null,
         ], fn($v) => $v !== null));
 
         // Update seller profile if seller

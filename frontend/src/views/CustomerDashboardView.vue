@@ -308,17 +308,176 @@
                   </div>
 
                   <div style="display: flex; gap: 10px; align-items: center;">
-                    <router-link to="/cart" class="btn btn-secondary btn-sm">
-                      Full Cart Details
-                    </router-link>
-                    <router-link to="/checkout" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <button type="button" @click="currentTab = 'checkout'" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
                       <span>Proceed to Checkout</span>
                       <span>→</span>
-                    </router-link>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- TAB 5: INTEGRATED ORDER CHECKOUT -->
+          <div v-else-if="currentTab === 'checkout'" class="dashboard-panel-card">
+            <div class="panel-header-row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 class="panel-heading">Order Checkout & Delivery Details</h3>
+                <p class="panel-subheading">Complete your delivery address and confirm payment directly inside your customer portal.</p>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" @click="currentTab = 'cart'">
+                ← Back to Cart
+              </button>
+            </div>
+
+            <!-- Empty Cart Alert -->
+            <div v-if="cart.items.length === 0 && !checkoutSuccess" style="text-align: center; padding: 2.5rem 1rem; color: #7A6F68;">
+              <div style="font-size: 2.2rem; margin-bottom: 10px;">🛒</div>
+              <h4 style="color: #2C221E; font-size: 1.1rem; margin-bottom: 6px;">Your cart is empty</h4>
+              <p style="margin-bottom: 16px; font-size: 0.92rem;">Please add handcrafted artisan items before placing an order.</p>
+              <button type="button" class="btn btn-primary btn-sm" @click="currentTab = 'overview'">Return to Dashboard</button>
+            </div>
+
+            <!-- Order Success Confirmation Screen -->
+            <div v-else-if="checkoutSuccess" style="text-align: center; padding: 2rem 1rem;">
+              <div style="font-size: 2.8rem; margin-bottom: 10px;">🎉</div>
+              <span class="status-pill status-delivered" style="margin-bottom: 8px;">Order Confirmed</span>
+              <h3 style="font-size: 1.4rem; color: #2C221E; margin-top: 6px;">Salamat! Your Order has been Placed.</h3>
+              <p style="color: #7A6F68; font-size: 0.92rem; margin-bottom: 18px;">
+                Order Number: <strong style="color: #C25E3E;">{{ placedOrder?.order_number }}</strong>
+              </p>
+              <div style="background: #FAF6F0; border: 1px solid #E8DFD5; border-radius: 8px; padding: 16px; max-width: 480px; margin: 0 auto 20px; text-align: left; font-size: 0.88rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span>Payment Method:</span>
+                  <strong>{{ placedOrder?.payment_method || 'Cash on Delivery (COD)' }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span>Amount Due on Delivery:</span>
+                  <strong style="color: #2E7D32;">₱{{ Number(placedOrder?.total_amount || 0).toFixed(2) }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span>Delivery Address:</span>
+                  <span>{{ placedOrder?.shipping_address }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Contact Number:</span>
+                  <span>{{ placedOrder?.contact_number }}</span>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: center; gap: 12px;">
+                <button type="button" class="btn btn-primary btn-sm" @click="viewPlacedOrders">
+                  View My Orders →
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" @click="currentTab = 'overview'">
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+
+            <!-- Integrated Checkout Form Grid -->
+            <form v-else @submit.prevent="handleDashboardCheckout" style="margin-top: 16px;">
+              <div v-if="checkoutAlert" style="padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.88rem;" :style="{ background: checkoutAlertError ? '#FDF2F0' : '#E8F5E9', color: checkoutAlertError ? '#C25E3E' : '#2E7D32', border: checkoutAlertError ? '1px solid #F3C5BA' : '1px solid #C8E6C9' }">
+                {{ checkoutAlert }}
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start;">
+                <!-- Left: Shipping & Contact Form -->
+                <div style="background: #FAF6F0; border: 1px solid #E8DFD5; border-radius: 8px; padding: 20px;">
+                  <h4 style="font-size: 1rem; color: #2C221E; margin-bottom: 14px; border-bottom: 1px solid #E8DFD5; padding-bottom: 8px;">
+                    1. Delivery Destination & Contact Details
+                  </h4>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                      <label style="font-size: 0.8rem; font-weight: 600; color: #2C221E; display: block; margin-bottom: 4px;">Recipient Name *</label>
+                      <input type="text" v-model="checkoutForm.fullName" required class="form-input" style="width: 100%; padding: 8px 10px; border: 1px solid #D6C8B8; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;" placeholder="Full Name">
+                    </div>
+                    <div>
+                      <label style="font-size: 0.8rem; font-weight: 600; color: #2C221E; display: block; margin-bottom: 4px;">Contact Number *</label>
+                      <input type="tel" v-model="checkoutForm.contactNumber" required class="form-input" style="width: 100%; padding: 8px 10px; border: 1px solid #D6C8B8; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;" placeholder="+63 917 123 4567">
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #2C221E; display: block; margin-bottom: 4px;">Complete Delivery Address *</label>
+                    <textarea v-model="checkoutForm.shippingAddress" rows="3" required class="form-input" style="width: 100%; padding: 8px 10px; border: 1px solid #D6C8B8; border-radius: 6px; font-size: 0.88rem; resize: vertical; box-sizing: border-box;" placeholder="House/Unit No., Street, Barangay, City, Province, Postal Code"></textarea>
+                  </div>
+
+                  <div style="margin-bottom: 16px;">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #2C221E; display: block; margin-bottom: 4px;">Delivery Landmark / Notes (Optional)</label>
+                    <input type="text" v-model="checkoutForm.notes" class="form-input" style="width: 100%; padding: 8px 10px; border: 1px solid #D6C8B8; border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;" placeholder="e.g. Near yellow gate, call rider upon arrival">
+                  </div>
+
+                  <h4 style="font-size: 1rem; color: #2C221E; margin-bottom: 12px; border-bottom: 1px solid #E8DFD5; padding-bottom: 8px;">
+                    2. Payment Method
+                  </h4>
+
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 6px; border: 1px solid #D6C8B8; background: #ffffff; cursor: pointer;" :style="checkoutPaymentMethod === 'cod' ? { borderColor: '#3E5943', background: '#F0F5F1' } : {}">
+                      <input type="radio" v-model="checkoutPaymentMethod" value="cod" style="margin-top: 3px;">
+                      <div>
+                        <strong style="font-size: 0.9rem; color: #2C221E;">🚚 Cash on Delivery (COD)</strong>
+                        <p style="font-size: 0.78rem; color: #7A6F68; margin: 2px 0 0;">Pay directly with exact cash upon receiving and inspecting packages.</p>
+                      </div>
+                    </label>
+
+                    <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 6px; border: 1px solid #D6C8B8; background: #ffffff; cursor: pointer;" :style="checkoutPaymentMethod === 'paymongo' ? { borderColor: '#3E5943', background: '#F0F5F1' } : {}">
+                      <input type="radio" v-model="checkoutPaymentMethod" value="paymongo" style="margin-top: 3px;">
+                      <div>
+                        <strong style="font-size: 0.9rem; color: #2C221E;">💳 Online Payment via PayMongo</strong>
+                        <p style="font-size: 0.78rem; color: #7A6F68; margin: 2px 0 0;">Pay securely online with GCash, Maya, credit/debit card, or GrabPay.</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Right: Order Items & Subtotal -->
+                <div style="background: #FAF6F0; border: 1px solid #E8DFD5; border-radius: 8px; padding: 20px;">
+                  <h4 style="font-size: 1rem; color: #2C221E; margin-bottom: 12px; border-bottom: 1px solid #E8DFD5; padding-bottom: 8px;">
+                    Order Summary ({{ cart.totalCount }} items)
+                  </h4>
+
+                  <div style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+                    <div v-for="item in cart.items" :key="item.id || item.productId" style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #423B36;">
+                      <span>{{ item.quantity }} × {{ item.title || item.name }}</span>
+                      <strong>₱{{ ((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2) }}</strong>
+                    </div>
+                  </div>
+
+                  <div style="border-top: 1px solid #E8DFD5; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem;">
+                    <div style="display: flex; justify-content: space-between; color: #7A6F68;">
+                      <span>Items Subtotal</span>
+                      <span>₱{{ cart.subtotal.toFixed(2) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #7A6F68;">
+                      <span>Shipping & Handling</span>
+                      <span v-if="cart.subtotal >= 1500" style="color: #2E7D32; font-weight: 700;">FREE (₱0.00)</span>
+                      <span v-else>₱150.00</span>
+                    </div>
+                    <div style="border-top: 1px solid #D6C8B8; margin-top: 6px; padding-top: 8px; display: flex; justify-content: space-between; font-size: 1.05rem;">
+                      <strong>Grand Total</strong>
+                      <strong style="color: #C25E3E;">₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}</strong>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    style="width: 100%; margin-top: 16px; padding: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                    :disabled="isSubmittingCheckout"
+                  >
+                    <span v-if="isSubmittingCheckout">Placing Order...</span>
+                    <span v-else-if="checkoutPaymentMethod === 'paymongo'">Proceed to PayMongo</span>
+                    <span v-else>Confirm & Place Order (COD)</span>
+                    <span v-if="!isSubmittingCheckout">→</span>
+                  </button>
+
+                  <button type="button" @click="currentTab = 'cart'" style="width: 100%; margin-top: 8px; background: none; border: none; font-size: 0.82rem; color: #7A6F68; cursor: pointer; text-decoration: underline;">
+                    ← Return to Cart
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
 
         </section>
@@ -330,8 +489,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { paymentService } from '../services/paymentService.js';
 import { useAuth } from '../composables/useAuth.js';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
 import CustomerOrdersTable from '../components/CustomerOrdersTable.vue';
@@ -341,6 +501,106 @@ import { wishlist } from '../data/wishlist.js';
 import { cart } from '../data/cart.js';
 
 const router = useRouter();
+const route = useRoute();
+
+const checkoutPaymentMethod = ref('cod');
+const isSubmittingCheckout = ref(false);
+const checkoutSuccess = ref(false);
+const placedOrder = ref(null);
+const checkoutAlert = ref('');
+const checkoutAlertError = ref(false);
+
+const checkoutForm = reactive({
+  fullName: '',
+  contactNumber: '',
+  shippingAddress: '',
+  notes: ''
+});
+
+const initCheckoutForm = () => {
+  const u = auth.user.value;
+  if (u) {
+    checkoutForm.fullName = u.fullName || u.name || '';
+    checkoutForm.contactNumber = u.phone || u.contact_number || '';
+    checkoutForm.shippingAddress = u.address || '';
+  }
+};
+
+const handleDashboardCheckout = async () => {
+  checkoutAlert.value = '';
+  checkoutAlertError.value = false;
+
+  if (!checkoutForm.fullName.trim() || !checkoutForm.contactNumber.trim() || !checkoutForm.shippingAddress.trim()) {
+    checkoutAlert.value = 'Please provide your Full Name, Contact Phone, and Complete Delivery Address.';
+    checkoutAlertError.value = true;
+    return;
+  }
+
+  if (cart.items.length === 0) {
+    checkoutAlert.value = 'Your basket is empty. Please add items to checkout.';
+    checkoutAlertError.value = true;
+    return;
+  }
+
+  isSubmittingCheckout.value = true;
+  try {
+    const payload = {
+      items: cart.items.map(i => ({
+        product_id: i.productId || i.id,
+        quantity: i.quantity
+      })),
+      shipping_address: checkoutForm.shippingAddress.trim(),
+      contact_number: checkoutForm.contactNumber.trim(),
+      notes: checkoutForm.notes.trim() || undefined,
+      payment_method: checkoutPaymentMethod.value === 'paymongo'
+        ? 'PayMongo Online Payment'
+        : 'Cash on Delivery',
+    };
+
+    const res = await orderService.createOrder(payload);
+    if (!res || !res.success) {
+      checkoutAlert.value = res?.message || 'Failed to place order.';
+      checkoutAlertError.value = true;
+      return;
+    }
+
+    const order = res.data;
+    if (checkoutPaymentMethod.value === 'paymongo') {
+      try {
+        const pmRes = await paymentService.createCheckoutSession(order.id);
+        if (pmRes && pmRes.success && pmRes.data?.checkout_url) {
+          cart.items.splice(0, cart.items.length);
+          localStorage.removeItem('craftmarket_local_cart');
+          window.location.href = pmRes.data.checkout_url;
+          return;
+        } else {
+          checkoutAlert.value = pmRes?.message || 'Could not start PayMongo session. Your order was saved.';
+          checkoutAlertError.value = true;
+        }
+      } catch (pmErr) {
+        checkoutAlert.value = pmErr.response?.data?.message || pmErr.message || 'Payment session failed.';
+        checkoutAlertError.value = true;
+      }
+    } else {
+      placedOrder.value = order;
+      checkoutSuccess.value = true;
+      cart.items.splice(0, cart.items.length);
+      localStorage.removeItem('craftmarket_local_cart');
+      loadOrders();
+    }
+  } catch (err) {
+    checkoutAlert.value = err.response?.data?.message || err.message || 'Failed to place order.';
+    checkoutAlertError.value = true;
+  } finally {
+    isSubmittingCheckout.value = false;
+  }
+};
+
+const viewPlacedOrders = () => {
+  checkoutSuccess.value = false;
+  currentTab.value = 'orders';
+  loadOrders();
+};
 const { logout } = useAuth();
 
 const handleLogout = async () => {
@@ -386,6 +646,10 @@ const loadOrders = async () => {
 };
 
 onMounted(() => {
+  if (route.query.tab) {
+    currentTab.value = route.query.tab;
+  }
+  initCheckoutForm();
   loadOrders();
   wishlist.loadWishlist(true);
   cart.loadCart(true);

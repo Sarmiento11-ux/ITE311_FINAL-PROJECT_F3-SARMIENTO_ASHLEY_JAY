@@ -145,4 +145,105 @@ class UserController extends Controller
             'data'    => $user,
         ]);
     }
+
+    /**
+     * Store a newly created user (Admin User Creation).
+     * POST /api/users
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'      => 'required|string|max:255',
+            'username'  => 'nullable|string|min:3|max:50|unique:users,username',
+            'email'     => 'required|email|max:255|unique:users,email',
+            'password'  => 'required|string|min:6',
+            'role'      => 'required|in:customer,seller,admin',
+            'phone'     => 'nullable|string|max:50',
+            'address'   => 'nullable|string',
+            'is_active' => 'nullable|boolean',
+            'shop_name' => 'nullable|string|max:255',
+        ]);
+
+        $validated['password'] = Hash::make($validated['password']);
+        $validated['is_active'] = $validated['is_active'] ?? true;
+
+        $user = User::create([
+            'name'      => $validated['name'],
+            'username'  => $validated['username'] ?? null,
+            'email'     => $validated['email'],
+            'password'  => $validated['password'],
+            'role'      => $validated['role'],
+            'phone'     => $validated['phone'] ?? null,
+            'address'   => $validated['address'] ?? null,
+            'is_active' => $validated['is_active'],
+        ]);
+
+        if ($user->role === 'seller') {
+            $shopName = $validated['shop_name'] ?? ($user->name . "'s Workshop");
+            $user->sellerProfile()->create([
+                'shop_name'           => $shopName,
+                'shop_slug'           => \Illuminate\Support\Str::slug($shopName) . '-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(5)),
+                'shop_description'    => 'Local handcrafted artisan workshop.',
+                'contact_number'      => $user->phone ?? '',
+                'address'             => $user->address ?? '',
+                'is_verified'         => false,
+                'verification_status' => 'pending',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User created successfully.',
+            'data'    => $user->load('sellerProfile'),
+        ], 201);
+    }
+
+    /**
+     * Delete user account permanently or safely archive.
+     * DELETE /api/users/{id}
+     */
+    public function destroy(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        if ($request->user()->id === $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot delete your own active administrator account.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $user->tokens()->delete();
+
+        // If user has orders or products, soft-deactivate to preserve historical integrity
+        if ($user->orders()->exists() || $user->products()->exists()) {
+            $user->update(['is_active' => false]);
+            return response()->json([
+                'success' => true,
+                'message' => 'User has active transactions or catalog items. Account was safely deactivated and archived.',
+                'data'    => $user,
+            ]);
+        }
+
+        if ($user->sellerProfile) {
+            $user->sellerProfile()->delete();
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User account deleted successfully.',
+            'data'    => null,
+        ]);
+    }
 }
