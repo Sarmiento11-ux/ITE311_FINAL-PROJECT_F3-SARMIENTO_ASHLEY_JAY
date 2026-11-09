@@ -34,6 +34,9 @@ const isDedicatedDashboard = computed(() => {
   if (route.path === '/wishlist') {
     return true;
   }
+  if (route.path === '/cart') {
+    return true;
+  }
   return false;
 });
 </script>
