@@ -11,7 +11,7 @@
         </div>
 
         <div class="dashboard-user-badge" style="background-color: #E8F0EA; color: #2F4533;">
-          <span>Verified Local Artisan Maker</span>
+          <span>{{ sellerVerificationLabel }}</span>
         </div>
       </div>
 
@@ -48,6 +48,15 @@
           >
             
             <span>Manage Orders ({{ orders.length }})</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'payouts' }"
+            @click="currentTab = 'payouts'"
+          >
+            <span>Payouts & Escrow</span>
           </button>
 
           <button 
@@ -151,6 +160,12 @@
                   <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Escrow Payout Rate:</span>
                   <span style="color: #2E7D32; font-weight: 600;">{{ subscriptionData?.is_pro ? '97% Direct Maker Payout (Pro Tier)' : '92% Direct Maker Payout (Basic Tier)' }}</span>
                 </div>
+                <div>
+                  <span style="color: #7A6F68; font-size: 0.8rem; display: block;">Storefront Verification:</span>
+                  <span class="status-pill" :class="sellerVerificationStatus === 'approved' ? 'status-delivered' : (sellerVerificationStatus === 'rejected' ? 'status-cancelled' : 'status-pending')">
+                    {{ sellerVerificationStatus }}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -244,7 +259,132 @@
             </div>
           </div>
 
-          <!-- Tab 4: Customer Reviews (Read-only) -->
+          <!-- Tab 4: Payouts & Escrow -->
+          <div v-else-if="currentTab === 'payouts'">
+            <div class="dashboard-panel-card">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Payouts & Escrow Ledger</h3>
+                  <p class="panel-subheading">Request a cash-out from escrow funds that have already been released by the platform.</p>
+                </div>
+                <span class="status-pill status-published">Escrow Protected</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 18px;">
+                <div style="padding: 16px; border-radius: 10px; background: #E8F0EA; border: 1px solid #C8DCCB;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #2F4533; font-weight: 700;">Available to Request</span>
+                  <div style="font-size: 1.45rem; font-weight: 700; color: #2E7D32; margin-top: 4px;">₱{{ Number(payoutsData?.available_balance ?? 0).toFixed(2) }}</div>
+                </div>
+                <div style="padding: 16px; border-radius: 10px; background: #FAF6F0; border: 1px solid #E8DFD5;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #7A6F68; font-weight: 700;">Released Earnings</span>
+                  <div style="font-size: 1.45rem; font-weight: 700; color: #2D2420; margin-top: 4px;">₱{{ Number(payoutsData?.released_earnings ?? 0).toFixed(2) }}</div>
+                </div>
+                <div style="padding: 16px; border-radius: 10px; background: #FFF7ED; border: 1px solid #FED7AA;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9A3412; font-weight: 700;">Reserved / Pending</span>
+                  <div style="font-size: 1.45rem; font-weight: 700; color: #C2410C; margin-top: 4px;">₱{{ Number(payoutsData?.reserved_amount ?? 0).toFixed(2) }}</div>
+                </div>
+                <div style="padding: 16px; border-radius: 10px; background: #EFF6FF; border: 1px solid #BFDBFE;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF; font-weight: 700;">Paid Out</span>
+                  <div style="font-size: 1.45rem; font-weight: 700; color: #1D4ED8; margin-top: 4px;">₱{{ Number(payoutsData?.paid_amount ?? 0).toFixed(2) }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-panel-card" style="margin-top: 18px;">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Request a Payout</h3>
+                  <p class="panel-subheading">Enter the amount you want to withdraw from your available released escrow balance.</p>
+                </div>
+              </div>
+
+              <form @submit.prevent="submitPayoutRequest" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 12px;">
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #5C524B; margin-bottom: 5px;">Amount (₱)</label>
+                  <input v-model="payoutForm.amount" type="number" min="1" step="0.01" class="form-input" style="padding: 9px;" placeholder="0.00" required />
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #5C524B; margin-bottom: 5px;">Payout Method</label>
+                  <select v-model="payoutForm.payout_method" class="form-input" style="padding: 9px;">
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Palawan Express">Palawan Express</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #5C524B; margin-bottom: 5px;">Account Name</label>
+                  <input v-model="payoutForm.account_name" type="text" class="form-input" style="padding: 9px;" placeholder="Full account name" />
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #5C524B; margin-bottom: 5px;">Account Number</label>
+                  <input v-model="payoutForm.account_number" type="text" class="form-input" style="padding: 9px;" placeholder="Mobile or bank account number" />
+                </div>
+                <div style="grid-column: 1 / -1;">
+                  <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #5C524B; margin-bottom: 5px;">Notes (optional)</label>
+                  <input v-model="payoutForm.notes" type="text" class="form-input" style="padding: 9px;" placeholder="Any instructions for the admin team" />
+                </div>
+                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap;">
+                  <span v-if="payoutFeedback" style="font-size: 0.84rem;" :style="{ color: payoutFeedbackIsError ? '#C25E3E' : '#2E7D32' }">{{ payoutFeedback }}</span>
+                  <button type="submit" class="btn btn-primary btn-sm" :disabled="isSubmittingPayout">
+                    {{ isSubmittingPayout ? 'Submitting…' : 'Submit Payout Request' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="dashboard-panel-card" style="margin-top: 18px;">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Payout Request History</h3>
+                  <p class="panel-subheading">Track every cash-out request and its settlement status.</p>
+                </div>
+              </div>
+
+              <div v-if="!payoutsData?.requests?.length" style="padding: 28px; text-align: center; color: #9E8F85; background: #FAF6F0; border-radius: 10px; margin-top: 12px;">
+                No payout requests yet. Your released escrow earnings will appear above once an order is delivered.
+              </div>
+
+              <div v-else style="overflow-x: auto; margin-top: 14px;">
+                <table class="dashboard-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                  <thead>
+                    <tr style="border-bottom: 2px solid #EFE8DE; font-size: 0.76rem; color: #7A6A60; text-transform: uppercase;">
+                      <th style="padding: 10px 12px;">Requested</th>
+                      <th style="padding: 10px 12px;">Amount</th>
+                      <th style="padding: 10px 12px;">Method</th>
+                      <th style="padding: 10px 12px;">Status</th>
+                      <th style="padding: 10px 12px;">Admin Notes</th>
+                      <th style="padding: 10px 12px;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="p in payoutsData.requests" :key="p.id" style="border-bottom: 1px solid #EFE8DE; font-size: 0.86rem;">
+                      <td style="padding: 12px;">{{ formatPayoutDate(p.requested_at || p.created_at) }}</td>
+                      <td style="padding: 12px; font-weight: 700;">₱{{ Number(p.amount).toFixed(2) }}</td>
+                      <td style="padding: 12px;">{{ p.payout_method || '—' }}</td>
+                      <td style="padding: 12px;">
+                        <span class="status-pill" :class="payoutStatusClass(p.status)">{{ p.status }}</span>
+                      </td>
+                      <td style="padding: 12px; color: #7A6F68;">{{ p.admin_notes || '—' }}</td>
+                      <td style="padding: 12px;">
+                        <button
+                          v-if="p.status === 'pending'"
+                          type="button"
+                          class="btn-table-action btn-action-view"
+                          @click="cancelPayoutRequest(p)"
+                        >
+                          Cancel
+                        </button>
+                        <span v-else style="color: #9E8F85;">—</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 5: Customer Reviews (Read-only) -->
           <div v-else-if="currentTab === 'reviews'">
             <div class="dashboard-panel-card">
               <div class="panel-header-row">
@@ -386,7 +526,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth.js';
 import DashboardStatCard from '../components/DashboardStatCard.vue';
@@ -420,6 +560,17 @@ const editingProduct = ref(null);
 const isEditMode = ref(false);
 const subscriptionData = ref(null);
 const isSubmittingSubscription = ref(false);
+const payoutsData = ref(null);
+const isSubmittingPayout = ref(false);
+const payoutFeedback = ref('');
+const payoutFeedbackIsError = ref(false);
+const payoutForm = reactive({
+  amount: '',
+  payout_method: 'GCash',
+  account_name: '',
+  account_number: '',
+  notes: '',
+});
 
 const seller = computed(() => {
   return auth.user.value || {
@@ -431,18 +582,32 @@ const seller = computed(() => {
   };
 });
 
+const sellerVerificationStatus = computed(() => {
+  return seller.value?.seller_profile?.verification_status
+    || seller.value?.sellerProfile?.verification_status
+    || 'pending';
+});
+
+const sellerVerificationLabel = computed(() => {
+  if (sellerVerificationStatus.value === 'approved') return 'Verified Local Artisan Maker';
+  if (sellerVerificationStatus.value === 'rejected') return 'Storefront Needs Revision';
+  return 'Storefront Pending Review';
+});
+
 const loadSellerData = async () => {
   isLoading.value = true;
   try {
     const sellerId = seller.value?.id || null;
-    const [fetchedProducts, fetchedOrders, fetchedStats] = await Promise.all([
+    const [fetchedProducts, fetchedOrders, fetchedStats, fetchedPayouts] = await Promise.all([
       sellerService.getProducts(sellerId),
       sellerService.getOrders(sellerId),
-      sellerService.getStats(sellerId)
+      sellerService.getStats(sellerId),
+      sellerService.getPayouts(sellerId)
     ]);
     products.value = fetchedProducts;
     orders.value = fetchedOrders;
     liveStats.value = fetchedStats;
+    payoutsData.value = fetchedPayouts;
 
     try {
       const revRes = await getSellerReviews();
@@ -598,6 +763,76 @@ const deleteProduct = async (productId) => {
       alert(`Failed to delete product: ${errMsg}`);
     }
   }
+};
+
+const submitPayoutRequest = async () => {
+  payoutFeedback.value = '';
+  payoutFeedbackIsError.value = false;
+
+  const amount = Number(payoutForm.amount);
+  if (!amount || amount <= 0) {
+    payoutFeedback.value = 'Please enter a valid payout amount.';
+    payoutFeedbackIsError.value = true;
+    return;
+  }
+
+  isSubmittingPayout.value = true;
+  try {
+    const res = await sellerService.requestPayout({
+      amount,
+      payout_method: payoutForm.payout_method,
+      account_name: payoutForm.account_name.trim() || null,
+      account_number: payoutForm.account_number.trim() || null,
+      notes: payoutForm.notes.trim() || null,
+    });
+
+    if (res?.success) {
+      payoutsData.value = res.data;
+      payoutFeedback.value = res.message || 'Payout request submitted.';
+      payoutForm.amount = '';
+      payoutForm.notes = '';
+    } else {
+      payoutFeedback.value = res?.message || 'Could not submit payout request.';
+      payoutFeedbackIsError.value = true;
+    }
+  } catch (err) {
+    payoutFeedback.value = err.response?.data?.message || 'Could not submit payout request.';
+    payoutFeedbackIsError.value = true;
+  } finally {
+    isSubmittingPayout.value = false;
+  }
+};
+
+const cancelPayoutRequest = async (payout) => {
+  if (!confirm(`Cancel this pending payout request of ₱${Number(payout.amount).toFixed(2)}?`)) return;
+
+  try {
+    const res = await sellerService.cancelPayout(payout.id);
+    if (res?.success) {
+      payoutsData.value = res.data;
+      payoutFeedback.value = res.message || 'Payout request cancelled.';
+      payoutFeedbackIsError.value = false;
+    }
+  } catch (err) {
+    payoutFeedback.value = err.response?.data?.message || 'Could not cancel payout request.';
+    payoutFeedbackIsError.value = true;
+  }
+};
+
+const payoutStatusClass = (status) => {
+  if (status === 'paid') return 'status-delivered';
+  if (status === 'approved') return 'status-published';
+  if (status === 'rejected') return 'status-cancelled';
+  return 'status-pending';
+};
+
+const formatPayoutDate = (value) => {
+  if (!value) return '—';
+  return new Date(value).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 };
 
 const handleUpgradeSubscription = async () => {

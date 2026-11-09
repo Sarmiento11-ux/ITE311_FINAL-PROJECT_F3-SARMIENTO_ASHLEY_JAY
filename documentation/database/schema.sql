@@ -10,6 +10,16 @@
 -- Escrow ledger (implemented): orders and order_items carry escrow_status,
 -- platform_fee, seller_payout, and escrow_released_at. Each order item also
 -- stores a commission_rate snapshot (8% Basic / 3% Artisan Pro).
+--
+-- Seller payouts (implemented): payout_requests records cash-out requests
+-- funded by released escrow (pending -> approved -> paid, or rejected).
+--
+-- Storefront verification (implemented): seller_profiles carries
+-- verification_status, verification_notes, verified_at and
+-- verification_reviewed_at for admin approval of artisan storefronts.
+--
+-- QR dispatch (implemented): order_items carries dispatch_code, dispatched_at
+-- and dispatch_confirmed_at for courier hand-off confirmation.
 -- ========================================================
 
 CREATE DATABASE IF NOT EXISTS craftmarket_db 

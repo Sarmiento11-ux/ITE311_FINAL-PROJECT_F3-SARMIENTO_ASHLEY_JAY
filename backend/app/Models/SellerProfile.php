@@ -18,11 +18,17 @@ class SellerProfile extends Model
         'contact_number',
         'is_verified',
         'is_active',
+        'verification_status',
+        'verification_notes',
+        'verified_at',
+        'verification_reviewed_at',
     ];
 
     protected $casts = [
-        'is_verified' => 'boolean',
-        'is_active'   => 'boolean',
+        'is_verified'             => 'boolean',
+        'is_active'               => 'boolean',
+        'verified_at'             => 'datetime',
+        'verification_reviewed_at' => 'datetime',
     ];
 
     // ─── Relationships ─────────────────────────────────────────────

@@ -131,6 +131,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reviews',                  [ProductReviewController::class, 'sellerReviews']);
         Route::get('/profile/{id}',             [SellerController::class, 'profile']);
         Route::patch('/order-items/{id}/status', [SellerController::class, 'updateItemStatus']);
+        Route::post('/order-items/{id}/dispatch-code',    [SellerController::class, 'generateDispatchCode']);
+        Route::post('/order-items/{id}/dispatch-confirm', [SellerController::class, 'confirmDispatch']);
+        Route::get('/payouts',                  [SellerController::class, 'payouts']);
+        Route::post('/payouts',                 [SellerController::class, 'requestPayout']);
+        Route::delete('/payouts/{id}',          [SellerController::class, 'cancelPayout']);
     });
 
     // ─── Admin: Full administrative endpoints (strictly role:admin) ──────
@@ -143,6 +148,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/reports',                 [AdminController::class, 'reports']);
             Route::get('/sellers',                 [AdminController::class, 'sellers']);
             Route::get('/sellers/{id}',            [AdminController::class, 'sellerDetails']);
+            Route::patch('/sellers/{id}/verification', [AdminController::class, 'updateSellerVerification']);
+            Route::get('/payouts',                 [AdminController::class, 'payoutRequests']);
+            Route::patch('/payouts/{id}',          [AdminController::class, 'updatePayoutRequest']);
+            Route::patch('/orders/{id}/escrow',    [AdminController::class, 'releaseEscrow']);
             Route::get('/reviews',                 [ProductReviewController::class, 'adminIndex']);
             Route::delete('/reviews/{reviewId}',   [ProductReviewController::class, 'destroy'])
                 ->defaults('productId', 0);

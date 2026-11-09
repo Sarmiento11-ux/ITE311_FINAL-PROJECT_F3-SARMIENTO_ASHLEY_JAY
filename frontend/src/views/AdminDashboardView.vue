@@ -87,6 +87,15 @@
           <button 
             type="button" 
             class="dashboard-nav-item" 
+            :class="{ active: currentTab === 'payouts' }"
+            @click="setTab('payouts')"
+          >
+            <span class="nav-icon">💸</span><span>Payouts</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="dashboard-nav-item" 
             :class="{ active: currentTab === 'reports' }"
             @click="setTab('reports')"
           >
@@ -488,6 +497,12 @@
                     <option value="1">Active Only</option>
                     <option value="0">Deactivated Only</option>
                   </select>
+                  <select v-model="sellerFilter.verification_status" @change="fetchSellers" class="form-select">
+                    <option value="">All Verifications</option>
+                    <option value="pending">Pending Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
                 </div>
               </div>
 
@@ -522,11 +537,31 @@
                         <span class="status-badge" :class="s.is_active ? 'badge-active' : 'badge-inactive'">
                           {{ s.is_active ? 'Active' : 'Deactivated' }}
                         </span>
+                        <span class="status-badge" :class="verificationBadgeClass(s.verification_status)" style="margin-left: 5px;">
+                          {{ s.verification_status || 'pending' }}
+                        </span>
                       </td>
                       <td>
                         <div class="action-buttons-group">
                           <button type="button" class="btn-action btn-view" @click="viewSellerDetails(s.id)">
                             View Shop
+                          </button>
+                          <button
+                            v-if="s.verification_status !== 'approved'"
+                            type="button"
+                            class="btn-action"
+                            style="background: #dcfce7; color: #166534;"
+                            @click="reviewSellerVerification(s, 'approved')"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            v-if="s.verification_status !== 'rejected'"
+                            type="button"
+                            class="btn-action btn-delete"
+                            @click="reviewSellerVerification(s, 'rejected')"
+                          >
+                            Reject
                           </button>
                           <button 
                             type="button" 
@@ -811,7 +846,123 @@
             </div>
           </div>
 
-          <!-- TAB 7: REPORTS -->
+          <!-- TAB 7: SELLER PAYOUT REQUESTS -->
+          <div v-else-if="currentTab === 'payouts'" class="tab-pane">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <div>
+                  <h3>Seller Payout Requests</h3>
+                  <p class="admin-card-sub">Audit cash-out requests funded by released escrow, then approve, reject, or mark them paid.</p>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px;">
+                <div style="padding: 14px; border-radius: 10px; background: #fff8e1; border: 1px solid #fde68a;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #92400e; font-weight: 700;">Pending</span>
+                  <div style="font-size: 1.35rem; font-weight: 700; color: #b45309; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.pending_amount ?? 0) }}</div>
+                  <small style="color: #92400e;">{{ payoutsData?.summary?.pending_count ?? 0 }} request(s)</small>
+                </div>
+                <div style="padding: 14px; border-radius: 10px; background: #eff6ff; border: 1px solid #bfdbfe;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #1e40af; font-weight: 700;">Approved / Queued</span>
+                  <div style="font-size: 1.35rem; font-weight: 700; color: #1d4ed8; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.approved_amount ?? 0) }}</div>
+                  <small style="color: #1e40af;">{{ payoutsData?.summary?.approved_count ?? 0 }} request(s)</small>
+                </div>
+                <div style="padding: 14px; border-radius: 10px; background: #e8f5e9; border: 1px solid #c8e6c9;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #166534; font-weight: 700;">Paid Out</span>
+                  <div style="font-size: 1.35rem; font-weight: 700; color: #2e7d32; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.paid_amount ?? 0) }}</div>
+                  <small style="color: #166534;">{{ payoutsData?.summary?.paid_count ?? 0 }} request(s)</small>
+                </div>
+                <div style="padding: 14px; border-radius: 10px; background: #ffebee; border: 1px solid #fecaca;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #991b1b; font-weight: 700;">Rejected</span>
+                  <div style="font-size: 1.35rem; font-weight: 700; color: #c62828; margin-top: 3px;">{{ payoutsData?.summary?.rejected_count ?? 0 }}</div>
+                  <small style="color: #991b1b;">request(s)</small>
+                </div>
+              </div>
+
+              <div class="admin-toolbar">
+                <div class="filter-controls-group">
+                  <select v-model="payoutFilter.status" @change="fetchPayouts" class="form-select">
+                    <option value="">All Payout Statuses</option>
+                    <option value="pending">Pending Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="paid">Paid</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Request</th>
+                      <th>Artisan</th>
+                      <th>Amount</th>
+                      <th>Payout Details</th>
+                      <th>Status</th>
+                      <th>Requested</th>
+                      <th>Admin Notes</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="p in payoutsData?.requests || []" :key="p.id">
+                      <td><strong>#{{ p.id }}</strong></td>
+                      <td>
+                        <strong>{{ p.seller?.name || 'Artisan' }}</strong>
+                        <small class="d-block text-muted">{{ p.seller?.sellerProfile?.shop_name || p.seller?.email }}</small>
+                      </td>
+                      <td><strong>₱{{ formatMoney(p.amount) }}</strong></td>
+                      <td>
+                        <div>{{ p.payout_method || 'Not specified' }}</div>
+                        <small class="text-muted">{{ p.account_name || '—' }} · {{ p.account_number || '—' }}</small>
+                      </td>
+                      <td>
+                        <span class="status-badge" :class="getStatusBadgeClass(p.status)">{{ p.status }}</span>
+                      </td>
+                      <td class="text-muted">{{ formatDate(p.requested_at || p.created_at) }}</td>
+                      <td class="text-muted" style="max-width: 220px;">{{ p.admin_notes || p.notes || '—' }}</td>
+                      <td>
+                        <div class="action-buttons-group">
+                          <button
+                            v-if="p.status === 'pending'"
+                            type="button"
+                            class="btn-action"
+                            style="background: #dcfce7; color: #166534;"
+                            @click="handlePayoutAction(p, 'approve')"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            v-if="p.status === 'approved'"
+                            type="button"
+                            class="btn-action btn-view"
+                            @click="handlePayoutAction(p, 'pay')"
+                          >
+                            Mark Paid
+                          </button>
+                          <button
+                            v-if="p.status === 'pending' || p.status === 'approved'"
+                            type="button"
+                            class="btn-action btn-delete"
+                            @click="handlePayoutAction(p, 'reject')"
+                          >
+                            Reject
+                          </button>
+                          <span v-if="p.status === 'paid' || p.status === 'rejected'" class="text-muted">Settled</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr v-if="!(payoutsData?.requests || []).length">
+                      <td colspan="8" class="empty-cell">No seller payout requests found.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 8: REPORTS -->
           <div v-else-if="currentTab === 'reports'" class="tab-pane">
             <!-- Reports KPI Header -->
             <div class="admin-metrics-grid">
@@ -1330,6 +1481,14 @@
               </strong>
             </div>
             <div class="detail-stat">
+              <span>Storefront Verification</span>
+              <strong>
+                <span class="status-badge" :class="verificationBadgeClass(activeSeller?.verification_status)">
+                  {{ activeSeller?.verification_status || 'pending' }}
+                </span>
+              </strong>
+            </div>
+            <div class="detail-stat">
               <span>Listings</span>
               <strong>{{ activeSeller?.products_count }} craft items</strong>
             </div>
@@ -1378,15 +1537,34 @@
           </div>
         </div>
 
-        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-          <button 
-            type="button" 
-            class="btn btn-sm" 
-            :class="activeSeller?.is_active ? 'btn-danger' : 'btn-primary'"
-            @click="toggleSellerActive(activeSeller); if (activeSeller) activeSeller.is_active = !activeSeller.is_active;"
-          >
-            {{ activeSeller?.is_active ? 'Deactivate Artisan Workshop' : 'Activate Artisan Workshop' }}
-          </button>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button
+              v-if="activeSeller?.verification_status !== 'approved'"
+              type="button"
+              class="btn btn-sm btn-primary"
+              style="background: #166534; border-color: #166534;"
+              @click="reviewSellerVerification(activeSeller, 'approved')"
+            >
+              Approve Storefront
+            </button>
+            <button
+              v-if="activeSeller?.verification_status !== 'rejected'"
+              type="button"
+              class="btn btn-sm btn-danger"
+              @click="reviewSellerVerification(activeSeller, 'rejected')"
+            >
+              Reject Storefront
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm" 
+              :class="activeSeller?.is_active ? 'btn-danger' : 'btn-primary'"
+              @click="toggleSellerActive(activeSeller); if (activeSeller) activeSeller.is_active = !activeSeller.is_active;"
+            >
+              {{ activeSeller?.is_active ? 'Deactivate Artisan Workshop' : 'Activate Artisan Workshop' }}
+            </button>
+          </div>
           <button type="button" class="btn btn-secondary" @click="showSellerDetailsModal = false">Close</button>
         </div>
       </div>
@@ -1622,6 +1800,27 @@
               <span v-if="isUpdatingOrderStatus">Updating...</span>
               <span v-else>Apply Status</span>
             </button>
+
+            <span style="width: 1px; height: 22px; background: #e5e7eb;"></span>
+
+            <button
+              type="button"
+              class="btn btn-sm"
+              style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;"
+              :disabled="activeOrder?.escrow_status === 'released_to_seller' || activeOrder?.payment_status !== 'paid'"
+              @click="handleEscrowAction(activeOrder, 'release')"
+            >
+              Release Escrow
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              style="background: #fff8e1; color: #92400e; border: 1px solid #fde68a;"
+              :disabled="activeOrder?.escrow_status === 'held'"
+              @click="handleEscrowAction(activeOrder, 'hold')"
+            >
+              Hold Escrow
+            </button>
           </div>
           <button type="button" class="btn btn-secondary" @click="showOrderModal = false">Close</button>
         </div>
@@ -1713,12 +1912,14 @@ const orders = ref([]);
 const reviews = ref([]);
 const subscriptionMetrics = ref(null);
 const subscribersList = ref([]);
+const payoutsData = ref({ summary: {}, requests: [] });
 
 // Filter States
 const userFilter = reactive({ search: '', role: '', is_active: '' });
-const sellerFilter = reactive({ search: '', is_active: '' });
+const sellerFilter = reactive({ search: '', is_active: '', verification_status: '' });
 const productFilter = reactive({ search: '', category: '', status: '' });
 const orderFilter = reactive({ search: '', status: '', payment_status: '' });
+const payoutFilter = reactive({ status: '' });
 
 // Modals State
 const showUserDetailsModal = ref(false);
@@ -1785,6 +1986,8 @@ const loadCurrentTabData = async () => {
       await fetchCategories();
     } else if (currentTab.value === 'orders') {
       await fetchOrders();
+    } else if (currentTab.value === 'payouts') {
+      await fetchPayouts();
     } else if (currentTab.value === 'reports') {
       reports.value = await adminService.getReports();
     } else if (currentTab.value === 'reviews') {
@@ -1813,7 +2016,8 @@ const fetchUsers = async () => {
 const fetchSellers = async () => {
   sellers.value = await adminService.getSellers({
     search: sellerFilter.search.trim() || undefined,
-    is_active: sellerFilter.is_active !== '' ? sellerFilter.is_active : undefined
+    is_active: sellerFilter.is_active !== '' ? sellerFilter.is_active : undefined,
+    verification_status: sellerFilter.verification_status || undefined
   });
 };
 
@@ -1834,6 +2038,12 @@ const fetchOrders = async () => {
     search: orderFilter.search.trim() || undefined,
     status: orderFilter.status || undefined,
     payment_status: orderFilter.payment_status || undefined
+  });
+};
+
+const fetchPayouts = async () => {
+  payoutsData.value = await adminService.getPayouts({
+    status: payoutFilter.status || undefined
   });
 };
 
@@ -1882,6 +2092,42 @@ const viewSellerDetails = async (sellerId) => {
 const toggleSellerActive = async (s) => {
   await toggleUserActive(s);
   await fetchSellers();
+};
+
+const verificationBadgeClass = (status) => {
+  if (status === 'approved') return 'badge-active';
+  if (status === 'rejected') return 'badge-inactive';
+  return 'badge-pending';
+};
+
+const reviewSellerVerification = async (seller, status) => {
+  if (!seller) return;
+
+  const verb = status === 'approved' ? 'approve' : 'reject';
+  if (!confirm(`Are you sure you want to ${verb} the storefront of ${seller.shop_name || seller.name}?`)) return;
+
+  let notes = null;
+  if (status === 'rejected') {
+    notes = prompt('Optional: enter the reason for rejecting this storefront.') || null;
+  }
+
+  try {
+    const res = await adminService.updateSellerVerification(seller.id, { status, notes });
+    if (res?.success) {
+      seller.verification_status = res.data.verification_status;
+      seller.is_verified = res.data.is_verified;
+
+      if (activeSeller.value && activeSeller.value.id === seller.id) {
+        activeSeller.value.verification_status = res.data.verification_status;
+        activeSeller.value.is_verified = res.data.is_verified;
+      }
+
+      showToast(`Storefront for "${seller.shop_name || seller.name}" ${res.data.verification_status}.`, 'alert-success');
+      await fetchSellers();
+    }
+  } catch (err) {
+    showToast(err.response?.data?.message || err.message || 'Failed to update storefront verification.', 'alert-danger');
+  }
 };
 
 // ─── Product Actions ─────────────────────────────────────────────────────────
@@ -1997,6 +2243,71 @@ const openOrderDetailsModal = (o) => {
   activeOrder.value = o;
   selectedNewStatus.value = o?.status || 'pending';
   showOrderModal.value = true;
+};
+
+const handleEscrowAction = async (order, action) => {
+  if (!order) return;
+
+  const labels = {
+    release: 'release the escrow to the artisan',
+    hold: 'place the escrow back on hold',
+    refund: 'refund the escrow to the customer',
+    cancel: 'cancel the escrow ledger',
+  };
+
+  if (!confirm(`Are you sure you want to ${labels[action] || action} for order ${order.order_number}?`)) return;
+
+  isUpdatingOrderStatus.value = true;
+  try {
+    const res = await adminService.releaseEscrow(order.id, action);
+    if (res?.success) {
+      const updated = res.data;
+      Object.assign(order, updated);
+      if (activeOrder.value?.id === order.id) {
+        activeOrder.value = updated;
+      }
+      const matched = orders.value?.find(item => item.id === order.id);
+      if (matched) {
+        Object.assign(matched, updated);
+      }
+      showToast(res.message, 'alert-success');
+    }
+  } catch (err) {
+    showToast(err.response?.data?.message || err.message || 'Failed to update escrow.', 'alert-danger');
+  } finally {
+    isUpdatingOrderStatus.value = false;
+  }
+};
+
+// ─── Payout Actions ──────────────────────────────────────────────────────────
+const handlePayoutAction = async (payout, action) => {
+  if (!payout) return;
+
+  const labels = {
+    approve: 'approve this payout request',
+    reject: 'reject this payout request',
+    pay: 'mark this payout as paid',
+  };
+
+  if (!confirm(`Are you sure you want to ${labels[action] || action} for ${payout.seller?.name || 'this artisan'} (₱${formatMoney(payout.amount)})?`)) return;
+
+  let adminNotes = null;
+  if (action === 'reject') {
+    adminNotes = prompt('Optional: enter the reason for rejecting this payout.') || null;
+  }
+
+  try {
+    const res = await adminService.updatePayoutRequest(payout.id, { action, admin_notes: adminNotes });
+    if (res?.success) {
+      showToast(res.message, 'alert-success');
+      await fetchPayouts();
+      if (currentTab.value === 'dashboard') {
+        stats.value = await adminService.getStats();
+      }
+    }
+  } catch (err) {
+    showToast(err.response?.data?.message || err.message || 'Failed to update payout request.', 'alert-danger');
+  }
 };
 
 const handleUpdateOrderStatus = async (order, newStatus) => {
@@ -2455,10 +2766,10 @@ const fetchSubscriptionMetrics = async () => {
   font-weight: 600;
   text-transform: capitalize;
 }
-.badge-active, .badge-paid, .badge-delivered, .badge-confirmed, .badge-released_to_seller, .badge-released-to-seller { background: #e8f5e9; color: #2e7d32; }
+.badge-active, .badge-approved, .badge-paid, .badge-delivered, .badge-confirmed, .badge-released_to_seller, .badge-released-to-seller { background: #e8f5e9; color: #2e7d32; }
 .badge-pending, .badge-processing, .badge-unpaid, .badge-held { background: #fff8e1; color: #b78103; }
 .badge-shipped, .badge-in-transit                         { background: #e3f2fd; color: #1565c0; }
-.badge-inactive, .badge-cancelled, .badge-out_of_stock, .badge-out-of-stock, .badge-refunded { background: #ffebee; color: #c62828; }
+.badge-inactive, .badge-rejected, .badge-cancelled, .badge-out_of_stock, .badge-out-of-stock, .badge-refunded { background: #ffebee; color: #c62828; }
 
 .role-badge {
   display: inline-block;

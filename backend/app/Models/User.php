@@ -110,4 +110,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(ArtisanSubscription::class);
     }
+
+    /**
+     * An artisan can request payouts from released escrow earnings.
+     */
+    public function payoutRequests()
+    {
+        return $this->hasMany(PayoutRequest::class, 'seller_id');
+    }
 }

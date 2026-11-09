@@ -82,6 +82,10 @@ export const sellerService = {
             paymentStatus: item.order?.payment_status || 'unpaid',
             status: (item.status || item.order?.status || 'pending').charAt(0).toUpperCase() + (item.status || item.order?.status || 'pending').slice(1),
             rawStatus: item.status || 'pending',
+            trackingNumber: item.tracking_number || '',
+            dispatchCode: item.dispatch_code || null,
+            dispatchedAt: item.dispatched_at || null,
+            dispatchConfirmedAt: item.dispatch_confirmed_at || null,
             orderDate: new Date(item.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -106,6 +110,45 @@ export const sellerService = {
     const payload = { status: status.toLowerCase() };
     if (trackingNumber) payload.tracking_number = trackingNumber;
     const response = await apiClient.patch(`/seller/order-items/${orderItemId}/status`, payload);
+    return response.data;
+  },
+
+  /**
+   * QR dispatch confirmation.
+   */
+  async generateDispatchCode(orderItemId) {
+    const response = await apiClient.post(`/seller/order-items/${orderItemId}/dispatch-code`);
+    return response.data;
+  },
+
+  async confirmDispatch(orderItemId, dispatchCode, trackingNumber = null) {
+    const payload = { dispatch_code: dispatchCode };
+    if (trackingNumber) payload.tracking_number = trackingNumber;
+    const response = await apiClient.post(`/seller/order-items/${orderItemId}/dispatch-confirm`, payload);
+    return response.data;
+  },
+
+  /**
+   * Payout ledger and cash-out requests.
+   */
+  async getPayouts(sellerId = null) {
+    try {
+      const params = sellerId ? { seller_id: sellerId } : {};
+      const response = await apiClient.get('/seller/payouts', { params });
+      return response.data?.data || null;
+    } catch (err) {
+      console.warn('[SellerService] Could not fetch payout ledger from API.', err.message);
+      return null;
+    }
+  },
+
+  async requestPayout(payload) {
+    const response = await apiClient.post('/seller/payouts', payload);
+    return response.data;
+  },
+
+  async cancelPayout(payoutId) {
+    const response = await apiClient.delete(`/seller/payouts/${payoutId}`);
     return response.data;
   },
 

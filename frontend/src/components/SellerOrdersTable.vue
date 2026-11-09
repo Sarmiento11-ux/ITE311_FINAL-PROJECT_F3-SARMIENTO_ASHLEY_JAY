@@ -113,6 +113,55 @@
             <small style="color: #6B7280; font-size: 0.78rem;">Enter the tracking reference from your courier so the customer can monitor delivery.</small>
           </div>
 
+          <!-- QR dispatch confirmation -->
+          <div style="margin-top: 12px; padding: 12px; background-color: #F5F3FF; border-radius: 8px; border: 1px solid #DDD6FE;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <div>
+                <strong style="font-size: 0.88rem; color: #4C1D95;">QR Dispatch Confirmation</strong>
+                <p style="margin: 3px 0 0; font-size: 0.78rem; color: #6B7280;">
+                  Generate a dispatch QR code and confirm the courier hand-off.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                style="font-size: 0.78rem;"
+                :disabled="isPreparingDispatch"
+                @click="prepareDispatchQr"
+              >
+                {{ isPreparingDispatch ? 'Preparing…' : (activeOrder.dispatchCode ? 'Refresh QR' : 'Generate Dispatch QR') }}
+              </button>
+            </div>
+
+            <div v-if="activeOrder.dispatchCode" style="margin-top: 10px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+              <div v-if="dispatchQr" style="background: #FFF; padding: 6px; border-radius: 8px; border: 1px solid #E5E7EB;">
+                <img :src="dispatchQr" alt="Dispatch QR code" style="display: block; width: 150px; height: 150px;" />
+              </div>
+              <div style="font-size: 0.8rem; color: #4B5563;">
+                <p style="margin: 0 0 4px;"><strong>Dispatch Code:</strong></p>
+                <code style="font-size: 0.78rem; background: #EDE9FE; padding: 3px 6px; border-radius: 4px; word-break: break-all;">{{ activeOrder.dispatchCode }}</code>
+                <p v-if="activeOrder.dispatchConfirmedAt" style="margin: 6px 0 0; color: #16A34A; font-weight: 600;">Dispatched confirmed on {{ formatDispatchDate(activeOrder.dispatchConfirmedAt) }}</p>
+                <p v-else style="margin: 6px 0 0; color: #B45309;">Awaiting dispatch scan confirmation.</p>
+              </div>
+            </div>
+
+            <div v-if="activeOrder.dispatchCode" style="margin-top: 10px;">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                style="font-size: 0.8rem;"
+                :disabled="isConfirmingDispatch || !!activeOrder.dispatchConfirmedAt"
+                @click="confirmDispatchScan"
+              >
+                {{ isConfirmingDispatch ? 'Confirming…' : (activeOrder.dispatchConfirmedAt ? 'Dispatch Confirmed' : 'Confirm Dispatch via QR') }}
+              </button>
+            </div>
+
+            <div v-if="dispatchFeedback" style="margin-top: 8px; font-size: 0.8rem;" :style="{ color: dispatchFeedbackIsError ? '#c25e3e' : '#2e7d32' }">
+              {{ dispatchFeedback }}
+            </div>
+          </div>
+
           <div v-if="statusFeedback" style="margin-top: 10px; font-size: 0.84rem;" :style="{ color: feedbackIsError ? '#c25e3e' : '#2e7d32' }">
             {{ statusFeedback }}
           </div>
@@ -131,6 +180,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import QRCode from 'qrcode';
 import { sellerService } from '../services/sellerService.js';
 
 const props = defineProps({
@@ -148,13 +198,114 @@ const isSaving = ref(false);
 const statusFeedback = ref('');
 const feedbackIsError = ref(false);
 const trackingNumber = ref('');
+const dispatchQr = ref('');
+const isPreparingDispatch = ref(false);
+const isConfirmingDispatch = ref(false);
+const dispatchFeedback = ref('');
+const dispatchFeedbackIsError = ref(false);
+
+const buildDispatchPayload = (order) => JSON.stringify({
+  type: 'craftmarket_dispatch',
+  order_item_id: order.orderItemId || order.id,
+  order_number: order.orderNumber,
+  dispatch_code: order.dispatchCode,
+});
+
+const renderDispatchQr = async (payload) => {
+  try {
+    dispatchQr.value = await QRCode.toDataURL(payload, { width: 300, margin: 1 });
+  } catch (err) {
+    console.warn('Could not render dispatch QR:', err);
+    dispatchQr.value = '';
+  }
+};
 
 const openOrderModal = (order) => {
   activeOrder.value = order;
   selectedStatus.value = (order.rawStatus || order.status || 'pending').toLowerCase();
   statusFeedback.value = '';
   feedbackIsError.value = false;
-  trackingNumber.value = '';
+  trackingNumber.value = order.trackingNumber || '';
+  dispatchQr.value = '';
+  dispatchFeedback.value = '';
+  dispatchFeedbackIsError.value = false;
+
+  if (order.dispatchCode) {
+    renderDispatchQr(buildDispatchPayload(order));
+  }
+};
+
+const prepareDispatchQr = async () => {
+  if (!activeOrder.value) return;
+  isPreparingDispatch.value = true;
+  dispatchFeedback.value = '';
+  dispatchFeedbackIsError.value = false;
+
+  try {
+    const itemId = activeOrder.value.orderItemId || activeOrder.value.id;
+    const res = await sellerService.generateDispatchCode(itemId);
+
+    if (res && res.success) {
+      activeOrder.value.dispatchCode = res.data.dispatch_code;
+      activeOrder.value.dispatchedAt = res.data.dispatched_at;
+      activeOrder.value.dispatchConfirmedAt = res.data.dispatch_confirmed_at;
+      await renderDispatchQr(res.data.qr_payload || buildDispatchPayload(activeOrder.value));
+      dispatchFeedback.value = 'Dispatch QR generated. Scan it to confirm the courier hand-off.';
+    } else {
+      dispatchFeedback.value = res?.message || 'Could not generate dispatch QR.';
+      dispatchFeedbackIsError.value = true;
+    }
+  } catch (err) {
+    dispatchFeedback.value = err.response?.data?.message || 'Could not generate dispatch QR.';
+    dispatchFeedbackIsError.value = true;
+  } finally {
+    isPreparingDispatch.value = false;
+  }
+};
+
+const confirmDispatchScan = async () => {
+  if (!activeOrder.value?.dispatchCode) return;
+  isConfirmingDispatch.value = true;
+  dispatchFeedback.value = '';
+  dispatchFeedbackIsError.value = false;
+
+  try {
+    const itemId = activeOrder.value.orderItemId || activeOrder.value.id;
+    const res = await sellerService.confirmDispatch(
+      itemId,
+      activeOrder.value.dispatchCode,
+      trackingNumber.value.trim() || null
+    );
+
+    if (res && res.success) {
+      activeOrder.value.status = 'Shipped';
+      activeOrder.value.rawStatus = 'shipped';
+      activeOrder.value.dispatchConfirmedAt = res.data?.dispatch_confirmed_at || new Date().toISOString();
+      activeOrder.value.dispatchedAt = res.data?.dispatched_at || activeOrder.value.dispatchedAt;
+      selectedStatus.value = 'shipped';
+      dispatchFeedback.value = res.message || 'Dispatch confirmed via QR scan.';
+      emit('order-updated');
+    } else {
+      dispatchFeedback.value = res?.message || 'Could not confirm dispatch.';
+      dispatchFeedbackIsError.value = true;
+    }
+  } catch (err) {
+    dispatchFeedback.value = err.response?.data?.message || 'Could not confirm dispatch.';
+    dispatchFeedbackIsError.value = true;
+  } finally {
+    isConfirmingDispatch.value = false;
+  }
+};
+
+const formatDispatchDate = (value) => {
+  if (!value) return '';
+  return new Date(value).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
 const saveStatus = async () => {
@@ -171,13 +322,25 @@ const saveStatus = async () => {
     if (res && res.success) {
       activeOrder.value.status = selectedStatus.value.charAt(0).toUpperCase() + selectedStatus.value.slice(1);
       activeOrder.value.rawStatus = selectedStatus.value;
-      statusFeedback.value = 'Fulfillment status updated! Email notification sent.';
 
+      if (res.data) {
+        activeOrder.value.dispatchCode = res.data.dispatch_code || activeOrder.value.dispatchCode;
+        activeOrder.value.dispatchedAt = res.data.dispatched_at || activeOrder.value.dispatchedAt;
+        activeOrder.value.dispatchConfirmedAt = res.data.dispatch_confirmed_at || activeOrder.value.dispatchConfirmedAt;
+      }
+
+      statusFeedback.value = 'Fulfillment status updated! Email notification sent.';
       feedbackIsError.value = false;
       emit('order-updated');
-      setTimeout(() => {
-        activeOrder.value = null;
-      }, 1200);
+
+      if (selectedStatus.value === 'shipped' && activeOrder.value.dispatchCode) {
+        await renderDispatchQr(buildDispatchPayload(activeOrder.value));
+        statusFeedback.value = 'Marked as shipped. Use the QR code below to confirm the courier hand-off.';
+      } else {
+        setTimeout(() => {
+          activeOrder.value = null;
+        }, 1200);
+      }
     } else {
       statusFeedback.value = res.message || 'Failed to update status.';
       feedbackIsError.value = true;

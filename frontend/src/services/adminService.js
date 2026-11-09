@@ -49,6 +49,27 @@ export const adminService = {
     return response.data?.data || null;
   },
 
+  async updateSellerVerification(id, payload) {
+    const response = await apiClient.patch(`/admin/sellers/${id}/verification`, payload);
+    return response.data;
+  },
+
+  // ─── Payout Requests & Escrow Audit ─────────────────────────────────────
+  async getPayouts(params = {}) {
+    const response = await apiClient.get('/admin/payouts', { params });
+    return response.data?.data || { summary: {}, requests: [] };
+  },
+
+  async updatePayoutRequest(id, payload) {
+    const response = await apiClient.patch(`/admin/payouts/${id}`, payload);
+    return response.data;
+  },
+
+  async releaseEscrow(orderId, action) {
+    const response = await apiClient.patch(`/admin/orders/${orderId}/escrow`, { action });
+    return response.data;
+  },
+
   // ─── Products Oversight ─────────────────────────────────────────────────
   async getProducts(params = {}) {
     const response = await apiClient.get('/products', { params });
