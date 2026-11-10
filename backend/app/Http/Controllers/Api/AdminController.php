@@ -317,6 +317,31 @@ class AdminController extends Controller
             $totalCommission = 0.0;
         }
 
+        // 7. Seller payout settlement summary (cash-out requests)
+        $payoutSummary = [
+            'pending_count'   => PayoutRequest::where('status', 'pending')->count(),
+            'pending_amount'  => round((float) PayoutRequest::where('status', 'pending')->sum('amount'), 2),
+            'approved_count'  => PayoutRequest::where('status', 'approved')->count(),
+            'approved_amount' => round((float) PayoutRequest::where('status', 'approved')->sum('amount'), 2),
+            'paid_count'      => PayoutRequest::where('status', 'paid')->count(),
+            'paid_amount'     => round((float) PayoutRequest::where('status', 'paid')->sum('amount'), 2),
+            'rejected_count'  => PayoutRequest::where('status', 'rejected')->count(),
+            'rejected_amount' => round((float) PayoutRequest::where('status', 'rejected')->sum('amount'), 2),
+            'total_requested' => round((float) PayoutRequest::sum('amount'), 2),
+        ];
+
+        // 8. Subscription revenue (Artisan Pro monetization)
+        $proSubscribers = User::where('role', 'seller')
+            ->where('subscription_plan', 'pro')
+            ->where('subscription_status', 'active')
+            ->count();
+
+        $subscriptionRevenue = [
+            'pro_subscribers_count' => $proSubscribers,
+            'mrr'                   => round($proSubscribers * 299.00, 2),
+            'all_time_revenue'      => round((float) \App\Models\ArtisanSubscription::sum('amount'), 2),
+        ];
+
         return response()->json([
             'success' => true,
             'message' => 'Reports data generated successfully.',
@@ -332,6 +357,8 @@ class AdminController extends Controller
                 'most_active_sellers'   => $mostActiveSellers,
                 'total_commission'      => round($totalCommission, 2),
                 'commission_ledger'     => $commissionLedger,
+                'payout_summary'        => $payoutSummary,
+                'subscription_revenue'  => $subscriptionRevenue,
             ],
         ]);
     }

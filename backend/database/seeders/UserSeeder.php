@@ -68,6 +68,9 @@ class UserSeeder extends Seeder
                 'contact_number'   => '+63 920 987 6543',
                 'is_verified'      => true,
                 'is_active'        => true,
+                'verification_status'      => 'approved',
+                'verified_at'              => now(),
+                'verification_reviewed_at' => now(),
             ]
         );
 
@@ -95,6 +98,9 @@ class UserSeeder extends Seeder
                 'contact_number'   => '+63 918 555 1234',
                 'is_verified'      => true,
                 'is_active'        => true,
+                'verification_status'      => 'approved',
+                'verified_at'              => now(),
+                'verification_reviewed_at' => now(),
             ]
         );
 

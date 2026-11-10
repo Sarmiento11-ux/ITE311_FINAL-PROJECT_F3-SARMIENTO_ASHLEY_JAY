@@ -16,6 +16,19 @@ class CraftMarket_CMS_Bridge {
 
     private $api_base = 'http://127.0.0.1:8000/api';
 
+    /**
+     * Resolve the shared secret used to authenticate against Laravel's
+     * /api/cms-bridge endpoints. Define CRAFTMARKET_CMS_BRIDGE_KEY in
+     * wp-config.php and set the same value in the Laravel .env file.
+     */
+    private function bridge_key() {
+        if (defined('CRAFTMARKET_CMS_BRIDGE_KEY')) {
+            return CRAFTMARKET_CMS_BRIDGE_KEY;
+        }
+
+        return apply_filters('craftmarket_cms_bridge_key', 'dev-cms-bridge-key');
+    }
+
     public function __construct() {
         add_action('admin_menu', [$this, 'register_admin_menus']);
         add_action('wp_dashboard_setup', [$this, 'add_dashboard_widgets']);
@@ -73,7 +86,10 @@ class CraftMarket_CMS_Bridge {
     private function fetch_api($endpoint) {
         $response = wp_remote_get($this->api_base . $endpoint, [
             'timeout' => 3,
-            'headers' => ['Accept' => 'application/json']
+            'headers' => [
+                'Accept'           => 'application/json',
+                'X-CMS-Bridge-Key' => $this->bridge_key(),
+            ]
         ]);
 
         if (is_wp_error($response)) {

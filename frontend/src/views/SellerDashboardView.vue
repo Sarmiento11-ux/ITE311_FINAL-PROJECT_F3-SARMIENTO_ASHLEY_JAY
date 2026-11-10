@@ -726,6 +726,71 @@
 
 
 
+            <!-- Revenue Analytics -->
+            <div class="dashboard-panel-card analytics-panel">
+              <div class="panel-header-row">
+                <div>
+                  <h3 class="panel-heading">Revenue Analytics</h3>
+                  <p class="panel-subheading">Six-month sales trend, top crafts, and month-over-month growth.</p>
+                </div>
+                <span
+                  class="status-pill"
+                  :class="revenueGrowth >= 0 ? 'status-delivered' : 'status-cancelled'"
+                >
+                  {{ revenueGrowth >= 0 ? '▲' : '▼' }} {{ Math.abs(revenueGrowth).toFixed(1) }}% vs last month
+                </span>
+              </div>
+              <div class="analytics-summary-grid">
+                <div class="analytics-summary-item">
+                  <span>This Month</span>
+                  <strong>₱{{ Number(liveStats?.revenue_this_month ?? 0).toFixed(2) }}</strong>
+                </div>
+                <div class="analytics-summary-item">
+                  <span>Last Month</span>
+                  <strong>₱{{ Number(liveStats?.revenue_last_month ?? 0).toFixed(2) }}</strong>
+                </div>
+                <div class="analytics-summary-item">
+                  <span>Average Order Value</span>
+                  <strong>₱{{ averageOrderValue.toFixed(2) }}</strong>
+                </div>
+                <div class="analytics-summary-item">
+                  <span>Commission Rate</span>
+                  <strong>{{ Number(liveStats?.commission_rate ?? (subscriptionData?.is_pro ? 3 : 8)).toFixed(0) }}%</strong>
+                </div>
+              </div>
+              <div class="analytics-two-col">
+                <div>
+                  <h4 class="analytics-subheading">Monthly Sales Trend</h4>
+                  <div class="sales-trend-chart" role="img" aria-label="Bar chart of the last six months of artisan sales">
+                    <div v-for="month in salesTrend" :key="month.month" class="trend-column">
+                      <div class="trend-bar-wrap">
+                        <div
+                          class="trend-bar"
+                          :style="{ height: trendBarHeight(month.sales) + '%' }"
+                          :title="`${month.label}: ₱${Number(month.sales).toFixed(2)} (${month.orders} orders)`"
+                        ></div>
+                      </div>
+                      <span class="trend-value">₱{{ formatCompact(month.sales) }}</span>
+                      <span class="trend-label">{{ month.label }}</span>
+                    </div>
+                    <p v-if="!salesTrend.length" class="analytics-empty">No sales recorded yet.</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="analytics-subheading">Top-Selling Crafts</h4>
+                  <ul class="top-products-list">
+                    <li v-for="(item, index) in topProducts" :key="item.product_id">
+                      <span class="top-rank">{{ index + 1 }}</span>
+                      <span class="top-product-name">{{ item.name }}</span>
+                      <span class="top-product-meta">{{ item.quantity }} sold</span>
+                      <strong class="top-product-revenue">₱{{ Number(item.revenue).toFixed(2) }}</strong>
+                    </li>
+                    <li v-if="!topProducts.length" class="analytics-empty">No completed craft sales yet.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             <!-- Recent Orders Section -->
 
 
@@ -3102,6 +3167,22 @@ const totalRevenue = computed(() => {
 
 
 
+const salesTrend = computed(() => liveStats.value?.sales_trend || []);
+const topProducts = computed(() => liveStats.value?.top_products || []);
+const revenueGrowth = computed(() => Number(liveStats.value?.revenue_growth_percent ?? 0));
+const averageOrderValue = computed(() => Number(liveStats.value?.average_order_value ?? 0));
+const maxTrendSales = computed(() =>
+  Math.max(...salesTrend.value.map((month) => Number(month.sales) || 0), 1)
+);
+const trendBarHeight = (sales) => {
+  const ratio = (Number(sales) || 0) / maxTrendSales.value;
+  return Math.max(4, Math.round(ratio * 100));
+};
+const formatCompact = (value) => {
+  const amount = Number(value) || 0;
+  return amount >= 1000 ? `${(amount / 1000).toFixed(1)}k` : amount.toFixed(0);
+};
+
 // Product Actions
 
 
@@ -3973,6 +4054,150 @@ const handleCancelSubscription = async () => {
 
 
 
+/* Revenue analytics */
+.analytics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.analytics-summary-item {
+  padding: 12px 14px;
+  border: 1px solid #E8DFD5;
+  border-radius: 10px;
+  background: #FAF6F0;
+}
+.analytics-summary-item span {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #7A6F68;
+  font-weight: 700;
+}
+.analytics-summary-item strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.2rem;
+  color: #2D2420;
+}
+.analytics-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 22px;
+  margin-top: 22px;
+}
+.analytics-subheading {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: #2D2420;
+}
+.sales-trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-height: 170px;
+  padding: 10px 8px 0;
+  border-bottom: 1px solid #E8DFD5;
+}
+.trend-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.trend-bar-wrap {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.trend-bar {
+  width: 70%;
+  max-width: 44px;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #6f9c76 0%, #3E5943 100%);
+  transition: height 0.35s ease;
+}
+.trend-value {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #3E5943;
+  white-space: nowrap;
+}
+.trend-label {
+  font-size: 0.64rem;
+  color: #7A6F68;
+  white-space: nowrap;
+}
+.top-products-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.top-products-list li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0E8DF;
+  font-size: 0.84rem;
+}
+.top-rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #E8F0EA;
+  color: #2F4533;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.top-product-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #2D2420;
+  font-weight: 600;
+}
+.top-product-meta {
+  color: #7A6F68;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.top-product-revenue {
+  color: #2E7D32;
+  white-space: nowrap;
+}
+.analytics-empty {
+  color: #9E8F85;
+  font-size: 0.82rem;
+  font-style: italic;
+  padding: 12px 0;
+}
+@media (max-width: 760px) {
+  .analytics-two-col {
+    grid-template-columns: 1fr;
+  }
+  .sales-trend-chart {
+    gap: 5px;
+  }
+  .trend-label {
+    font-size: 0.58rem;
+  }
+  .top-products-list li {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+  }
+  .top-product-meta {
+    display: none;
+  }
+}
 </style>
 
 

@@ -82,7 +82,7 @@ export const adminService = {
 
   // ─── Products Oversight ─────────────────────────────────────────────────
   async getProducts(params = {}) {
-    const response = await apiClient.get('/products', { params });
+    const response = await apiClient.get('/admin/products', { params });
     return response.data?.data || [];
   },
 

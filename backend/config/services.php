@@ -36,6 +36,11 @@ return [
     ],
 
     // ─── PayMongo Payment Gateway ─────────────────────────────────────────────
+    // Shared secret used by the headless WordPress CMS bridge plugin.
+    'cms_bridge' => [
+        'key' => env('CMS_BRIDGE_KEY'),
+    ],
+
     'paymongo' => [
         'secret_key'      => env('PAYMONGO_SECRET_KEY'),
         'public_key'      => env('PAYMONGO_PUBLIC_KEY'),

@@ -37,8 +37,9 @@ Route::post('/webhooks/paymongo', [WebhookController::class, 'handlePayMongo']);
 
 // ─── Public Auth Routes ───────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login',    [AuthController::class, 'login'])->name('login');
+    // Security: brute-force protection on credential endpoints (per IP).
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login');
 });
 
 // ─── Public Read-Only Routes (Products / Categories) ─────────────────────────
@@ -53,8 +54,8 @@ Route::get('/products/{id}',    [ProductController::class, 'show']);
 // Product reviews: publicly readable, auth required to write
 Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
 
-// Headless WordPress CMS Bridge Routes (allows local CMS to synchronize users & reports)
-Route::prefix('cms-bridge')->group(function () {
+// Headless WordPress CMS Bridge Routes (secrets required — never public)
+Route::prefix('cms-bridge')->middleware('cms.bridge')->group(function () {
     Route::get('/users',   [\App\Http\Controllers\Api\UserController::class, 'index']);
     Route::get('/reports', [\App\Http\Controllers\Api\AdminController::class, 'reports']);
 });
@@ -147,6 +148,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/stats',                   [AdminController::class, 'stats']);
             Route::get('/recent-activity',         [AdminController::class, 'recentActivity']);
             Route::get('/reports',                 [AdminController::class, 'reports']);
+            Route::get('/products',                [ProductController::class, 'adminIndex']);
             Route::get('/sellers',                 [AdminController::class, 'sellers']);
             Route::get('/sellers/{id}',            [AdminController::class, 'sellerDetails']);
             Route::patch('/sellers/{id}/verification', [AdminController::class, 'updateSellerVerification']);

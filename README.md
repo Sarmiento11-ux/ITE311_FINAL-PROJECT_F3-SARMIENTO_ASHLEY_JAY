@@ -12,6 +12,19 @@
 
 ---
 
+## ✨ Key Features
+
+- **Verified storefronts** — only admin-approved artisan shops appear in the public catalog, filters, and product detail pages.
+- **Escrow-protected checkout** — funds are held and released per line item on delivery; cancellations and refunds reverse escrow.
+- **Multi-vendor orders** — one order can contain items from several sellers, each with its own commission and payout snapshot.
+- **Two revenue streams** — 8% Basic commission (3% on Artisan Pro) plus a ₱299/month Pro subscription.
+- **Seller tools** — listing management, order fulfilment, QR dispatch confirmation, revenue analytics, and payout requests.
+- **Admin tools** — storefront verification, full product oversight, user/role management, escrow audit, payout settlement, and platform reports.
+- **Verified reviews** — only customers with a delivered purchase can review a product.
+- **Secure by design** — Sanctum tokens, RBAC middleware, rate-limited auth, signed payment webhooks, and a fail-closed CMS bridge.
+
+---
+
 ## 🧰 Decoupled Technology Stack
 
 - **Frontend SPA:** Vue.js 3, Vite, Vue Router 4, Axios, DOMPurify, Custom Editorial Design System (CSS)
@@ -55,9 +68,18 @@ CraftMarket/
 │   └── wordpress-integration-guide.md # Headless WP REST API documentation
 │
 ├── documentation/                     # [PROJECT SPECIFICATIONS]
+│   ├── README.md                      # Documentation index & rubric map
+│   ├── SRS/system-requirements.md     # Requirements with IDs & acceptance criteria
+│   ├── diagrams/
+│   │   ├── use-case.md                # Use case diagram + 22 specifications
+│   │   ├── erd.md                     # Mermaid ERD & integrity notes
+│   │   ├── context.md                 # Level-0 DFD & trust boundaries
+│   │   ├── architecture.md            # Layered architecture & deployment
+│   │   └── wireframes.md              # Wireframes & responsive spec
 │   ├── database/schema.sql            # Relational schema reference
-│   ├── diagrams/erd.md                # Mermaid ERD & architecture diagrams
-│   └── SRS/system-requirements.md     # Software Requirements Specification
+│   ├── business-model.md              # Revenue, unit economics, break-even
+│   ├── security/security-controls.md  # OWASP mapping & security controls
+│   └── presentation/defense-guide.md  # Demo script & Q&A
 │
 ├── assets/, pages/, index.html, style.css  # Legacy static prototype
 └── README.md                          # Main project guide
@@ -135,11 +157,57 @@ npm run preview
 
 ---
 
+## 🧪 Testing
+
+```powershell
+cd backend
+php artisan test
+```
+
+| Suite | Coverage |
+|---|---|
+| `OrderEscrowTest` | Commission split, Pro payout, escrow on payment, release on delivery, refund on cancellation |
+| `SellerPayoutAndVerificationTest` | Storefront approval/rejection, payout balance rules |
+| `SecurityAndAuthorizationTest` | RBAC (401/403), role guards, catalog visibility, admin oversight, seller analytics, CMS bridge secret, report summaries |
+
+Frontend production build:
+
+```powershell
+cd frontend
+npm run build
+```
+
+---
+
+## 🔒 Security Notes
+
+- Sanctum bearer tokens expire after **7 days** (`SANCTUM_EXPIRATION`).
+- Role changes and deactivations **revoke all tokens**.
+- Login and registration are rate limited to **5 requests/minute/IP**.
+- Public catalog and product detail only expose **approved storefronts**.
+- PayMongo webhooks are verified with **HMAC-SHA256**.
+- The CMS bridge requires `X-CMS-Bridge-Key` and returns `503` if unset.
+- Set `CMS_BRIDGE_KEY`, `SANCTUM_EXPIRATION`, `CORS_ALLOWED_ORIGINS`, and PayMongo keys in `backend/.env`.
+
+---
+
 ## 📚 Documentation
 
-- **Backend API & setup:** [`backend/README.md`](backend/README.md)
-- **Frontend SPA:** [`frontend/README.md`](frontend/README.md)
-- **WordPress CMS bridge:** [`cms/wordpress-integration-guide.md`](cms/wordpress-integration-guide.md)
-- **Database schema:** [`documentation/database/schema.sql`](documentation/database/schema.sql)
-- **ERD & diagrams:** [`documentation/diagrams/erd.md`](documentation/diagrams/erd.md)
-- **System requirements:** [`documentation/SRS/system-requirements.md`](documentation/SRS/system-requirements.md)
+Start at the **[documentation index](documentation/README.md)** for the full rubric-mapped set.
+
+| Document | Link |
+|---|---|
+| Documentation index & rubric map | [`documentation/README.md`](documentation/README.md) |
+| Software Requirements Specification | [`documentation/SRS/system-requirements.md`](documentation/SRS/system-requirements.md) |
+| Use case diagram & 22 specifications | [`documentation/diagrams/use-case.md`](documentation/diagrams/use-case.md) |
+| Entity Relationship Diagram | [`documentation/diagrams/erd.md`](documentation/diagrams/erd.md) |
+| Context diagram (Level-0 DFD) | [`documentation/diagrams/context.md`](documentation/diagrams/context.md) |
+| System architecture | [`documentation/diagrams/architecture.md`](documentation/diagrams/architecture.md) |
+| Wireframes & responsive spec | [`documentation/diagrams/wireframes.md`](documentation/diagrams/wireframes.md) |
+| Database schema | [`documentation/database/schema.sql`](documentation/database/schema.sql) |
+| Business model & revenue | [`documentation/business-model.md`](documentation/business-model.md) |
+| Security & validation controls | [`documentation/security/security-controls.md`](documentation/security/security-controls.md) |
+| Final defense guide | [`documentation/presentation/defense-guide.md`](documentation/presentation/defense-guide.md) |
+| Backend API & setup | [`backend/README.md`](backend/README.md) |
+| Frontend SPA | [`frontend/README.md`](frontend/README.md) |
+| WordPress CMS bridge | [`cms/wordpress-integration-guide.md`](cms/wordpress-integration-guide.md) |

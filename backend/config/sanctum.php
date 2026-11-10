@@ -50,7 +50,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Bearer tokens expire after 7 days by default; adjust per deployment.
+    'expiration' => (int) env('SANCTUM_EXPIRATION', 60 * 24 * 7),
 
     /*
     |--------------------------------------------------------------------------

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\SellerProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -96,13 +98,94 @@ class UserController extends Controller
             unset($validated['password']);
         }
 
+        // Security: an administrator cannot demote or deactivate their own
+        // account while logged in, which prevents accidental lockouts.
+        $isSelf = (int) $request->user()->id === (int) $user->id;
+
+        if ($isSelf && array_key_exists('role', $validated) && $validated['role'] !== $user->role) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot change your own administrative role.',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($isSelf && array_key_exists('is_active', $validated) && !$validated['is_active']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot deactivate your own administrative account.',
+                'data'    => null,
+            ], 422);
+        }
+
+        // Security: never allow the final administrator to be demoted.
+        if (
+            $user->role === 'admin'
+            && array_key_exists('role', $validated)
+            && $validated['role'] !== 'admin'
+            && User::where('role', 'admin')->where('id', '!=', $user->id)->count() === 0
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The last remaining administrator cannot be demoted.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $previousRole = $user->role;
+
         $user->update($validated);
+
+        // When an account is promoted to seller, provision a pending storefront
+        // so it can go through the artisan verification workflow.
+        if ($user->role === 'seller' && !$user->sellerProfile) {
+            $shopName = $user->name . "'s Workshop";
+            $baseSlug = Str::slug($shopName) ?: 'artisan-shop';
+
+            SellerProfile::create([
+                'user_id'         => $user->id,
+                'shop_name'       => $shopName,
+                'shop_slug'       => $this->uniqueShopSlug($baseSlug),
+                'shop_description' => '',
+                'location'        => $user->address,
+                'contact_number'  => $user->phone,
+                'is_verified'     => false,
+                'is_active'       => true,
+                'verification_status' => 'pending',
+            ]);
+        }
+
+        // Deactivation must immediately invalidate existing Sanctum tokens.
+        if (array_key_exists('is_active', $validated) && !$validated['is_active']) {
+            $user->tokens()->delete();
+        }
+
+        // A role transition invalidates sessions so the new RBAC scope is applied
+        // from a fresh login.
+        if ($previousRole !== $user->role) {
+            $user->tokens()->delete();
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'User updated successfully.',
-            'data'    => $user->load('sellerProfile'),
+            'data'    => $user->fresh()->load('sellerProfile'),
         ]);
+    }
+
+    /**
+     * Generate a collision-free shop slug for newly promoted sellers.
+     */
+    private function uniqueShopSlug(string $base): string
+    {
+        $slug = $base;
+        $suffix = 1;
+
+        while (SellerProfile::where('shop_slug', $slug)->exists()) {
+            $slug = $base . '-' . $suffix++;
+        }
+
+        return $slug;
     }
 
     /**

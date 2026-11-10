@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register 'role' as a named middleware alias for route-level role checking
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'cms.bridge' => \App\Http\Middleware\VerifyCmsBridgeKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
