@@ -41,8 +41,8 @@
           <ul class="footer-links">
             <li><router-link to="/login">Seller Central</router-link></li>
             <li><router-link to="/register?role=seller">Open a Shop</router-link></li>
-            <li><a href="/#how-it-works">Fee Structure (8%)</a></li>
-            <li><a href="/#about">Handmade Standards</a></li>
+            <li><router-link to="/#how-it-works">Fee Structure (8%)</router-link></li>
+            <li><router-link to="/#about">Handmade Standards</router-link></li>
             <li><router-link to="/login">Administrator Panel</router-link></li>
           </ul>
         </div>

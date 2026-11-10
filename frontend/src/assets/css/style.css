@@ -378,6 +378,7 @@ button {
     color: var(--text-secondary);
     position: relative;
     padding: 4px 0;
+    white-space: nowrap;
 }
 
 .nav-link:hover, .nav-link.active {
@@ -393,6 +394,13 @@ button {
     height: 2px;
     background-color: var(--color-terracotta);
     border-radius: var(--radius-full);
+}
+
+/* Keep hash targets clear of the sticky header when anchored to */
+#categories,
+#how-it-works,
+#about {
+    scroll-margin-top: 100px;
 }
 
 /* User Actions */

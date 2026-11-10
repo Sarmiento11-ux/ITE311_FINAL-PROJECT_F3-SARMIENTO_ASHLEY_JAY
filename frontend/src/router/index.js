@@ -115,7 +115,9 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition;
     } else if (to.hash) {
-      return { el: to.hash, behavior: 'smooth' };
+      // `top` is subtracted from the element position, keeping the section
+      // heading visible below the sticky 76px site header.
+      return { el: to.hash, behavior: 'smooth', top: 100 };
     } else {
       return { top: 0, behavior: 'smooth' };
     }

@@ -49,6 +49,7 @@
             to="/#categories"
             class="nav-link"
             :class="{ active: route.path === '/' && route.hash === '#categories' }"
+            @click="handleSectionLink('#categories')"
           >
             Categories
           </router-link>
@@ -61,8 +62,22 @@
         >
           Admin Panel
         </router-link>
-        <a href="/#how-it-works" class="nav-link">How It Works</a>
-        <a href="/#about" class="nav-link">Our Story</a>
+        <router-link
+            to="/#how-it-works"
+            class="nav-link"
+            :class="{ active: route.path === '/' && route.hash === '#how-it-works' }"
+            @click="handleSectionLink('#how-it-works')"
+          >
+            How It Works
+          </router-link>
+        <router-link
+            to="/#about"
+            class="nav-link"
+            :class="{ active: route.path === '/' && route.hash === '#about' }"
+            @click="handleSectionLink('#about')"
+          >
+            Our Story
+          </router-link>
       </nav>
 
       <!-- User Actions -->
@@ -157,8 +172,22 @@
           <router-link to="/" class="mobile-nav-item" exact-active-class="active" @click="closeMobileMenu">Home</router-link>
           <router-link to="/products" class="mobile-nav-item" active-class="active" @click="closeMobileMenu">Shop All Crafts</router-link>
           <router-link to="/#categories" class="mobile-nav-item" :class="{ active: route.path === '/' && route.hash === '#categories' }" @click="closeMobileMenu">Categories</router-link>
-          <a href="/#how-it-works" class="mobile-nav-item" @click="closeMobileMenu">How It Works</a>
-          <a href="/#about" class="mobile-nav-item" @click="closeMobileMenu">Our Story</a>
+          <router-link
+            to="/#how-it-works"
+            class="mobile-nav-item"
+            :class="{ active: route.path === '/' && route.hash === '#how-it-works' }"
+            @click="handleSectionLink('#how-it-works')"
+          >
+            How It Works
+          </router-link>
+          <router-link
+            to="/#about"
+            class="mobile-nav-item"
+            :class="{ active: route.path === '/' && route.hash === '#about' }"
+            @click="handleSectionLink('#about')"
+          >
+            Our Story
+          </router-link>
 
           <div class="mobile-nav-divider"></div>
 
@@ -216,7 +245,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import DOMPurify from 'dompurify';
 import { cart } from '../data/cart.js';
@@ -239,10 +268,22 @@ const safeAnnouncementText = computed(() =>
 const isFromCms = ref(false);
 const isMobileMenuOpen = ref(false);
 
-// Close mobile menu on route change
-watch(() => route.path, () => {
+// Close mobile menu on any route or hash change
+watch(() => [route.path, route.hash], () => {
   isMobileMenuOpen.value = false;
 });
+
+// Same-page hash links are treated by the router as duplicate navigations,
+// so they never scroll. Scroll manually in that case.
+const handleSectionLink = (hash) => {
+  closeMobileMenu();
+  if (route.path === '/' && route.hash === hash) {
+    nextTick(() => {
+      const target = document.querySelector(hash);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+};
 
 onMounted(async () => {
   try {
@@ -502,8 +543,10 @@ const handleLogout = async () => {
   transform: translateX(100%);
 }
 
-/* ── Responsive: Show hamburger & hide desktop nav at ≤ 768px ── */
-@media (max-width: 768px) {
+/* ── Responsive: Show hamburger & hide desktop nav at ≤ 1024px ──
+   Must match the `.main-navigation { display: none }` breakpoint in
+   assets/css/style.css so the header is never left with no navigation. */
+@media (max-width: 1024px) {
   .mobile-menu-toggle {
     display: flex;
   }
