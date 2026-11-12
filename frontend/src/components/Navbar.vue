@@ -153,21 +153,6 @@
       <div v-if="isMobileMenuOpen" class="mobile-drawer-backdrop" @click="closeMobileMenu">
         <nav class="mobile-drawer-sheet" @click.stop aria-label="Mobile Navigation">
 
-          <!-- Mobile Search -->
-          <form @submit.prevent="handleMobileSearch" class="mobile-search-form">
-            <svg class="mobile-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="Search handcrafted crafts..." 
-              aria-label="Search marketplace"
-            >
-            <button type="submit" class="mobile-search-btn">Go</button>
-          </form>
-
           <!-- Primary Pages -->
           <router-link to="/" class="mobile-nav-item" exact-active-class="active" @click="closeMobileMenu">Home</router-link>
           <router-link to="/products" class="mobile-nav-item" active-class="active" @click="closeMobileMenu">Shop All Crafts</router-link>
@@ -306,10 +291,6 @@ const handleSearch = () => {
   closeMobileMenu();
 };
 
-const handleMobileSearch = () => {
-  handleSearch();
-};
-
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
@@ -430,50 +411,6 @@ const handleLogout = async () => {
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Mobile Search Form */
-.mobile-search-form {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin: 0 16px 16px;
-  border: 1px solid var(--border-color, #E8DFD5);
-  border-radius: 30px;
-  overflow: hidden;
-  background: var(--bg-page, #FBF8F3);
-}
-
-.mobile-search-icon {
-  position: absolute;
-  left: 12px;
-  color: var(--text-muted, #9E8F85);
-  pointer-events: none;
-}
-
-.mobile-search-form input {
-  flex: 1;
-  padding: 10px 12px 10px 36px;
-  border: none;
-  background: transparent;
-  font-size: 0.88rem;
-  color: var(--text-primary, #2C221E);
-  outline: none;
-}
-
-.mobile-search-btn {
-  padding: 8px 14px;
-  background-color: var(--cm-forest, #3E5943);
-  color: #ffffff;
-  border: none;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.mobile-search-btn:hover {
-  background-color: #2d4030;
-}
-
 /* Mobile Nav Items */
 .mobile-nav-item {
   display: block;
@@ -558,13 +495,14 @@ const handleLogout = async () => {
   .desktop-only-action {
     display: none;
   }
-
-  .header-search {
-    display: none;
-  }
 }
 
 @media (max-width: 480px) {
+  /* Free up room so the search field and hamburger both fit */
+  .brand-name {
+    display: none;
+  }
+
   .mobile-drawer-sheet {
     max-width: 100%;
   }

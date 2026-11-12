@@ -1427,8 +1427,16 @@ button {
         gap: 16px;
     }
 
+    /* Keep search in the header next to the hamburger on tablets/phones */
+    .header-search {
+        flex: 1 1 auto;
+        max-width: 420px;
+        min-width: 0;
+        margin-left: auto;
+    }
+
     .main-navigation {
-        display: none; /* In future phases: Mobile off-canvas drawer */
+        display: none; /* Replaced by the mobile drawer */
     }
 
     .hero-grid {
@@ -1473,8 +1481,13 @@ button {
         display: none;
     }
 
-    .header-search {
-        display: none;
+    .header-search input {
+        padding: 8px 12px 8px 32px;
+        font-size: 0.8rem;
+    }
+
+    .header-search .search-icon {
+        left: 11px;
     }
 
     .hero-title {
