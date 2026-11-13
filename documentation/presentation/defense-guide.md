@@ -33,6 +33,7 @@ The panel scores seven areas. Every demo step below is chosen to **produce visib
 # Backend
 cd backend
 php artisan migrate:fresh --seed
+php artisan storage:link
 php artisan serve
 
 # Frontend (new terminal)
@@ -42,10 +43,34 @@ npm run dev
 
 - [ ] `backend/.env` has DB, PayMongo, `CMS_BRIDGE_KEY`, and CORS values.
 - [ ] Database seeded successfully.
+- [ ] `php artisan storage:link` ran (required for seller-uploaded product images).
 - [ ] Frontend opens at `http://localhost:5173`.
 - [ ] API health check returns JSON at `http://127.0.0.1:8000/api`.
 - [ ] Demo accounts verified (see below).
 - [ ] Browser zoom at 100%; clean profile or incognito.
+
+#### Enabling PayMongo sandbox checkout
+
+Online payment needs a real sandbox key; COD works without it.
+
+1. Create/log in at <https://dashboard.paymongo.com> and switch to **Test mode**.
+2. Open **Developers → API Keys** and copy the **Secret key** (`sk_test_...`).
+3. Add it to `backend/.env`:
+   ```env
+   PAYMONGO_SECRET_KEY=sk_test_your_secret_key
+   PAYMONGO_PUBLIC_KEY=pk_test_your_public_key
+   PAYMONGO_BASE_URL=https://api.paymongo.com/v1
+   ```
+4. Clear the cached config and restart the API:
+   ```powershell
+   php artisan config:clear
+   php artisan serve
+   ```
+5. Test checkout: place an order with **PayMongo**, pay on the hosted page
+   (GCash test flow), then confirm the order flips to `paid` / `confirmed`.
+
+If the key is missing, checkout returns a clear `422` and the order is saved —
+you can retry from **My Orders** after configuring the key, or use **Cash on Delivery**.
 
 ### 2.2 Demo accounts
 

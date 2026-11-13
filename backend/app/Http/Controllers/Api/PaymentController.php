@@ -55,13 +55,26 @@ class PaymentController extends Controller
             ], 403);
         }
 
-        // Guard: already paid
-        if ($order->payment_status === 'paid') {
-            return response()->json([
-                'success' => false,
-                'message' => 'This order has already been paid.',
-            ], 422);
-        }
+        // Guard: already paid
+        if ($order->payment_status === 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This order has already been paid.',
+            ], 422);
+        }
+
+        // Pre-flight: fail fast with an actionable message when the gateway is
+        // not configured, instead of sending an empty key to PayMongo.
+        $secretKey = (string) config('services.paymongo.secret_key');
+        $isConfigured = $secretKey !== '' && !str_contains($secretKey, 'REPLACE_WITH');
+
+        if (!$isConfigured) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Online payment is not configured on this server. Add a valid PayMongo sandbox key (PAYMONGO_SECRET_KEY=sk_test_...) to backend/.env, then run "php artisan config:clear". You can also choose Cash on Delivery.',
+                'data'    => ['configured' => false],
+            ], 422);
+        }
 
         try {
             $result = DB::transaction(function () use ($order, $user) {
@@ -121,14 +134,13 @@ class PaymentController extends Controller
                     ],
                 ]);
 
-                if (!$response->successful()) {
-                    $errorBody = $response->json();
-                    $errorMsg  = $errorBody['errors'][0]['detail'] ?? 'PayMongo API error. Please try again.';
-                    $secretKey = (string) config('services.paymongo.secret_key');
-                    if ($response->status() === 401 || str_contains($secretKey, 'REPLACE_WITH')) {
-                        $errorMsg = 'PayMongo sandbox test credentials are not configured in backend/.env. Please configure valid PAYMONGO_SECRET_KEY to test online checkout.';
-                    }
-                    throw new \Exception($errorMsg);
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMsg  = $errorBody['errors'][0]['detail'] ?? 'PayMongo API error. Please try again.';
+                    if ($response->status() === 401) {
+                        $errorMsg = 'PayMongo rejected the configured secret key. Verify PAYMONGO_SECRET_KEY in backend/.env, then run "php artisan config:clear".';
+                    }
+                    throw new \Exception($errorMsg);
                 }
 
                 $sessionData = $response->json('data');
