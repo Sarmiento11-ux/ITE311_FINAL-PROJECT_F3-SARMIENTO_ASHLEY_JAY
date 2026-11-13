@@ -21,6 +21,7 @@ USE craftmarket_db;
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    username VARCHAR(50) NULL,                      -- optional public handle
     email VARCHAR(255) NOT NULL,
     email_verified_at TIMESTAMP NULL,
     password VARCHAR(255) NOT NULL,                 -- bcrypt hash
@@ -38,6 +39,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP NULL,
     updated_at TIMESTAMP NULL,
     UNIQUE KEY uq_users_email (email),
+    UNIQUE KEY uq_users_username (username),
     KEY idx_users_role (role),
     KEY idx_users_active (is_active)
 ) ENGINE=InnoDB;

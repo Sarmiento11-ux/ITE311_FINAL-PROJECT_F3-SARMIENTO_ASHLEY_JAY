@@ -34,6 +34,7 @@ erDiagram
     USERS {
         bigint id PK
         string name
+        string username UK "nullable public handle"
         string email UK
         timestamp email_verified_at
         string password "bcrypt hash"
@@ -279,7 +280,7 @@ erDiagram
   - Cart and wishlist rows are junction tables with unique `(user_id, product_id)` constraints.
 
 ### Constraints and indexes
-- Unique: `users.email`, `products.slug`, `categories.slug`, `orders.order_number`, `seller_profiles.shop_slug`, `order_items.dispatch_code`, `product_reviews(user_id, product_id)`, `cart_items(user_id, product_id)`, `wishlists(user_id, product_id)`.
+- Unique: `users.email`, `users.username`, `products.slug`, `categories.slug`, `orders.order_number`, `seller_profiles.shop_slug`, `order_items.dispatch_code`, `product_reviews(user_id, product_id)`, `cart_items(user_id, product_id)`, `wishlists(user_id, product_id)`.
 - Indexed: payout `(seller_id, status)`, payments `order_id`, `status`, `payment_reference`, reviews `product_id`, `user_id`.
 - State transitions are enforced in the controllers (for example delivery releases escrow; only approved payouts can be paid).
 
