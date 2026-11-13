@@ -43,12 +43,15 @@
           </div>
         </div>
 
-        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+        <div class="email-sent-notice" v-if="authUser?.email && !isSimulated" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
             <polyline points="22,6 12,13 2,6"></polyline>
           </svg>
           <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
+        </div>
+        <div class="email-sent-notice" v-else-if="isSimulated" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #fff8ef; border: 1px dashed #f0b46a; color: #8a4b00; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.88rem;">
+          <span>Demo mode: no real receipt email was sent and no payment was charged.</span>
         </div>
 
         <div class="status-actions">
