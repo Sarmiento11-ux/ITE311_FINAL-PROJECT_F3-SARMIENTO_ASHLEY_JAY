@@ -1065,7 +1065,7 @@
                 </div>
 
                 <div class="table-responsive">
-                  <table class="admin-table">
+                  <table class="admin-table admin-table--compact">
                     <thead>
                       <tr>
                         <th>Escrow Status</th>
@@ -1151,7 +1151,7 @@
                 </div>
 
                 <div class="table-responsive">
-                  <table class="admin-table">
+                  <table class="admin-table admin-table--compact">
                     <thead>
                       <tr>
                         <th>Craft</th>
@@ -1185,7 +1185,7 @@
                 </div>
 
                 <div class="table-responsive">
-                  <table class="admin-table">
+                  <table class="admin-table admin-table--compact">
                     <thead>
                       <tr>
                         <th>Artisan / Workshop</th>
@@ -2716,7 +2716,9 @@ const fetchSubscriptionMetrics = async () => {
 /* Layout Grid */
 .admin-layout-grid {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  /* minmax(0, 1fr) lets the content column shrink so wide tables
+     scroll inside their card instead of pushing cards off-screen. */
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -2892,7 +2894,9 @@ const fetchSubscriptionMetrics = async () => {
 /* Two Column Layout */
 .admin-dashboard-two-col {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
+  /* minmax(0, …) keeps both columns on screen on laptops; wide tables
+     scroll inside their own card instead of pushing the side card away. */
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: 24px;
 }
 
@@ -2902,6 +2906,7 @@ const fetchSubscriptionMetrics = async () => {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+  min-width: 0;
 }
 
 .admin-card-header {
@@ -2995,6 +3000,18 @@ const fetchSubscriptionMetrics = async () => {
   padding: 32px 14px !important;
   color: #9c8a80;
   font-style: italic;
+}
+
+/* Compact report tables: fit inside the narrow two-column cards on laptops
+   instead of forcing a 580px-wide horizontal scrollbar. */
+.admin-table--compact {
+  min-width: 0;
+}
+.admin-table--compact th,
+.admin-table--compact td {
+  padding: 10px;
+  font-size: 0.82rem;
+  word-break: break-word;
 }
 
 /* Badges */
