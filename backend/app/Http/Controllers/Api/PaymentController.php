@@ -86,7 +86,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Online payment is not configured on this server. Add a valid PayMongo sandbox key (PAYMONGO_SECRET_KEY=sk_test_...) to backend/.env, then run "php artisan config:clear". You can also choose Cash on Delivery.',
+                'message' => 'Online payment is temporarily unavailable. Please choose Cash on Delivery or try again later.',
                 'data'    => ['configured' => false],
             ], 422);
         }
@@ -225,12 +225,12 @@ class PaymentController extends Controller
                 'payment_gateway'     => 'paymongo_sandbox',
                 'checkout_session_id' => $sessionId,
                 'checkout_url'        => rtrim((string) config('services.paymongo.frontend_url'), '/')
-                    . '/payment/sandbox?order_id=' . $order->id,
+                    . '/payment/checkout?order_id=' . $order->id,
                 'amount'              => $order->total_amount,
                 'status'              => 'pending',
             ]);
 
-            $order->update(['payment_method' => 'PayMongo Online Payment (Sandbox)']);
+            $order->update(['payment_method' => 'PayMongo Online Payment']);
 
             return $payment;
         });
@@ -240,7 +240,7 @@ class PaymentController extends Controller
         return response()->json([
             'success' => true,
             'mode'    => 'sandbox',
-            'message' => 'Local sandbox checkout created. No real payment will be processed.',
+            'message' => 'Checkout session created. Redirecting to payment page.',
             'data'    => [
                 'payment_id'   => $payment->id,
                 'checkout_url' => $payment->checkout_url,
@@ -267,7 +267,7 @@ class PaymentController extends Controller
         if (!$this->simulationAllowed()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Local sandbox simulation is disabled. Configure a PayMongo sandbox key or enable PAYMONGO_ALLOW_SIMULATION in backend/.env.',
+                'message' => 'Online payment is not available on this server. Please choose Cash on Delivery or try again later.',
             ], 403);
         }
 
@@ -297,7 +297,7 @@ class PaymentController extends Controller
         if (!$payment) {
             return response()->json([
                 'success' => false,
-                'message' => 'No pending simulated checkout found for this order. Start checkout again from My Orders.',
+                'message' => 'No pending checkout session found for this order. Start checkout again from My Orders.',
             ], 422);
         }
 
@@ -310,7 +310,7 @@ class PaymentController extends Controller
             return response()->json([
                 'success' => true,
                 'mode'    => 'sandbox',
-                'message' => 'Simulated checkout cancelled. The order is still unpaid.',
+                'message' => 'Payment was cancelled. The order is still unpaid.',
                 'data'    => [
                     'order_id'       => $order->id,
                     'order_number'   => $order->order_number,
@@ -347,14 +347,14 @@ class PaymentController extends Controller
         NotificationService::sendPaymentSuccess(
             $order->fresh(),
             (float) $payment->amount,
-            'Sandbox Simulation',
+            'PayMongo Online Payment',
             $reference
         );
 
         return response()->json([
             'success' => true,
             'mode'    => 'sandbox',
-            'message' => 'Simulated payment successful. No real money was charged.',
+            'message' => 'Payment successful.',
             'data'    => [
                 'order_id'       => $order->id,
                 'order_number'   => $order->order_number,

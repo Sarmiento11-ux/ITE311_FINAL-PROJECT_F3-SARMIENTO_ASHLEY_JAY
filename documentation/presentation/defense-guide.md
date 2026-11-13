@@ -82,12 +82,14 @@ APP_FRONTEND_URL=http://localhost:5173
 ```
 
 Then run `php artisan config:clear` and restart the API. With no valid key configured,
-**PayMongo** checkout redirects to `/payment/sandbox` instead of PayMongo:
+**PayMongo** checkout redirects to the local `/payment/checkout` page instead of PayMongo:
 
-- The page is clearly labeled **LOCAL SANDBOX MODE — NO REAL MONEY WILL BE CHARGED**.
-- **Simulate Successful Payment** applies the same order/escrow transitions as the
-  real webhook (`paid` → `confirmed` → escrow `held`) and tags the record
-  `payment_gateway=paymongo_sandbox` with a `SIMULATED-…` reference.
+- The page renders as a normal **SECURE CHECKOUT** screen; no sandbox/simulation wording
+  is shown to the customer.
+- **Pay Now** applies the same order/escrow transitions as the real webhook
+  (`paid` → `confirmed` → escrow `held`) and tags the record
+  `payment_gateway=paymongo_sandbox` with a `SIMULATED-…` reference (audit only,
+  never displayed in the UI).
 - **Cancel Payment** leaves the order unpaid.
 
 Safeguards: the simulator only runs when `APP_ENV` is `local` or `testing` **and**

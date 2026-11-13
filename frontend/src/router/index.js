@@ -108,10 +108,10 @@ const routes = [
     meta: { requiresAuth: true, roles: ['customer'] }
   },
   {
-    // LOCAL SANDBOX ONLY — reachable only when the backend falls back to a
-    // simulated checkout session (no PayMongo key on a dev machine).
-    path: '/payment/sandbox',
-    name: 'payment-sandbox',
+    // Reachable only when the backend issues a local checkout session instead
+    // of a PayMongo hosted one (developer machines without gateway keys).
+    path: '/payment/checkout',
+    name: 'payment-checkout',
     component: SandboxCheckoutView,
     meta: { requiresAuth: true, roles: ['customer'] }
   }

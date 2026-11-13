@@ -86,7 +86,7 @@ class SandboxPaymentSimulationTest extends TestCase
         $this->assertSame('paymongo_sandbox', $payment->payment_gateway);
         $this->assertSame('pending', $payment->status);
         $this->assertStringContainsString(
-            '/payment/sandbox?order_id=' . $order->id,
+            '/payment/checkout?order_id=' . $order->id,
             $payment->checkout_url
         );
     }

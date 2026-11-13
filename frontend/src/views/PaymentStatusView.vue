@@ -13,15 +13,10 @@
       <div v-else-if="paymentStatus === 'paid'" class="status-card success-card">
         <div class="status-icon success-icon"></div>
         <span class="status-eyebrow">PAYMENT CONFIRMED</span>
-        <span v-if="isSimulated" class="sandbox-badge">SIMULATED PAYMENT — NO REAL MONEY CHARGED</span>
         <h2 class="status-title">Bayad Na! Payment Successful</h2>
         <p class="status-subtitle">
           Your payment for order <strong class="order-tag">{{ orderNumber }}</strong> has been confirmed.
           The artisan makers have been notified to start preparing your handcrafted items.
-        </p>
-        <p v-if="isSimulated" class="simulated-note">
-          This order was settled through the <strong>local sandbox simulator</strong>, not PayMongo.
-          It is safe for demos and development, but no real money moved.
         </p>
 
         <div class="status-details-box" v-if="paymentInfo">
@@ -43,15 +38,12 @@
           </div>
         </div>
 
-        <div class="email-sent-notice" v-if="authUser?.email && !isSimulated" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
+        <div class="email-sent-notice" v-if="authUser?.email" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0faf3; border: 1px solid #b8e4c6; color: #235438; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.92rem;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
             <polyline points="22,6 12,13 2,6"></polyline>
           </svg>
           <span>Official payment receipt has been emailed to <strong>{{ authUser.email }}</strong></span>
-        </div>
-        <div class="email-sent-notice" v-else-if="isSimulated" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #fff8ef; border: 1px dashed #f0b46a; color: #8a4b00; padding: 12px 18px; border-radius: 8px; margin: 18px 0; font-size: 0.88rem;">
-          <span>Demo mode: no real receipt email was sent and no payment was charged.</span>
         </div>
 
         <div class="status-actions">
@@ -174,7 +166,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth.js';
 import { useRoute } from 'vue-router';
 import { paymentService } from '../services/paymentService.js';
@@ -187,15 +179,6 @@ const paymentStatus = ref(null);
 const paymentInfo  = ref(null);
 const orderNumber  = ref('');
 const errorMsg     = ref('');
-
-// True when this payment was settled by the local sandbox simulator rather
-// than the real PayMongo gateway.
-const isSimulated = computed(() => {
-  const p = paymentInfo.value;
-  if (!p) return false;
-  return p.payment_gateway === 'paymongo_sandbox'
-    || String(p.payment_reference || '').startsWith('SIMULATED-');
-});
 
 // URL query params set by PayMongo redirect
 const urlStatus  = route.query.status;     // 'success' | 'cancelled'
@@ -259,7 +242,7 @@ function formatPaymentMethod(method) {
     billease: 'BillEase',
     dob: 'Online Banking',
     online: 'Online Payment',
-    sandbox: 'Sandbox Simulation (Demo)',
+    sandbox: 'Online Payment',
   };
   return map[method.toLowerCase()] || method;
 }
@@ -382,31 +365,6 @@ function formatPaymentMethod(method) {
   border-radius: 6px;
   padding: 10px 14px;
   margin-bottom: 20px;
-}
-
-/* Local sandbox simulation badge */
-.sandbox-badge {
-  display: inline-block;
-  margin-bottom: 14px;
-  padding: 5px 12px;
-  background: #fff4e5;
-  border: 1px solid #f0b46a;
-  border-radius: 999px;
-  color: #8a4b00;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-.simulated-note {
-  font-size: 0.86rem;
-  line-height: 1.6;
-  color: #8a4b00;
-  background: #fff8ef;
-  border: 1px dashed #f0b46a;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin: -8px 0 24px;
 }
 
 /* Responsive */

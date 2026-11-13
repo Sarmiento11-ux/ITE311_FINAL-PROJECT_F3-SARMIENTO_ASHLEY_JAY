@@ -2,23 +2,11 @@
   <main class="sandbox-wrapper">
     <div class="container">
 
-      <!-- LOCAL SANDBOX BANNER -->
-      <div class="sandbox-banner" role="note">
-        <span class="sandbox-banner-icon">!</span>
-        <div>
-          <strong>LOCAL SANDBOX MODE — NO REAL MONEY WILL BE CHARGED</strong>
-          <p>
-            This page replaces the PayMongo hosted checkout because no sandbox API key is
-            configured on this machine. It exists only for local demos and development.
-          </p>
-        </div>
-      </div>
-
       <!-- Loading -->
       <div v-if="isLoading" class="sandbox-card loading-card">
         <div class="sandbox-spinner"></div>
         <h2>Loading your order…</h2>
-        <p>Please wait while we prepare the simulated checkout.</p>
+        <p>Please wait while we prepare your checkout.</p>
       </div>
 
       <!-- Error -->
@@ -34,8 +22,8 @@
 
       <!-- Checkout -->
       <div v-else class="sandbox-card">
-        <span class="sandbox-eyebrow">SIMULATED CHECKOUT</span>
-        <h1 class="sandbox-title">Complete your demo payment</h1>
+        <span class="sandbox-eyebrow">SECURE CHECKOUT</span>
+        <h1 class="sandbox-title">Complete your payment</h1>
         <p class="sandbox-subtitle">
           Order <strong class="order-tag">{{ order.order_number }}</strong>
           <span v-if="order.created_at"> · {{ formatDate(order.created_at) }}</span>
@@ -62,12 +50,12 @@
           </div>
         </div>
 
-        <!-- Fake payment method -->
+        <!-- Payment method -->
         <div class="sandbox-method">
-          <div class="method-logo">SIM</div>
+          <div class="method-logo">PAY</div>
           <div class="method-text">
-            <strong>Sandbox Payment</strong>
-            <span>Simulated GCash / Card / Maya — no card details are collected</span>
+            <strong>Online Payment</strong>
+            <span>GCash, Maya, or credit/debit card</span>
           </div>
           <span class="method-amount">{{ formatPeso(order.total_amount) }}</span>
         </div>
@@ -86,7 +74,7 @@
             :disabled="isProcessing"
             @click="settle('paid')"
           >
-            {{ isProcessing ? 'Processing…' : `Simulate Successful Payment · ${formatPeso(order.total_amount)}` }}
+            {{ isProcessing ? 'Processing…' : `Pay Now · ${formatPeso(order.total_amount)}` }}
           </button>
           <button
             class="btn btn-secondary"
@@ -101,11 +89,6 @@
           <router-link to="/orders" class="btn btn-primary">View My Orders →</router-link>
         </div>
 
-        <p class="sandbox-footnote">
-          This is not a real payment gateway. No request is sent to PayMongo, no card data is
-          stored, and no money moves. In production this page is unreachable — a valid
-          <code>PAYMONGO_SECRET_KEY</code> is required and the real hosted checkout is used.
-        </p>
       </div>
 
     </div>
@@ -153,7 +136,7 @@ async function settle(outcome) {
     const res = await paymentService.simulatePayment(order.value.id, outcome);
 
     if (!res || !res.success) {
-      errorMsg.value = res?.message || 'Simulation failed. Please try again.';
+      errorMsg.value = res?.message || 'Payment could not be completed. Please try again.';
       return;
     }
 
@@ -166,7 +149,7 @@ async function settle(outcome) {
     });
   } catch (err) {
     errorMsg.value =
-      err.response?.data?.message || err.message || 'Simulation failed. Please try again.';
+      err.response?.data?.message || err.message || 'Payment could not be completed. Please try again.';
   } finally {
     isProcessing.value = false;
   }
@@ -193,47 +176,6 @@ function formatDate(dateStr) {
   padding: 2.5rem 0 5rem;
   background-color: var(--cm-cream, #faf6f0);
   min-height: 80vh;
-}
-
-.sandbox-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  max-width: 640px;
-  margin: 0 auto 20px;
-  padding: 16px 20px;
-  background: #fff4e5;
-  border: 1px solid #f0b46a;
-  border-left: 5px solid #d97706;
-  border-radius: 10px;
-  color: #6b3f00;
-}
-
-.sandbox-banner-icon {
-  flex: 0 0 26px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #d97706;
-  color: #fff;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sandbox-banner strong {
-  display: block;
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
-
-.sandbox-banner p {
-  margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: #7a4a00;
 }
 
 .sandbox-card {
@@ -415,20 +357,6 @@ function formatDate(dateStr) {
   background: #ffebee;
   border: 1px solid #f5c2c7;
   color: #b3261e;
-}
-
-.sandbox-footnote {
-  margin-top: 22px;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: #9c8a80;
-}
-
-.sandbox-footnote code {
-  background: #f3ece4;
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-size: 0.76rem;
 }
 
 /* Loading */
