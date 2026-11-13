@@ -115,8 +115,13 @@ Create the database, then run the migrations and seeders:
 
 ```powershell
 php artisan migrate:fresh --seed
+php artisan storage:link
 php artisan serve
 ```
+
+`php artisan storage:link` is required once per machine so seller-uploaded product
+images in `backend/storage/app/public/products/` are served at
+`http://127.0.0.1:8000/storage/products/<file>`.
 
 The API runs at `http://127.0.0.1:8000` (health check: `http://127.0.0.1:8000/api`).
 
