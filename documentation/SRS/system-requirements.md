@@ -187,6 +187,7 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | FR-PAY-12 | Admins can approve, reject, or mark a payout paid. | M | State machine enforces `pending → approved → paid` or `pending → rejected`. |
 | FR-PAY-13 | Admins can manually release escrow for exceptions. | S | `PATCH /api/admin/orders/{id}/escrow` updates the escrow ledger with timestamps. |
 | FR-PAY-14 | Reports separate commission revenue from pass-through shipping. | M | Commission/subscription totals exclude shipping fees. |
+| FR-PAY-15 | Developers can demo the online payment flow without gateway keys. | C | Local/testing only, gated by `PAYMONGO_ALLOW_SIMULATION`; simulated payments are tagged `paymongo_sandbox` and never settle real money. Production still requires a valid PayMongo key. |
 
 ### 3.5 Seller Storefront, Listings & Fulfilment
 

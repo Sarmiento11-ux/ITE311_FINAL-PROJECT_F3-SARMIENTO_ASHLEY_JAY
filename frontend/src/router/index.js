@@ -13,6 +13,7 @@ import WishlistView from '../views/WishlistView.vue';
 import CheckoutView from '../views/CheckoutView.vue';
 import OrdersView from '../views/OrdersView.vue';
 import PaymentStatusView from '../views/PaymentStatusView.vue';
+import SandboxCheckoutView from '../views/SandboxCheckoutView.vue';
 import AdminDashboardView from '../views/AdminDashboardView.vue';
 
 // Route meta fields:
@@ -104,6 +105,14 @@ const routes = [
     path: '/payment/status',
     name: 'payment-status',
     component: PaymentStatusView,
+    meta: { requiresAuth: true, roles: ['customer'] }
+  },
+  {
+    // LOCAL SANDBOX ONLY — reachable only when the backend falls back to a
+    // simulated checkout session (no PayMongo key on a dev machine).
+    path: '/payment/sandbox',
+    name: 'payment-sandbox',
+    component: SandboxCheckoutView,
     meta: { requiresAuth: true, roles: ['customer'] }
   }
 ];

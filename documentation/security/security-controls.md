@@ -149,6 +149,7 @@ sequenceDiagram
 | Transaction safety | Order placement, escrow release, refunds, and payouts run in DB transactions |
 | Race-condition control | `lockForUpdate()` on product rows during checkout |
 | Audit timestamps | `confirmed_at`, `shipped_at`, `delivered_at`, `escrow_released_at`, `reviewed_at`, `paid_at` |
+| Local sandbox simulation | Developer-only fallback: requires `APP_ENV=local/testing` **and** `PAYMONGO_ALLOW_SIMULATION=true`; owner-only, pending-session only; records are tagged `payment_gateway=paymongo_sandbox` and `payment_reference=SIMULATED-…`; unreachable in production |
 
 ---
 

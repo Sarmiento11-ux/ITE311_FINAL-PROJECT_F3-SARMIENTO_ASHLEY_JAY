@@ -49,6 +49,10 @@ return [
         // Redirect URLs for hosted checkout (PayMongo sends customer back here)
         'success_url'     => env('APP_FRONTEND_URL', 'http://localhost:5173') . '/payment/status?status=success',
         'cancel_url'      => env('APP_FRONTEND_URL', 'http://localhost:5173') . '/payment/status?status=cancelled',
+        // Demo-only fallback for developer machines without sandbox keys.
+        // Ignored outside local/testing (see PaymentController::simulationAllowed()).
+        'simulation_enabled' => (bool) env('PAYMONGO_ALLOW_SIMULATION', false),
+        'frontend_url'       => env('APP_FRONTEND_URL', 'http://localhost:5173'),
     ],
 
 ];

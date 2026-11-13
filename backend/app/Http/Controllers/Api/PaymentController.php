@@ -7,9 +7,10 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
@@ -25,9 +26,19 @@ class PaymentController extends Controller
      * Base64-encoded secret key for PayMongo Basic Auth.
      * PayMongo uses: Authorization: Basic base64(secret_key:)
      */
-    private function authHeader(): string
-    {
-        return 'Basic ' . base64_encode(config('services.paymongo.secret_key') . ':');
+    private function authHeader(): string
+    {
+        return 'Basic ' . base64_encode(config('services.paymongo.secret_key') . ':');
+    }
+
+    /**
+     * Local sandbox simulation is a developer-only fallback. It must never be
+     * reachable on production, even if the env flag is accidentally left on.
+     */
+    private function simulationAllowed(): bool
+    {
+        return app()->environment('local', 'testing')
+            && (bool) config('services.paymongo.simulation_enabled');
     }
 
     /**
@@ -69,6 +80,10 @@ class PaymentController extends Controller
         $isConfigured = $secretKey !== '' && !str_contains($secretKey, 'REPLACE_WITH');
 
         if (!$isConfigured) {
+            if ($this->simulationAllowed()) {
+                return $this->createSimulatedCheckoutSession($order, $user);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Online payment is not configured on this server. Add a valid PayMongo sandbox key (PAYMONGO_SECRET_KEY=sk_test_...) to backend/.env, then run "php artisan config:clear". You can also choose Cash on Delivery.',
@@ -176,16 +191,184 @@ class PaymentController extends Controller
                 'data'    => $result,
             ]);
 
-        } catch (\Exception $e) {
-            Log::error('[PayMongo] Checkout session creation failed: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'data'    => null,
-            ], 422);
-        }
-    }
-
+        } catch (\Exception $e) {
+            Log::error('[PayMongo] Checkout session creation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data'    => null,
+            ], 422);
+        }
+    }
+
+    /**
+     * Create a local-only simulated checkout session.
+     *
+     * Used on developer machines when no PayMongo sandbox key is configured so
+     * the full order → payment → escrow flow can still be demonstrated. No
+     * request reaches PayMongo and no money moves.
+     */
+    private function createSimulatedCheckoutSession(Order $order, $user)
+    {
+        $sessionId = 'cs_sandbox_' . Str::uuid();
+
+        $payment = DB::transaction(function () use ($order, $user, $sessionId) {
+            // Only one pending payment attempt per order (mirrors the real flow).
+            Payment::where('order_id', $order->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'cancelled']);
+
+            $payment = Payment::create([
+                'order_id'            => $order->id,
+                'user_id'             => $user->id,
+                'payment_method'      => 'sandbox',
+                'payment_gateway'     => 'paymongo_sandbox',
+                'checkout_session_id' => $sessionId,
+                'checkout_url'        => rtrim((string) config('services.paymongo.frontend_url'), '/')
+                    . '/payment/sandbox?order_id=' . $order->id,
+                'amount'              => $order->total_amount,
+                'status'              => 'pending',
+            ]);
+
+            $order->update(['payment_method' => 'PayMongo Online Payment (Sandbox)']);
+
+            return $payment;
+        });
+
+        Log::info('[PayMongo Sandbox] Simulated checkout created for order ' . $order->order_number);
+
+        return response()->json([
+            'success' => true,
+            'mode'    => 'sandbox',
+            'message' => 'Local sandbox checkout created. No real payment will be processed.',
+            'data'    => [
+                'payment_id'   => $payment->id,
+                'checkout_url' => $payment->checkout_url,
+                'session_id'   => $sessionId,
+                'order_number' => $order->order_number,
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/payments/simulate
+     *
+     * Local-only settlement endpoint for a simulated checkout session. Applies
+     * the same payment → order → escrow transitions as the PayMongo webhook so
+     * the rest of the system (seller dashboards, payouts) behaves identically.
+     */
+    public function simulatePayment(Request $request)
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'outcome'  => 'sometimes|in:paid,cancelled',
+        ]);
+
+        if (!$this->simulationAllowed()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Local sandbox simulation is disabled. Configure a PayMongo sandbox key or enable PAYMONGO_ALLOW_SIMULATION in backend/.env.',
+            ], 403);
+        }
+
+        $user  = $request->user();
+        $order = Order::find($validated['order_id']);
+
+        if (!$order || $order->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found or access denied.',
+            ], 403);
+        }
+
+        if ($order->payment_status === 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This order has already been paid.',
+            ], 422);
+        }
+
+        $payment = Payment::where('order_id', $order->id)
+            ->where('payment_gateway', 'paymongo_sandbox')
+            ->where('status', 'pending')
+            ->latest('id')
+            ->first();
+
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No pending simulated checkout found for this order. Start checkout again from My Orders.',
+            ], 422);
+        }
+
+        // ── Cancel branch ───────────────────────────────────────────────────
+        if (($validated['outcome'] ?? 'paid') === 'cancelled') {
+            $payment->update(['status' => 'cancelled']);
+
+            Log::info('[PayMongo Sandbox] Simulated checkout cancelled for order ' . $order->order_number);
+
+            return response()->json([
+                'success' => true,
+                'mode'    => 'sandbox',
+                'message' => 'Simulated checkout cancelled. The order is still unpaid.',
+                'data'    => [
+                    'order_id'       => $order->id,
+                    'order_number'   => $order->order_number,
+                    'payment_status' => $order->fresh()->payment_status,
+                ],
+            ]);
+        }
+
+        // ── Paid branch (mirrors WebhookController::handleCheckoutPaid) ─────
+        $reference = 'SIMULATED-' . strtoupper(Str::random(10));
+
+        DB::transaction(function () use ($payment, $order, $reference) {
+            $payment->update([
+                'status'            => 'paid',
+                'paid_at'           => now(),
+                'payment_reference' => $reference,
+                'payment_method'    => 'sandbox',
+            ]);
+
+            $order->update([
+                'payment_status' => 'paid',
+                'status'         => 'confirmed',
+                'confirmed_at'   => now(),
+                'escrow_status'  => 'held',
+            ]);
+
+            $order->items()->update(['escrow_status' => 'held']);
+        });
+
+        Log::info('[PayMongo Sandbox] Order ' . $order->order_number . ' marked as PAID (simulated)');
+
+        // NotificationService swallows mail failures, so a missing SMTP server
+        // can never break the simulated settlement.
+        NotificationService::sendPaymentSuccess(
+            $order->fresh(),
+            (float) $payment->amount,
+            'Sandbox Simulation',
+            $reference
+        );
+
+        return response()->json([
+            'success' => true,
+            'mode'    => 'sandbox',
+            'message' => 'Simulated payment successful. No real money was charged.',
+            'data'    => [
+                'order_id'       => $order->id,
+                'order_number'   => $order->order_number,
+                'payment_status' => 'paid',
+                'payment'        => [
+                    'id'                => $payment->id,
+                    'status'            => 'paid',
+                    'payment_gateway'   => 'paymongo_sandbox',
+                    'payment_reference' => $reference,
+                ],
+            ],
+        ]);
+    }
+
     /**
      * GET /api/payments/status/{orderId}
      *
@@ -207,10 +390,13 @@ class PaymentController extends Controller
 
         $payment = $order->latestPayment;
 
-        // If we have a pending PayMongo session, refresh its status from the API
-        if ($payment && $payment->status === 'pending' && $payment->checkout_session_id) {
-            $this->refreshCheckoutSessionStatus($payment);
-            $payment->refresh();
+        // If we have a pending PayMongo session, refresh its status from the API.
+        // Simulated sessions never exist on PayMongo, so they are skipped.
+        if ($payment && $payment->status === 'pending'
+            && $payment->checkout_session_id
+            && $payment->payment_gateway !== 'paymongo_sandbox') {
+            $this->refreshCheckoutSessionStatus($payment);
+            $payment->refresh();
         }
 
         return response()->json([
@@ -220,13 +406,14 @@ class PaymentController extends Controller
                 'order_number'     => $order->order_number,
                 'order_status'     => $order->status,
                 'payment_status'   => $order->fresh()->payment_status,
-                'payment'          => $payment ? [
-                    'id'               => $payment->id,
-                    'status'           => $payment->status,
-                    'payment_method'   => $payment->payment_method,
-                    'amount'           => $payment->amount,
-                    'paid_at'          => $payment->paid_at,
-                    'payment_reference' => $payment->payment_reference,
+                'payment'          => $payment ? [
+                    'id'               => $payment->id,
+                    'status'           => $payment->status,
+                    'payment_method'   => $payment->payment_method,
+                    'payment_gateway'  => $payment->payment_gateway,
+                    'amount'           => $payment->amount,
+                    'paid_at'          => $payment->paid_at,
+                    'payment_reference' => $payment->payment_reference,
                 ] : null,
             ],
         ]);

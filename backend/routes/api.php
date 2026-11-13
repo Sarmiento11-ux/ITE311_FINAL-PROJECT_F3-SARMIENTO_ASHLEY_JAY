@@ -107,6 +107,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // ─── Customer: Payments (PayMongo checkout sessions) ─────────────────
     Route::post('/payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
     Route::get('/payments/status/{orderId}',  [PaymentController::class, 'getPaymentStatus']);
+    // Local-only sandbox settlement (guarded by environment + env flag).
+    Route::post('/payments/simulate',         [PaymentController::class, 'simulatePayment']);
 
     // ─── Customer: Product Reviews ───────────────────────────────────────────────
     Route::get('/products/{productId}/reviews/eligibility', [ProductReviewController::class, 'checkEligibility']);

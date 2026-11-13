@@ -72,6 +72,31 @@ Online payment needs a real sandbox key; COD works without it.
 If the key is missing, checkout returns a clear `422` and the order is saved —
 you can retry from **My Orders** after configuring the key, or use **Cash on Delivery**.
 
+#### Offline demo fallback (local sandbox simulation)
+
+If the defense machine has no PayMongo key or internet, enable the local simulator:
+
+```env
+PAYMONGO_ALLOW_SIMULATION=true
+APP_FRONTEND_URL=http://localhost:5173
+```
+
+Then run `php artisan config:clear` and restart the API. With no valid key configured,
+**PayMongo** checkout redirects to `/payment/sandbox` instead of PayMongo:
+
+- The page is clearly labeled **LOCAL SANDBOX MODE — NO REAL MONEY WILL BE CHARGED**.
+- **Simulate Successful Payment** applies the same order/escrow transitions as the
+  real webhook (`paid` → `confirmed` → escrow `held`) and tags the record
+  `payment_gateway=paymongo_sandbox` with a `SIMULATED-…` reference.
+- **Cancel Payment** leaves the order unpaid.
+
+Safeguards: the simulator only runs when `APP_ENV` is `local` or `testing` **and**
+`PAYMONGO_ALLOW_SIMULATION=true`. In production the flag is ignored and online
+checkout still requires a valid PayMongo key. Never use this for real orders.
+
+> If a valid `PAYMONGO_SECRET_KEY` is present, the simulator is bypassed and the
+> real hosted checkout is always used.
+
 ### 2.2 Demo accounts
 
 | Role | Email | Password |

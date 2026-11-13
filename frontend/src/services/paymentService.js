@@ -20,4 +20,17 @@ export const paymentService = {
     const response = await apiClient.get(`/payments/status/${orderId}`);
     return response.data;
   },
+
+  /**
+   * LOCAL SANDBOX ONLY — settle a simulated checkout session.
+   * The backend rejects this unless APP_ENV=local/testing and
+   * PAYMONGO_ALLOW_SIMULATION=true. No real money moves.
+   */
+  async simulatePayment(orderId, outcome = 'paid') {
+    const response = await apiClient.post('/payments/simulate', {
+      order_id: orderId,
+      outcome,
+    });
+    return response.data;
+  },
 };

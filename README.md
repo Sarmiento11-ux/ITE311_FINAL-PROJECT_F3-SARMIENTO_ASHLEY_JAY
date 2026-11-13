@@ -192,6 +192,7 @@ npm run build
 - Public catalog and product detail only expose **approved storefronts**.
 - PayMongo webhooks are verified with **HMAC-SHA256**.
 - The CMS bridge requires `X-CMS-Bridge-Key` and returns `503` if unset.
+- Local sandbox payment simulation is **disabled by default**; it only runs with `APP_ENV=local`/`testing` **and** `PAYMONGO_ALLOW_SIMULATION=true`, and simulated records are tagged `paymongo_sandbox`.
 - Set `CMS_BRIDGE_KEY`, `SANCTUM_EXPIRATION`, `CORS_ALLOWED_ORIGINS`, and PayMongo keys in `backend/.env`.
 
 ---
