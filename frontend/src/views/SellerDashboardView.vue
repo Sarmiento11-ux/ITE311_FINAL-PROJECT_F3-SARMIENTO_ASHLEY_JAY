@@ -1092,25 +1092,19 @@
 
 
               <div class="panel-header-row">
-
-
-
                 <div>
-
-
-
                   <h3 class="panel-heading">Seller Order Management</h3>
-
-
-
                   <p class="panel-subheading">Fulfill orders and track escrow payout disbursements.</p>
-
-
-
                 </div>
-
-
-
+                <button 
+                  v-if="orders && orders.length > 0"
+                  type="button" 
+                  class="btn btn-secondary btn-sm"
+                  style="display: inline-flex; align-items: center; gap: 6px;"
+                  @click="exportOrdersToCsv"
+                >
+                  <span>📥 Export Sales (CSV)</span>
+                </button>
               </div>
 
 
@@ -1164,29 +1158,22 @@
 
 
               <div class="panel-header-row">
-
-
-
                 <div>
-
-
-
                   <h3 class="panel-heading">Payouts & Escrow Ledger</h3>
-
-
-
                   <p class="panel-subheading">Request a cash-out from escrow funds that have already been released by the platform.</p>
-
-
-
                 </div>
-
-
-
-                <span class="status-pill status-published">Escrow Protected</span>
-
-
-
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <button 
+                    v-if="payoutsData?.requests && payoutsData.requests.length > 0"
+                    type="button" 
+                    class="btn btn-secondary btn-sm"
+                    style="display: inline-flex; align-items: center; gap: 6px;"
+                    @click="exportPayoutsToCsv"
+                  >
+                    <span>📥 Export Payouts (CSV)</span>
+                  </button>
+                  <span class="status-pill status-published">Escrow Protected</span>
+                </div>
               </div>
 
 
@@ -3759,6 +3746,108 @@ const handleCancelSubscription = async () => {
   } finally {
     isSubmittingSubscription.value = false;
   }
+};
+
+const exportOrdersToCsv = () => {
+  if (!orders.value || orders.value.length === 0) {
+    showToast('No orders available to export.', true);
+    return;
+  }
+  const headers = [
+    'Order ID',
+    'Order Number',
+    'Date',
+    'Customer Name',
+    'Product',
+    'Quantity',
+    'Gross Sale (PHP)',
+    'Commission Rate (%)',
+    'Platform Commission (PHP)',
+    'Seller Payout (PHP)',
+    'Escrow Status',
+    'Fulfillment Status',
+    'Tracking Number'
+  ];
+
+  const escapeCsv = (str) => {
+    if (str == null) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = orders.value.map(o => [
+    escapeCsv(o.id),
+    escapeCsv(o.orderNumber || o.id),
+    escapeCsv(o.orderDate || o.date),
+    escapeCsv(o.customerName || 'Customer'),
+    escapeCsv(o.product || o.productName),
+    o.quantity || 1,
+    Number(o.grossAmount ?? o.totalAmount ?? 0).toFixed(2),
+    Number(o.commissionRate ?? 8).toFixed(1),
+    Number(o.platformFee ?? 0).toFixed(2),
+    Number(o.sellerPayout ?? o.totalAmount ?? 0).toFixed(2),
+    escapeCsv(o.payoutStatus || o.escrowStatus || 'Held in Escrow'),
+    escapeCsv(o.status || 'pending'),
+    escapeCsv(o.trackingNumber || '')
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const filename = `craftmarket_seller_sales_${new Date().toISOString().slice(0, 10)}.csv`;
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Sales ledger exported successfully!');
+};
+
+const exportPayoutsToCsv = () => {
+  const reqs = payoutsData.value?.requests || [];
+  if (reqs.length === 0) {
+    showToast('No payout requests to export.', true);
+    return;
+  }
+  const headers = [
+    'Request ID',
+    'Amount (PHP)',
+    'Status',
+    'Payment Method',
+    'Account Details',
+    'Requested Date',
+    'Approved Date',
+    'Reference Number'
+  ];
+  const escapeCsv = (str) => {
+    if (str == null) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const rows = reqs.map(r => [
+    escapeCsv(r.id),
+    Number(r.amount || 0).toFixed(2),
+    escapeCsv(r.status),
+    escapeCsv(r.payout_method || r.payment_method || 'GCash'),
+    escapeCsv(r.account_number || r.account_details || ''),
+    escapeCsv(r.requested_at || r.created_at || ''),
+    escapeCsv(r.approved_at || r.processed_at || ''),
+    escapeCsv(r.reference_number || '')
+  ].join(','));
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const filename = `craftmarket_payouts_ledger_${new Date().toISOString().slice(0, 10)}.csv`;
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Payouts ledger exported successfully!');
 };
 
 

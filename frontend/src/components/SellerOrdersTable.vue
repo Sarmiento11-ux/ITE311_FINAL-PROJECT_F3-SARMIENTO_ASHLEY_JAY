@@ -32,13 +32,24 @@
               </span>
             </td>
             <td>
-              <button 
-                type="button" 
-                class="btn-table-action btn-action-view" 
-                @click="openOrderModal(order)"
-              >
-                <span>View Details</span>
-              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button 
+                  type="button" 
+                  class="btn-table-action btn-action-view" 
+                  @click="openOrderModal(order)"
+                >
+                  <span>View Details</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="btn-table-action" 
+                  style="border-color: #2F4533; color: #2F4533; background: #FAF8F5;"
+                  title="Print Packing Slip & Merchant Invoice"
+                  @click="invoiceOrder = order"
+                >
+                  <span>🧾</span>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -61,6 +72,12 @@
           <h3 class="modal-title">Order Fulfillment: {{ activeOrder.id }}</h3>
           <button type="button" class="btn-modal-close" @click="activeOrder = null">&times;</button>
         </div>
+
+        <!-- Visual Delivery Tracking Stepper -->
+        <OrderTrackingStepper 
+          :status="activeOrder.status" 
+          :trackingNumber="activeOrder.trackingNumber || trackingNumber" 
+        />
 
         <div style="font-size: 0.9rem; line-height: 1.7; color: #423B36;">
           <p><strong>Customer Name:</strong> {{ activeOrder.customerName }}</p>
@@ -167,14 +184,32 @@
           </div>
         </div>
 
-        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: flex-end; gap: 10px;">
-          <button type="button" class="btn btn-secondary btn-sm" @click="activeOrder = null">Close</button>
-          <button type="button" class="btn btn-primary btn-sm" @click="saveStatus" :disabled="isSaving">
-            {{ isSaving ? 'Saving…' : 'Save Status' }}
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-sm"
+            style="display: inline-flex; align-items: center; gap: 6px;"
+            @click="invoiceOrder = activeOrder"
+          >
+            <span>🧾 Print Packing Slip / Invoice</span>
           </button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-secondary btn-sm" @click="activeOrder = null">Close</button>
+            <button type="button" class="btn btn-primary btn-sm" @click="saveStatus" :disabled="isSaving">
+              {{ isSaving ? 'Saving…' : 'Save Status' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Official Packing Slip & Order Invoice Modal -->
+    <OrderInvoiceModal 
+      v-if="invoiceOrder" 
+      :order="invoiceOrder" 
+      userRole="seller" 
+      @close="invoiceOrder = null" 
+    />
   </div>
 </template>
 
@@ -182,6 +217,8 @@
 import { ref } from 'vue';
 import QRCode from 'qrcode';
 import { sellerService } from '../services/sellerService.js';
+import OrderTrackingStepper from './OrderTrackingStepper.vue';
+import OrderInvoiceModal from './OrderInvoiceModal.vue';
 
 const props = defineProps({
   orders: {
@@ -193,6 +230,7 @@ const props = defineProps({
 const emit = defineEmits(['order-updated']);
 
 const activeOrder = ref(null);
+const invoiceOrder = ref(null);
 const selectedStatus = ref('pending');
 const isSaving = ref(false);
 const statusFeedback = ref('');

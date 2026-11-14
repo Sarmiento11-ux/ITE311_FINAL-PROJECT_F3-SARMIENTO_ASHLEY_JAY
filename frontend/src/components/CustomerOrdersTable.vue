@@ -34,13 +34,24 @@
               </span>
             </td>
             <td>
-              <button 
-                type="button" 
-                class="btn-table-action btn-action-view" 
-                @click="openOrderDetails(order)"
-              >
-                <span>View Details</span>
-              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button 
+                  type="button" 
+                  class="btn-table-action btn-action-view" 
+                  @click="openOrderDetails(order)"
+                >
+                  <span>View Details</span>
+                </button>
+                <button 
+                  type="button" 
+                  class="btn-table-action" 
+                  style="border-color: #2F4533; color: #2F4533; background: #FAF8F5;"
+                  title="Print Official Order Receipt"
+                  @click="invoiceOrder = order"
+                >
+                  <span>🧾</span>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -66,6 +77,12 @@
           <h3 class="modal-title">Order Summary: {{ selectedOrder.orderNumber || selectedOrder.id }}</h3>
           <button type="button" class="btn-modal-close" @click="selectedOrder = null">&times;</button>
         </div>
+
+        <!-- Visual Delivery Tracking Stepper -->
+        <OrderTrackingStepper 
+          :status="selectedOrder.status" 
+          :trackingNumber="selectedOrder.trackingNumber" 
+        />
 
         <div style="font-size: 0.9rem; line-height: 1.7; color: #423B36;">
           <div v-if="selectedOrder.items && selectedOrder.items.length > 0" style="margin-bottom: 10px;">
@@ -121,8 +138,16 @@
           {{ cancelFeedback.message }}
         </div>
 
-        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: space-between; align-items: center;">
-          <div>
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E8DFD5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button 
+              type="button" 
+              class="btn btn-secondary btn-sm" 
+              style="display: inline-flex; align-items: center; gap: 6px;"
+              @click="invoiceOrder = selectedOrder"
+            >
+              <span>🧾 Print Receipt / Invoice</span>
+            </button>
             <button 
               v-if="selectedOrder.status && selectedOrder.status.toLowerCase() === 'pending' && !confirmCancel"
               type="button" 
@@ -138,12 +163,22 @@
         </div>
       </div>
     </div>
+
+    <!-- Official Order Invoice & Receipt Modal -->
+    <OrderInvoiceModal 
+      v-if="invoiceOrder" 
+      :order="invoiceOrder" 
+      userRole="customer" 
+      @close="invoiceOrder = null" 
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { orderService } from '../services/orderService.js';
+import OrderTrackingStepper from './OrderTrackingStepper.vue';
+import OrderInvoiceModal from './OrderInvoiceModal.vue';
 
 defineProps({
   orders: {
@@ -155,6 +190,7 @@ defineProps({
 const emit = defineEmits(['order-updated']);
 
 const selectedOrder = ref(null);
+const invoiceOrder = ref(null);
 const cancelling = ref(false);
 const confirmCancel = ref(false);
 const cancelFeedback = ref(null);

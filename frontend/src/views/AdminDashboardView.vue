@@ -862,6 +862,15 @@
                   <h3>Seller Payout Requests</h3>
                   <p class="admin-card-sub">Audit cash-out requests funded by released escrow, then approve, reject, or mark them paid.</p>
                 </div>
+                <button 
+                  v-if="payoutsData?.requests && payoutsData.requests.length > 0"
+                  type="button" 
+                  class="btn btn-secondary btn-sm"
+                  style="display: inline-flex; align-items: center; gap: 6px;"
+                  @click="exportAdminPayoutsToCsv"
+                >
+                  <span>📥 Export Payouts (CSV)</span>
+                </button>
               </div>
 
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px;">
@@ -978,14 +987,22 @@
                 <h3 style="margin: 0; font-size: 1.15rem; color: #2C221E; font-weight: 700;">Financial & Marketplace Performance Reports</h3>
                 <p style="margin: 4px 0 0; font-size: 0.84rem; color: #7A6F68;">Platform sales, average order value, commission splits, and top artisan performers.</p>
               </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <label style="font-size: 0.82rem; font-weight: 600; color: #423B36;">Date Range:</label>
-                <select v-model="reportPeriod" @change="fetchReports" class="form-select" style="min-width: 160px; padding: 6px 12px; font-size: 0.85rem;">
+                <select v-model="reportPeriod" @change="fetchReports" class="form-select" style="min-width: 140px; padding: 6px 12px; font-size: 0.85rem;">
                   <option value="all">All Time</option>
                   <option value="month">Last 30 Days</option>
                   <option value="week">Last 7 Days</option>
                   <option value="today">Today</option>
                 </select>
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-sm"
+                  style="display: inline-flex; align-items: center; gap: 6px;"
+                  @click="exportAdminReportsToCsv"
+                >
+                  <span>📥 Export Financials (CSV)</span>
+                </button>
               </div>
             </div>
             <!-- Reports KPI Header -->
@@ -2610,6 +2627,128 @@ const fetchReports = async () => {
   } catch (err) {
     showToast(err.message || 'Failed to retrieve reports.', 'alert-danger');
   }
+};
+
+const exportAdminReportsToCsv = () => {
+  if (!reports.value) {
+    showToast('No report data available to export.', 'alert-warning');
+    return;
+  }
+  const r = reports.value;
+  const escapeCsv = (str) => {
+    if (str == null) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const lines = [
+    '=== CRAFTMARKET EXECUTIVE FINANCIAL SUMMARY ===',
+    `Report Period,${escapeCsv(r.period || reportPeriod.value)}`,
+    `Generated On,${escapeCsv(new Date().toLocaleString('en-PH'))}`,
+    `Total Gross Sales (PHP),${Number(r.total_sales || 0).toFixed(2)}`,
+    `Total Orders Placed,${r.total_orders || 0}`,
+    `Completed Orders,${r.completed_orders_count || 0}`,
+    `Average Order Value (PHP),${Number(r.average_order_value || 0).toFixed(2)}`,
+    `Platform Commission Revenue (PHP),${Number(r.total_commission || 0).toFixed(2)}`,
+    `Subscription MRR (PHP),${Number(r.subscription_revenue?.mrr || 0).toFixed(2)}`,
+    `All-Time Subscription Revenue (PHP),${Number(r.subscription_revenue?.all_time_revenue || 0).toFixed(2)}`,
+    `Active Pro/Premium Artisans,${r.subscription_revenue?.pro_subscribers_count || 0}`,
+    `Active Basic Artisans,${r.subscription_revenue?.basic_subscribers_count || 0}`,
+    `Free Starter Artisans,${r.subscription_revenue?.free_sellers_count || 0}`,
+    '',
+    '=== TOP SELLING HANDCRAFTED PRODUCTS ===',
+    'Product ID,Product Name,Quantity Sold,Total Revenue (PHP)'
+  ];
+
+  if (Array.isArray(r.best_selling_products)) {
+    r.best_selling_products.forEach(p => {
+      lines.push([
+        escapeCsv(p.id),
+        escapeCsv(p.name),
+        p.total_quantity_sold || 0,
+        Number(p.total_sales || 0).toFixed(2)
+      ].join(','));
+    });
+  }
+
+  lines.push('');
+  lines.push('=== MOST ACTIVE ARTISAN MAKERS ===');
+  lines.push('Artisan ID,Artisan Name,Shop Name,Orders Fulfilled,Total GMV (PHP)');
+
+  if (Array.isArray(r.most_active_sellers)) {
+    r.most_active_sellers.forEach(s => {
+      lines.push([
+        escapeCsv(s.id),
+        escapeCsv(s.name),
+        escapeCsv(s.seller_profile?.shop_name || s.shop_name || 'Artisan Workshop'),
+        s.total_orders || 0,
+        Number(s.total_sales || 0).toFixed(2)
+      ].join(','));
+    });
+  }
+
+  const csvContent = lines.join('\r\n');
+  const filename = `craftmarket_executive_report_${new Date().toISOString().slice(0, 10)}.csv`;
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Executive financial report exported successfully!', 'alert-success');
+};
+
+const exportAdminPayoutsToCsv = () => {
+  const reqs = payoutsData.value?.requests || [];
+  if (reqs.length === 0) {
+    showToast('No payout requests to export.', 'alert-warning');
+    return;
+  }
+  const escapeCsv = (str) => {
+    if (str == null) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const headers = [
+    'Request ID',
+    'Artisan / Seller Name',
+    'Shop Name',
+    'Amount (PHP)',
+    'Payment Channel',
+    'Account Details',
+    'Status',
+    'Requested Date',
+    'Processed Date',
+    'Transaction Reference'
+  ];
+  const rows = reqs.map(p => [
+    escapeCsv(p.id),
+    escapeCsv(p.seller?.name || 'Seller'),
+    escapeCsv(p.seller?.seller_profile?.shop_name || p.seller?.sellerProfile?.shop_name || 'Workshop'),
+    Number(p.amount || 0).toFixed(2),
+    escapeCsv(p.payout_method || p.payment_method || 'GCash'),
+    escapeCsv(p.account_number || p.account_details || ''),
+    escapeCsv(p.status),
+    escapeCsv(p.requested_at || p.created_at || ''),
+    escapeCsv(p.processed_at || p.approved_at || ''),
+    escapeCsv(p.reference_number || '')
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const filename = `craftmarket_admin_payouts_${new Date().toISOString().slice(0, 10)}.csv`;
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Payout requests ledger exported successfully!', 'alert-success');
 };
 
 const reviewRatingFilter = ref('all');
