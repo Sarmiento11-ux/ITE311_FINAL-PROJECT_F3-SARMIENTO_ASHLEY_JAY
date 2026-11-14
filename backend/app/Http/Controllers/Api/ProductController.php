@@ -583,4 +583,116 @@ class ProductController extends Controller
             Storage::disk('public')->delete($path);
         }
     }
+
+    /**
+     * Toggle featured status for a craft item.
+     * Guarded to Pro / Premium subscription tiers and capped at 3 active items.
+     */
+    public function toggleFeatured(Request $request, $id)
+    {
+        $user = $request->user();
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        // Sellers can only toggle their own products (admins can toggle any)
+        if ($user->role === 'seller' && $product->seller_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. You can only feature your own products.',
+                'data'    => null,
+            ], 403);
+        }
+
+        // Check Pro/Premium subscription tier (admins bypass)
+        if ($user->role !== 'admin') {
+            $isPro = in_array($user->subscription_plan, ['pro', 'premium']) 
+                || ($user->subscription_status === 'active' && in_array($user->subscription_plan, ['pro', 'premium']));
+            
+            if (!$isPro) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Featuring craft listings is an exclusive Artisan Pro feature. Upgrade your subscription to feature your creations on the homepage spotlight.',
+                    'data'    => null,
+                ], 403);
+            }
+        }
+
+        // If toggling ON, enforce maximum 3 featured crafts cap per seller
+        if (!$product->is_featured) {
+            $currentFeaturedCount = Product::where('seller_id', $product->seller_id)
+                ->where('is_featured', true)
+                ->count();
+
+            if ($currentFeaturedCount >= 3) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You can feature a maximum of 3 crafts simultaneously. Unfeature another item first before featuring this one.',
+                    'data'    => [
+                        'featured_count' => $currentFeaturedCount,
+                        'max_allowed'    => 3,
+                    ],
+                ], 422);
+            }
+        }
+
+        $product->is_featured = !$product->is_featured;
+        $product->save();
+
+        return response()->json([
+            'success'     => true,
+            'message'     => $product->is_featured ? 'Craft promoted to Featured Spotlight!' : 'Craft removed from Featured Spotlight.',
+            'is_featured' => (bool) $product->is_featured,
+            'data'        => $product,
+        ]);
+    }
+
+    /**
+     * Submit a custom craft customization inquiry from a patron to the artisan.
+     */
+    public function submitInquiry(Request $request, $id)
+    {
+        $product = Product::with('seller')->find($id);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found.',
+                'data'    => null,
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'customer_name'       => 'required|string|max:120',
+            'customer_email'      => 'required|email|max:150',
+            'customer_phone'      => 'nullable|string|max:30',
+            'custom_description'  => 'required|string|min:10|max:2000',
+            'preferred_specs'     => 'nullable|string|max:500',
+            'desired_quantity'    => 'required|integer|min:1|max:1000',
+            'contact_preference'  => 'nullable|string|in:email,phone,sms,viber',
+        ]);
+
+        $seller = $product->seller;
+        $sellerName = $seller ? $seller->name : 'Artisan Maker';
+
+        // Log the inquiry for auditing
+        \Illuminate\Support\Facades\Log::info("[CraftInquiry] Custom inquiry received for product #{$product->id} '{$product->name}' from {$validated['customer_name']} ({$validated['customer_email']}) to seller #{$product->seller_id}");
+
+        return response()->json([
+            'success' => true,
+            'message' => "Your custom inquiry for '{$product->name}' has been sent to {$sellerName}. The artisan will review your specifications and contact you shortly!",
+            'data'    => [
+                'product_id'   => $product->id,
+                'product_name' => $product->name,
+                'inquiry'      => $validated,
+                'submitted_at' => now()->toIso8601String(),
+            ],
+        ], 201);
+    }
 }

@@ -932,29 +932,13 @@
 
 
               <SellerProductsTable 
-
-
-
                 v-else
-
-
-
                 :products="products.slice(0, 3)" 
-
-
-
+                :is-pro="subscriptionData?.is_pro || ['pro', 'premium'].includes(subscriptionData?.plan)"
                 @edit="openEditModal" 
-
-
-
                 @delete="deleteProduct" 
-
-
-
                 @add-product="openAddModal"
-
-
-
+                @toggle-featured="handleToggleFeatured"
               />
 
 
@@ -1040,29 +1024,13 @@
 
 
               <SellerProductsTable 
-
-
-
                 v-else
-
-
-
                 :products="products" 
-
-
-
+                :is-pro="subscriptionData?.is_pro || ['pro', 'premium'].includes(subscriptionData?.plan)"
                 @edit="openEditModal" 
-
-
-
                 @delete="deleteProduct" 
-
-
-
                 @add-product="openAddModal"
-
-
-
+                @toggle-featured="handleToggleFeatured"
               />
 
 
@@ -2283,6 +2251,7 @@ import ProductRating from '../components/ProductRating.vue';
 
 
 import { sellerService } from '../services/sellerService.js';
+import { productService } from '../services/productService.js';
 
 
 
@@ -3389,21 +3358,24 @@ const deleteProduct = async (productId) => {
 
 
       const errMsg = err.response?.data?.message || err.message || 'Unable to delete product listing. Please try again.';
-
-
-
       showToast(`Failed to delete product: ${errMsg}`, true);
-
-
-
     }
-
-
-
   }
+};
 
-
-
+const handleToggleFeatured = async (product) => {
+  try {
+    const res = await productService.toggleFeatured(product.id);
+    if (res && res.success) {
+      product.is_featured = res.is_featured;
+      showToast(res.message || 'Craft spotlight status updated successfully.');
+    } else {
+      showToast(res?.message || 'Failed to update craft featured status.', true);
+    }
+  } catch (err) {
+    const msg = err.response?.data?.message || err.message || 'Unable to update craft spotlight status.';
+    showToast(msg, true);
+  }
 };
 
 

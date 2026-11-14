@@ -452,4 +452,20 @@ export const productService = {
     const response = await apiClient.delete(`/products/${id}`);
     return response.data;
   },
+
+  /**
+   * Toggle featured spotlight status for a craft (Artisan Pro feature).
+   */
+  async toggleFeatured(id) {
+    const response = await apiClient.patch(`/products/${id}/featured`);
+    return response.data;
+  },
+
+  /**
+   * Submit custom craft inquiry from patron to maker.
+   */
+  async submitInquiry(productId, inquiryData) {
+    const response = await apiClient.post(`/products/${productId}/inquiry`, inquiryData);
+    return response.data;
+  },
 };

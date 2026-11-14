@@ -34,9 +34,23 @@
               <span class="status-pill" :class="getStatusClass(product.status)">
                 {{ product.status }}
               </span>
+              <span v-if="product.is_featured" class="featured-badge-pill" title="Featured Spotlight Craft">
+                ⭐ Featured
+              </span>
             </td>
             <td>
               <div class="action-btn-group">
+                <!-- Pro Featured Toggle Button -->
+                <button 
+                  v-if="isPro"
+                  type="button" 
+                  class="btn-table-action"
+                  :class="product.is_featured ? 'btn-action-featured-active' : 'btn-action-featured-inactive'"
+                  @click="$emit('toggle-featured', product)"
+                  :title="product.is_featured ? 'Click to unfeature from homepage' : 'Promote to homepage spotlight (Pro feature)'"
+                >
+                  {{ product.is_featured ? '⭐ Featured' : '☆ Feature' }}
+                </button>
                 <button 
                   type="button" 
                   class="btn-table-action btn-action-edit"
@@ -81,10 +95,14 @@ defineProps({
   products: {
     type: Array,
     required: true
+  },
+  isPro: {
+    type: Boolean,
+    default: false
   }
 });
 
-defineEmits(['edit', 'delete', 'add-product']);
+defineEmits(['edit', 'delete', 'add-product', 'toggle-featured']);
 
 const handleImgError = (e) => {
   e.target.src = defaultPlaceholder;
@@ -98,3 +116,37 @@ const getStatusClass = (status) => {
   return 'status-draft';
 };
 </script>
+
+<style scoped>
+.featured-badge-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  background: #FFF8E1;
+  color: #F57F17;
+  border: 1px solid #FFE082;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.btn-action-featured-active {
+  background: #FFF8E1 !important;
+  color: #F57F17 !important;
+  border: 1px solid #FFE082 !important;
+  font-weight: 700 !important;
+}
+
+.btn-action-featured-inactive {
+  background: #FAF8F5 !important;
+  color: #7A6F68 !important;
+  border: 1px solid #D9CFC4 !important;
+}
+
+.btn-action-featured-inactive:hover {
+  background: #FFF8E1 !important;
+  color: #F57F17 !important;
+  border-color: #FFE082 !important;
+}
+</style>

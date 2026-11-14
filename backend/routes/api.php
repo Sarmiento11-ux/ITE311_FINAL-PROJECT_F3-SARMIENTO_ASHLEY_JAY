@@ -121,10 +121,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/products/{productId}/reviews/{reviewId}',  [ProductReviewController::class, 'update']);
     Route::delete('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'destroy']);
 
+    // ─── Customer: Custom Craft Inquiry ──────────────────────────────────────────
+    Route::post('/products/{id}/inquiry',                    [ProductController::class, 'submitInquiry']);
+
     // ─── Seller / Admin: Product management ──────────────────────────────
     Route::middleware('role:seller,admin')->group(function () {
         Route::post('/products',         [ProductController::class, 'store']);
         Route::put('/products/{id}',     [ProductController::class, 'update']);
+        Route::patch('/products/{id}/featured', [ProductController::class, 'toggleFeatured']);
         Route::delete('/products/{id}',        [ProductController::class, 'destroy']);
         Route::post('/products/{id}/image',    [ProductController::class, 'uploadImage']);
         Route::delete('/products/{id}/image',  [ProductController::class, 'deleteImage']);

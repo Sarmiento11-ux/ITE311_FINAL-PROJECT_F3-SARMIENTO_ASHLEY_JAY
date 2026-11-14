@@ -174,6 +174,18 @@
 
                   <WishlistButton :product="product" variant="full" size="md" class="btn-details-wishlist" />
                 </div>
+
+                <!-- Custom Craft Inquiry Button -->
+                <div class="custom-inquiry-trigger-wrapper">
+                  <button 
+                    type="button" 
+                    @click="openInquiryModal" 
+                    class="btn btn-custom-inquiry"
+                  >
+                    🎨 Request Custom / Bespoke Craft
+                  </button>
+                  <span class="custom-inquiry-hint">Have specific dimensions, color preferences, or bulk order requests? Inquire directly with the maker.</span>
+                </div>
               </template>
             </div>
 
@@ -289,6 +301,14 @@
     <p>The craft piece you are looking for might have been moved or is currently sold out.</p>
     <router-link to="/products" class="btn btn-primary" style="margin-top: 20px;">Return to Catalog</router-link>
   </div>
+
+  <!-- Custom Craft Inquiry Modal -->
+  <CraftInquiryModal
+    v-if="showInquiryModal && product"
+    :product="product"
+    @close="showInquiryModal = false"
+    @inquiry-sent="showInquiryModal = false"
+  />
 </template>
 
 <script setup>
@@ -299,6 +319,7 @@ import WishlistButton from '../components/WishlistButton.vue';
 import ProductRating from '../components/ProductRating.vue';
 import ReviewList from '../components/ReviewList.vue';
 import ReviewForm from '../components/ReviewForm.vue';
+import CraftInquiryModal from '../components/CraftInquiryModal.vue';
 import { productService } from '../services/productService.js';
 import { authService } from '../services/authService.js';
 import { getProductReviews, checkReviewEligibility, deleteReview } from '../services/reviewService.js';
@@ -315,6 +336,7 @@ const quantity = ref(1);
 const isLoading = ref(true);
 const cartFeedback = ref('');
 const feedbackIsError = ref(false);
+const showInquiryModal = ref(false);
 
 // ─── Review State ─────────────────────────────────────────────────────────────
 const reviews = ref([]);
@@ -531,6 +553,19 @@ const addToCart = () => {
     feedbackIsError.value = true;
   }
 };
+
+const openInquiryModal = () => {
+  if (isAdmin.value || authService.isAdmin()) {
+    alert('Administrators cannot submit inquiries. Please use a customer account.');
+    return;
+  }
+  if (!authService.isAuthenticated()) {
+    alert('Please log in with your customer account to submit a custom craft inquiry.');
+    router.push({ name: 'login', query: { redirect: route.fullPath } });
+    return;
+  }
+  showInquiryModal.value = true;
+};
 </script>
 
 <style scoped>
@@ -737,5 +772,45 @@ const addToCart = () => {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* ── Custom Craft Inquiry Button ── */
+.custom-inquiry-trigger-wrapper {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #E8DFD5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-custom-inquiry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  background: #FAF8F5;
+  border: 1.5px solid #2F4533;
+  color: #2F4533;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-custom-inquiry:hover {
+  background: #2F4533;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(47, 69, 51, 0.2);
+}
+
+.custom-inquiry-hint {
+  font-size: 0.76rem;
+  color: #7A6F68;
+  line-height: 1.35;
+  text-align: center;
 }
 </style>
