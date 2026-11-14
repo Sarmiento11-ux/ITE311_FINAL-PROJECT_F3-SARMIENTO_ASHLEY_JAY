@@ -5,7 +5,7 @@ const WP_API_BASE = import.meta.env.VITE_WP_API_BASE_URL || 'http://localhost/cr
 
 const wpClient = axios.create({
   baseURL: WP_API_BASE,
-  timeout: 1500,
+  timeout: 4000,
   headers: {
     'Accept': 'application/json',
   },
@@ -32,13 +32,40 @@ export const cmsService = {
    */
   async getLatestAnnouncement() {
     try {
-      const response = await wpClient.get('/posts', {
-        params: { search: 'announcement', per_page: 1 }
-      });
-      if (Array.isArray(response.data) && response.data.length > 0) {
+      // 1. Try querying posts in the 'announcements' category (ID 2 by default)
+      let response = await wpClient.get('/posts', {
+        params: { categories: 2, per_page: 1 }
+      }).catch(() => null);
+
+      // 2. If not found, dynamically resolve the category ID by slug 'announcements'
+      if (!response || !Array.isArray(response.data) || response.data.length === 0) {
+        try {
+          const catRes = await wpClient.get('/categories', {
+            params: { slug: 'announcements', per_page: 1 }
+          });
+          if (Array.isArray(catRes.data) && catRes.data.length > 0) {
+            response = await wpClient.get('/posts', {
+              params: { categories: catRes.data[0].id, per_page: 1 }
+            }).catch(() => null);
+          }
+        } catch {
+          // fallback continues
+        }
+      }
+
+      // 3. Fallback: text search for 'announcement' in titles/content
+      if (!response || !Array.isArray(response.data) || response.data.length === 0) {
+        response = await wpClient.get('/posts', {
+          params: { search: 'announcement', per_page: 1 }
+        }).catch(() => null);
+      }
+
+      if (response && Array.isArray(response.data) && response.data.length > 0) {
         const item = response.data[0];
-        // Strip HTML tags from rendered content if necessary
-        const text = sanitizeHtmlText(item.title?.rendered || item.content?.rendered);
+        // Strip HTML tags from rendered content; prioritize message body over headline
+        const bodyText = sanitizeHtmlText(item.content?.rendered || item.excerpt?.rendered);
+        const titleText = sanitizeHtmlText(item.title?.rendered);
+        const text = bodyText || titleText;
         if (text) {
           return {
             text,
@@ -72,6 +99,7 @@ export const cmsService = {
           eyebrow: 'SUPPORT LOCAL ARTISANS & CULTURAL HERITAGE',
           title: sanitizeHtmlText(page.title?.rendered) || 'Discover Unique Filipino Craftsmanship',
           description: sanitizeHtmlText(page.excerpt?.rendered) || 
+            sanitizeHtmlText(page.content?.rendered) || 
             'Connect directly with independent local weavers, potters, woodworkers, and jewelers across the Philippine archipelago.',
           ctaText: 'Explore Handmade Products',
           ctaLink: '/products',
@@ -102,14 +130,33 @@ export const cmsService = {
       });
       if (Array.isArray(response.data) && response.data.length > 0) {
         const page = response.data[0];
-        return {
-          badge: 'OUR ROOTS & PURPOSE',
-          title: page.title?.rendered || 'Preserving Philippine Craftsmanship & Empowering Artisan Communities',
-          leadText: 'CraftMarket was established to bridge the gap between talented provincial artisans and conscious buyers seeking authentic, sustainable, and ethically handcrafted goods.',
-          paragraphs: [
+        let paragraphs = [];
+        if (page.content?.rendered) {
+          try {
+            const doc = new DOMParser().parseFromString(page.content.rendered, 'text/html');
+            const pTags = Array.from(doc.querySelectorAll('p'))
+              .map(p => (p.textContent || '').trim())
+              .filter(t => t.length > 0);
+            if (pTags.length > 0) {
+              paragraphs = pTags;
+            }
+          } catch {
+            const text = sanitizeHtmlText(page.content.rendered);
+            if (text) paragraphs = [text];
+          }
+        }
+        if (paragraphs.length === 0) {
+          paragraphs = [
             'Across Luzon, Visayas, and Mindanao, indigenous weaving communities, family-run potteries, and generational woodcarvers have sustained their cultural craft for centuries.',
             'CraftMarket eliminates unfair middleman markups by enabling makers to list directly, manage their stalls, and receive fair, dignified earnings for every piece sold.'
-          ],
+          ];
+        }
+
+        return {
+          badge: 'OUR ROOTS & PURPOSE',
+          title: sanitizeHtmlText(page.title?.rendered) || 'Preserving Philippine Craftsmanship & Empowering Artisan Communities',
+          leadText: sanitizeHtmlText(page.excerpt?.rendered) || paragraphs[0] || 'CraftMarket was established to bridge the gap between talented provincial artisans and conscious buyers seeking authentic, sustainable, and ethically handcrafted goods.',
+          paragraphs,
           isFromCms: true
         };
       }

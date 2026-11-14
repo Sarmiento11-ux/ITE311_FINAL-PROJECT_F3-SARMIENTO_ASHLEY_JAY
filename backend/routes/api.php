@@ -91,12 +91,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart',             [CartController::class, 'clear']);
 
     // ─── Customer: Wishlist & Favorites (persistent MySQL wishlist) ─────
-    Route::get('/wishlist',                     [WishlistController::class, 'index']);
-    Route::get('/wishlist/ids',                 [WishlistController::class, 'ids']);
-    Route::get('/wishlist/status/{productId}',  [WishlistController::class, 'status']);
-    Route::post('/wishlist',                    [WishlistController::class, 'store']);
-    Route::delete('/wishlist/{productId}',      [WishlistController::class, 'destroy']);
-    Route::delete('/wishlist',                  [WishlistController::class, 'clear']);
+    Route::middleware('role:customer')->group(function () {
+        Route::get('/wishlist',                     [WishlistController::class, 'index']);
+        Route::get('/wishlist/ids',                 [WishlistController::class, 'ids']);
+        Route::get('/wishlist/status/{productId}',  [WishlistController::class, 'status']);
+        Route::post('/wishlist',                    [WishlistController::class, 'store']);
+        Route::delete('/wishlist/{productId}',      [WishlistController::class, 'destroy']);
+        Route::delete('/wishlist',                  [WishlistController::class, 'clear']);
+    });
 
     // ─── Customer / Admin: Orders & Status Updates (access rules enforced in controller) ──────
     Route::get('/orders',              [OrderController::class, 'index']);

@@ -610,6 +610,14 @@ class SellerController extends Controller
             ], 404);
         }
 
+        if ($profile->verification_status === 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your artisan workshop is already verified and approved.',
+                'data'    => $profile,
+            ], 422);
+        }
+
         $validated = $request->validate([
             'notes' => 'nullable|string|max:1000',
         ]);

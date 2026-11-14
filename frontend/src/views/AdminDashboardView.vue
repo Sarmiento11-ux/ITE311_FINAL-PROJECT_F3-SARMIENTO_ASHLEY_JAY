@@ -1441,7 +1441,7 @@
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Posts tagged <code>announcement</code>.</small>
-                  <a href="http://localhost/craftmarket-cms/wp-admin/edit.php" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                  <a :href="`${wpAdminUrl}/edit.php`" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
                     Manage Announcements in WordPress ↗
                   </a>
                 </div>
@@ -1464,7 +1464,7 @@
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Managed via WordPress Pages (<code>homepage</code>, <code>about-us</code>) and Posts.</small>
-                  <a href="http://localhost/craftmarket-cms/wp-admin/edit.php?post_type=page" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                  <a :href="`${wpAdminUrl}/edit.php?post_type=page`" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
                     Edit Website Content in WordPress ↗
                   </a>
                 </div>
@@ -1484,7 +1484,7 @@
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Synced to WordPress via <code>craftmarket-products</code> plugin hook.</small>
-                  <a href="http://localhost/craftmarket-cms/wp-admin/admin.php?page=craftmarket-products" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                  <a :href="`${wpAdminUrl}/admin.php?page=craftmarket-products`" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
                     View Products in WordPress CMS ↗
                   </a>
                 </div>
@@ -1504,7 +1504,7 @@
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Synced to WordPress via <code>craftmarket-users</code> plugin hook.</small>
-                  <a href="http://localhost/craftmarket-cms/wp-admin/admin.php?page=craftmarket-users" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                  <a :href="`${wpAdminUrl}/admin.php?page=craftmarket-users`" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
                     View Users in WordPress CMS ↗
                   </a>
                 </div>
@@ -1524,7 +1524,7 @@
                 </div>
                 <div style="padding: 0 16px 16px;">
                   <small style="color: #7A6F68; display: block; margin-bottom: 12px;">Synced to WordPress via <code>craftmarket-reports</code> plugin hook.</small>
-                  <a href="http://localhost/craftmarket-cms/wp-admin/admin.php?page=craftmarket-reports" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
+                  <a :href="`${wpAdminUrl}/admin.php?page=craftmarket-reports`" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-align: center;">
                     View Reports in WordPress CMS ↗
                   </a>
                 </div>
