@@ -1,7 +1,7 @@
 # CraftMarket — Entity Relationship Diagram (ERD)
 
-**Project:** CraftMarket — Local Handmade Products Marketplace  
-**Course:** ITE311 Final Project — BSIT F3  
+**Project Title:** Startup-Oriented Web Application Development with CMS and System Integration (CraftMarket)  
+**Courses:** Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311) — BSIT F3  
 **Database:** MySQL 8.x / InnoDB, utf8mb4  
 **Source of truth:** `backend/database/migrations/` (this document mirrors the executable schema)
 

@@ -1,8 +1,15 @@
-# CraftMarket — Business Model & Revenue Generation
+# CraftMarket — Business Proposal & Revenue Generation
+## Required Component A: Business Proposal Specification
 
-**Project:** CraftMarket — Local Handmade Products Marketplace  
-**Course:** ITE311 — Web Systems and Technologies 2  
-**Student:** Ashley Jay Sarmiento (BSIT F3)
+| Field | Detail |
+|---|---|
+| **Project Title** | Startup-Oriented Web Application Development with CMS and System Integration |
+| **Application** | CraftMarket — Local Handmade Products Marketplace |
+| **Courses** | Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311) |
+| **Student** | Ashley Jay Sarmiento (BSIT F3) |
+| **Document version** | 2.1 |
+| **Status** | Implemented and verified |
+| **Last updated** | November 2026 |
 
 ---
 
@@ -19,9 +26,9 @@ CraftMarket holds **no inventory and owns no warehouse**. It monetizes the trans
 
 ---
 
-## 2. Problem and Value Proposition
+## 2. Problem Statement (Component A.1)
 
-### 2.1 Problem
+### 2.1 The Problem Being Solved
 
 | Stakeholder | Pain point |
 |---|---|
@@ -31,7 +38,11 @@ CraftMarket holds **no inventory and owns no warehouse**. It monetizes the trans
 | Shopper | Hard to verify that a product is genuinely handmade and that the seller is real. |
 | Shopper | Paying strangers online feels risky without buyer protection. |
 
-### 2.2 Value proposition
+---
+
+## 3. Value Proposition (Component A.3)
+
+### 3.1 What Makes the System Useful
 
 | For artisans | For shoppers |
 |---|---|
@@ -41,15 +52,15 @@ CraftMarket holds **no inventory and owns no warehouse**. It monetizes the trans
 | Lower commission on Pro (3% vs 8%) | Free shipping threshold and transparent shipping fees |
 | QR-based dispatch confirmation for courier hand-off | Order tracking from confirmation to delivery |
 
-### 2.3 Positioning statement
+### 3.2 Positioning Statement
 
 > For Filipino artisans who want to sell beyond social media, **CraftMarket** is a curated, escrow-protected marketplace that turns craft stories into trustworthy storefronts — unlike general e-commerce platforms, we verify every shop and charge a transparent commission instead of upfront listing fees.
 
 ---
 
-## 3. Target Market
+## 4. Target Users (Component A.2)
 
-### 3.1 Primary segments
+### 4.1 Primary User & Customer Segments
 
 | Segment | Profile | Size signal | Why they buy/sell |
 |---|---|---|---|
@@ -69,7 +80,7 @@ Start with **ceramics, woven goods, and home decor** in Metro Manila and nearby 
 
 ---
 
-## 4. Revenue Streams
+## 5. Revenue Model & Income Generation Strategy (Component A.4)
 
 | # | Stream | Mechanism | Rate | Implementation |
 |---|---|---|---|---|

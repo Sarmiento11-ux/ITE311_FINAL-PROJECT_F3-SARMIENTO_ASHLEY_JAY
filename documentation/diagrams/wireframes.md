@@ -1,6 +1,7 @@
 # CraftMarket — Wireframes & UI/UX Specification
 
-**Project:** CraftMarket — Local Handmade Products Marketplace  
+**Project Title:** Startup-Oriented Web Application Development with CMS and System Integration (CraftMarket)  
+**Courses:** Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311)  
 **Design language:** Editorial Filipino-craft storefront — warm cream surfaces, forest green actions, terracotta accents, serif display headings  
 **Responsive strategy:** Mobile-first fluid grid → tablet two-column → desktop twelve-column with persistent navigation
 

@@ -1,13 +1,14 @@
 # Software Requirements Specification (SRS)
 
-## CraftMarket — Local Handmade Products Marketplace
+## CraftMarket — Startup-Oriented Web Application Development with CMS and System Integration
 
 | Field | Detail |
 |---|---|
-| **Project** | CraftMarket Web Application |
-| **Course** | ITE311 — Web Systems and Technologies 2 |
+| **Project Title** | Startup-Oriented Web Application Development with CMS and System Integration |
+| **Application** | CraftMarket — Local Handmade Products Marketplace |
+| **Courses** | Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311) |
 | **Student** | Ashley Jay Sarmiento (BSIT F3) |
-| **Document version** | 2.0 |
+| **Document version** | 2.1 |
 | **Status** | Implemented and verified |
 | **Last updated** | November 2026 |
 
@@ -19,7 +20,18 @@
 
 This SRS defines the functional and non-functional requirements of **CraftMarket**, a decoupled multi-vendor marketplace for Philippine handmade products. It is the reference for development, testing, defense evaluation, and future maintenance.
 
-### 1.2 Scope
+### 1.2 Objectives
+
+In accordance with the project requirements for **Web Systems and Technologies 2** and **System Integration and Architecture 1**, the objectives of this application are:
+
+1. **Design and Develop a Complete Web Application:** Build a responsive, production-ready full-stack application featuring a public storefront, customer portal, artisan workshop dashboard, and administrative console.
+2. **Apply System Integration Concepts:** Implement decoupled multi-system communication across payment gateways (PayMongo hosted checkout and webhooks), physical dispatch verification (dynamic QR code generation), transactional notification channels (SMTP), and editorial CMS data bridges.
+3. **Utilize a CMS Platform for Content and System Management:** Integrate headless WordPress to manage marketing pages, promotional announcement bars, and editorial journal stories decoupled from the transactional core.
+4. **Implement Secure User Authentication and Authorization:** Provide token-based authentication (Laravel Sanctum), granular Role-Based Access Control (`customer`, `seller`, `admin`), password hashing (Bcrypt), input sanitization, and brute-force throttling.
+5. **Design a Revenue-Generating Digital Business Solution:** Formulate a sustainable startup business model incorporating dual monetization streams (transaction commissions with 8% Basic and 3% Pro rates, alongside a ₱299/month recurring Artisan Pro subscription).
+6. **Present a Viable Startup/Business Concept:** Provide a complete business proposal, stakeholder value proposition, and architectural documentation for defense evaluation.
+
+### 1.3 Scope
 
 CraftMarket lets independent artisans open a verified storefront, list handmade crafts, receive and fulfil orders, monitor revenue, and cash out earnings. Shoppers can browse a curated catalog, manage a cart and wishlist, pay through an escrow-protected checkout, track delivery, and publish verified reviews. Administrators approve storefronts, moderate content, manage users and roles, audit escrow, and settle payouts.
 
@@ -45,7 +57,7 @@ CraftMarket lets independent artisans open a verified storefront, list handmade 
 - Native mobile applications
 - Multi-currency pricing (single currency: PHP)
 
-### 1.3 Definitions
+### 1.4 Definitions
 
 | Term | Meaning |
 |---|---|
@@ -59,7 +71,7 @@ CraftMarket lets independent artisans open a verified storefront, list handmade 
 | **QR dispatch** | Scannable hand-off code confirming courier turnover |
 | **RBAC** | Role-Based Access Control |
 
-### 1.4 References
+### 1.5 References
 
 - [`documentation/diagrams/use-case.md`](../diagrams/use-case.md)
 - [`documentation/diagrams/erd.md`](../diagrams/erd.md)

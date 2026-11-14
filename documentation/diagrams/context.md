@@ -1,6 +1,7 @@
 # CraftMarket — Context Diagram (Level-0 Data Flow Diagram)
 
-**Project:** CraftMarket — Local Handmade Products Marketplace  
+**Project Title:** Startup-Oriented Web Application Development with CMS and System Integration (CraftMarket)  
+**Courses:** Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311)  
 **Notation:** Yourdon/DeMarco Level-0 DFD (single process = the whole system)  
 **Companion document:** [`architecture.md`](./architecture.md) for the internal decomposition
 

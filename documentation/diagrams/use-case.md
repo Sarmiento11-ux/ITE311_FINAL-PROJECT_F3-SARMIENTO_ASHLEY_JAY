@@ -1,7 +1,7 @@
 # CraftMarket — Use Case Diagram & Use Case Specifications
 
-**Project:** CraftMarket — Local Handmade Products Marketplace  
-**Course:** ITE311 — Web Systems and Technologies 2  
+**Project Title:** Startup-Oriented Web Application Development with CMS and System Integration (CraftMarket)  
+**Courses:** Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311)  
 **Student:** Ashley Jay Sarmiento (BSIT F3)
 
 ---
