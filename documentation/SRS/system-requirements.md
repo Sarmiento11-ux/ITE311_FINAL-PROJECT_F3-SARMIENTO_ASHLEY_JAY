@@ -28,7 +28,7 @@ In accordance with the project requirements for **Web Systems and Technologies 2
 2. **Apply System Integration Concepts:** Implement decoupled multi-system communication across payment gateways (PayMongo hosted checkout and webhooks), physical dispatch verification (dynamic QR code generation), transactional notification channels (SMTP), and editorial CMS data bridges.
 3. **Utilize a CMS Platform for Content and System Management:** Integrate headless WordPress to manage marketing pages, promotional announcement bars, and editorial journal stories decoupled from the transactional core.
 4. **Implement Secure User Authentication and Authorization:** Provide token-based authentication (Laravel Sanctum), granular Role-Based Access Control (`customer`, `seller`, `admin`), password hashing (Bcrypt), input sanitization, and brute-force throttling.
-5. **Design a Revenue-Generating Digital Business Solution:** Formulate a sustainable startup business model incorporating dual monetization streams (transaction commissions with 8% Basic and 3% Pro rates, alongside a ₱299/month recurring Artisan Pro subscription).
+5. **Design a Revenue-Generating Digital Business Solution:** Formulate a sustainable startup business model incorporating dual monetization streams (tiered transaction commissions with 8% Free Starter, 5% Basic Maker, and 3% Premium Pro rates, alongside tiered recurring subscriptions with monthly and annual billing).
 6. **Present a Viable Startup/Business Concept:** Provide a complete business proposal, stakeholder value proposition, and architectural documentation for defense evaluation.
 
 ### 1.3 Scope
@@ -64,9 +64,9 @@ CraftMarket lets independent artisans open a verified storefront, list handmade 
 | **Artisan / Seller** | Craft producer with a storefront profile |
 | **Storefront verification** | Admin approval required before a shop's products are publicly visible |
 | **Escrow** | Platform-held funds released to the seller only after delivery |
-| **Commission** | Platform fee per line item: 8% Basic, 3% Artisan Pro |
+| **Commission** | Platform fee per line item: 8% Free Starter, 5% Basic Maker, 3% Premium Pro |
 | **Payout** | Seller cash-out of released escrow earnings |
-| **Artisan Pro** | ₱299/month subscription with 3% commission and unlimited listings |
+| **Tiered Subscriptions** | Free (₱0), Basic (₱149/mo or ₱1,490/yr), Premium Pro (₱299/mo or ₱2,990/yr) |
 | **GMV** | Gross merchandise value (sum of item subtotals) |
 | **QR dispatch** | Scannable hand-off code confirming courier turnover |
 | **RBAC** | Role-Based Access Control |
@@ -186,8 +186,9 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | ID | Requirement | Priority | Acceptance criteria |
 |---|---|---|---|
 | FR-PAY-01 | Cash on Delivery is supported. | M | Order is created with `payment_method`/gateway COD and settles on delivery. |
-| FR-PAY-02 | Basic sellers are charged 8% commission per line item. | M | `platform_fee = subtotal × 0.08`, `seller_payout = subtotal × 0.92`. |
-| FR-PAY-03 | Artisan Pro sellers are charged 3% commission per line item. | M | `platform_fee = subtotal × 0.03`, `seller_payout = subtotal × 0.97`. |
+| FR-PAY-02 | Free Starter sellers are charged 8% commission per line item. | M | `platform_fee = subtotal × 0.08`, `seller_payout = subtotal × 0.92`. |
+| FR-PAY-03a | Basic Maker sellers are charged 5% commission per line item. | M | `platform_fee = subtotal × 0.05`, `seller_payout = subtotal × 0.95`. |
+| FR-PAY-03b | Premium Artisan Pro sellers are charged 3% commission per line item. | M | `platform_fee = subtotal × 0.03`, `seller_payout = subtotal × 0.97`. |
 | FR-PAY-04 | Online payment uses a PayMongo hosted checkout session. | M | API returns a `checkout_url`; no card data touches CraftMarket. |
 | FR-PAY-05 | PayMongo webhooks are verified before processing. | M | Missing/invalid HMAC signature returns `401`; valid event updates payment. |
 | FR-PAY-06 | Successful payment marks the order confirmed and escrow held. | M | `payment_status = paid`, order `confirmed`, escrow `held`. |
@@ -243,15 +244,15 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | FR-REV-04 | Reviews record the verifying `order_item_id`. | M | Public responses show a verified-purchase marker. |
 | FR-REV-05 | Product rating and review count update automatically. | M | Catalog cards reflect the new average and count. |
 
-### 3.8 Artisan Pro Subscription
+### 3.8 Tiered Artisan Subscriptions (Free, Basic, Premium Pro)
 
 | ID | Requirement | Priority | Acceptance criteria |
 |---|---|---|---|
-| FR-SUB-01 | Guests and sellers can view Basic and Pro plan pricing. | M | Basic 8% / 10 listings; Pro ₱299 / 3% / unlimited. |
-| FR-SUB-02 | Sellers can upgrade to Pro through hosted checkout. | M | Successful verification sets plan `pro`, rate `3.00`, limit `NULL`. |
-| FR-SUB-03 | Subscription billing history is retained. | M | `artisan_subscriptions` records amount, cycle, status, and dates. |
-| FR-SUB-04 | Sellers can cancel and return to Basic. | M | Rate returns to `8.00`, limit to `10`, with a clear message. |
-| FR-SUB-05 | Admins can view Pro metrics. | S | MRR = active Pro sellers × ₱299; all-time subscription revenue reported. |
+| FR-SUB-01 | Guests and sellers can view Free, Basic, and Premium Pro plan pricing with monthly/annual options. | M | Free (₱0, 8%, 5 listings); Basic (₱149/mo or ₱1,490/yr, 5%, 25 listings); Premium Pro (₱299/mo or ₱2,990/yr, 3%, unlimited listings). |
+| FR-SUB-02 | Sellers can upgrade to Basic or Premium Pro through PayMongo hosted checkout. | M | Successful verification updates plan, commission rate (5.00% or 3.00%), and listing limit (25 or NULL). |
+| FR-SUB-03 | Subscription billing history is retained. | M | `artisan_subscriptions` records tier, amount, billing cycle (monthly/annual), status, and validity dates. |
+| FR-SUB-04 | Sellers can cancel paid subscriptions and return to Free Starter. | M | Commission rate returns to `8.00%`, listing limit to `5`, with a clear confirmation dialog. |
+| FR-SUB-05 | Admins can view tiered subscription metrics and MRR. | S | MRR combines active Pro and Basic subscribers; all-time subscription revenue and conversion rate reported. |
 
 ### 3.9 CMS Integration
 

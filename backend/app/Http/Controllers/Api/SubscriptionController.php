@@ -14,8 +14,20 @@ use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
-    const PRO_MONTHLY_PRICE_PHP = 299.00;
-    const PRO_MONTHLY_CENTAVOS  = 29900;
+    // Tiered Pricing Constants
+    const BASIC_MONTHLY_PRICE_PHP   = 149.00;
+    const BASIC_ANNUAL_PRICE_PHP    = 1490.00; // ~17% discount (2 months free)
+    const BASIC_MONTHLY_CENTAVOS    = 14900;
+    const BASIC_ANNUAL_CENTAVOS     = 149000;
+
+    const PREMIUM_MONTHLY_PRICE_PHP = 299.00;
+    const PREMIUM_ANNUAL_PRICE_PHP  = 2990.00; // ~17% discount (2 months free)
+    const PREMIUM_MONTHLY_CENTAVOS  = 29900;
+    const PREMIUM_ANNUAL_CENTAVOS   = 299000;
+
+    // Backwards-compatibility aliases
+    const PRO_MONTHLY_PRICE_PHP     = 299.00;
+    const PRO_MONTHLY_CENTAVOS      = 29900;
 
     /**
      * PayMongo API base URL.
@@ -34,58 +46,89 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Get available subscription plans.
+     * Get available subscription plans (Free, Basic, Premium) with Monthly & Annual billing.
      */
     public function getPlans()
     {
         $plans = [
             [
-                'id' => 'basic',
-                'name' => 'Basic Artisan',
-                'price' => 0,
+                'id'              => 'free',
+                'name'            => 'Free Artisan Starter',
+                'price'           => 0,
                 'price_formatted' => 'Free',
-                'billing_period' => 'Forever Free',
+                'billing_period'  => 'Forever Free',
+                'price_monthly'   => 0,
+                'price_annual'    => 0,
                 'commission_rate' => 8.0,
                 'commission_text' => '8% marketplace commission',
-                'listing_limit' => 10,
-                'listing_text' => 'Up to 10 active craft listings',
-                'badge' => 'Standard Artisan',
-                'features' => [
+                'listing_limit'   => 5,
+                'listing_text'    => 'Up to 5 active craft listings',
+                'badge'           => 'Starter Artisan',
+                'features'        => [
                     'Standard search & catalog visibility',
                     'Direct customer review interactions',
                     'Escrow payouts within 24-48 hours',
+                    'Up to 5 active craft listings',
                     'Standard seller dashboard analytics',
-                    'Standard customer support'
+                    'Standard email support',
                 ],
-                'popular' => false,
+                'popular'         => false,
             ],
             [
-                'id' => 'pro',
-                'name' => 'Artisan Pro',
-                'price' => (int) self::PRO_MONTHLY_PRICE_PHP,
-                'price_formatted' => '₱' . ((int) self::PRO_MONTHLY_PRICE_PHP),
-                'billing_period' => 'per month',
+                'id'              => 'basic',
+                'name'            => 'Basic Artisan Maker',
+                'price'           => (int) self::BASIC_MONTHLY_PRICE_PHP,
+                'price_formatted' => '₱' . ((int) self::BASIC_MONTHLY_PRICE_PHP),
+                'billing_period'  => 'per month (or ₱1,490/year)',
+                'price_monthly'   => self::BASIC_MONTHLY_PRICE_PHP,
+                'price_annual'    => self::BASIC_ANNUAL_PRICE_PHP,
+                'annual_savings'  => 'Save ₱298/year (2 months free)',
+                'commission_rate' => 5.0,
+                'commission_text' => 'Reduced 5% commission (Save 3%!)',
+                'listing_limit'   => 25,
+                'listing_text'    => 'Up to 25 active craft listings',
+                'badge'           => 'Verified Artisan Maker',
+                'features'        => [
+                    'Reduced 5% marketplace commission rate',
+                    'Up to 25 active handmade craft listings',
+                    'Verified Artisan Maker badge across store',
+                    'Priority catalog search indexing',
+                    'Flexible monthly & annual billing options',
+                    'Standard artisan dashboard analytics',
+                ],
+                'popular'         => false,
+            ],
+            [
+                'id'              => 'pro',
+                'alias'           => 'premium',
+                'name'            => 'Premium Artisan Pro',
+                'price'           => (int) self::PREMIUM_MONTHLY_PRICE_PHP,
+                'price_formatted' => '₱' . ((int) self::PREMIUM_MONTHLY_PRICE_PHP),
+                'billing_period'  => 'per month (or ₱2,990/year)',
+                'price_monthly'   => self::PREMIUM_MONTHLY_PRICE_PHP,
+                'price_annual'    => self::PREMIUM_ANNUAL_PRICE_PHP,
+                'annual_savings'  => 'Save ₱598/year (2 months free)',
                 'commission_rate' => 3.0,
-                'commission_text' => 'Only 3% commission (Save 5%!)',
-                'listing_limit' => null, // unlimited
-                'listing_text' => 'Unlimited craft listings',
-                'badge' => '⭐ Pro Artisan Maker',
-                'features' => [
-                    'Reduced 3% commission rate on all sales',
+                'commission_text' => 'Lowest 3% commission (Save 5%!)',
+                'listing_limit'   => null, // unlimited
+                'listing_text'    => 'Unlimited craft listings',
+                'badge'           => '⭐ Pro Artisan Maker',
+                'features'        => [
+                    'Lowest 3% commission rate on all sales',
                     'Unlimited handmade craft inventory',
                     '⭐ "Pro Artisan" verified badge across catalog',
                     'Homepage & category priority discovery',
                     'Advanced revenue & customer demographics',
                     'Featured maker spotlight eligibility',
-                    'Priority artisan assistance & escrow clearing'
+                    'Expedited escrow clearing & priority support',
                 ],
-                'popular' => true,
+                'popular'         => true,
             ]
         ];
 
         return response()->json([
             'success' => true,
-            'data' => $plans
+            'data'    => $plans
         ]);
     }
 
@@ -105,8 +148,8 @@ class SubscriptionController extends Controller
 
         $activeProductsCount = Product::where('seller_id', $user->id)->count();
 
-        // Check if seller has an active Artisan Pro subscription record
-        $latestActivePro = ArtisanSubscription::where('user_id', $user->id)
+        // Check if seller has an active paid subscription record
+        $latestActiveSub = ArtisanSubscription::where('user_id', $user->id)
             ->where('status', 'active')
             ->where(function ($q) {
                 $q->whereNull('expires_at')->orWhere('expires_at', '>=', Carbon::now());
@@ -114,35 +157,47 @@ class SubscriptionController extends Controller
             ->latest()
             ->first();
 
-        if ($latestActivePro && ($user->subscription_plan !== 'pro' || $user->subscription_status !== 'active')) {
+        if ($latestActiveSub && ($user->subscription_status !== 'active')) {
+            $subPlanKey = str_contains(strtolower($latestActiveSub->plan_name), 'basic') ? 'basic' : 'pro';
             $user->update([
-                'subscription_plan'       => 'pro',
+                'subscription_plan'       => $subPlanKey,
                 'subscription_status'     => 'active',
-                'subscription_expires_at' => $latestActivePro->expires_at,
-                'commission_rate'         => 3.00,
-                'listing_limit'           => null,
+                'subscription_expires_at' => $latestActiveSub->expires_at,
+                'commission_rate'         => $subPlanKey === 'basic' ? 5.00 : 3.00,
+                'listing_limit'           => $subPlanKey === 'basic' ? 25 : null,
             ]);
             $user->refresh();
         }
 
-        $plan = $user->subscription_plan ?: 'basic';
-        $limit = $user->listing_limit !== null ? (int)$user->listing_limit : ($plan === 'basic' ? 10 : null);
-        $commissionRate = $user->commission_rate !== null ? (float)$user->commission_rate : ($plan === 'pro' ? 3.0 : 8.0);
+        $rawPlan = $user->subscription_plan ?: 'free';
+        $plan = ($rawPlan === 'premium') ? 'pro' : $rawPlan;
+        $isPro = ($plan === 'pro');
+        $isBasic = ($plan === 'basic' && (float)$user->commission_rate === 5.00);
 
-        // Check if pro subscription has expired
+        $limit = $user->listing_limit;
+        if ($limit === null && !$isPro) {
+            $limit = $isBasic ? 25 : 5;
+        }
+
+        $commissionRate = $user->commission_rate !== null
+            ? (float) $user->commission_rate
+            : ($isPro ? 3.0 : ($isBasic ? 5.0 : 8.0));
+
+        // Check if paid subscription has expired
         $isExpired = false;
-        if ($plan === 'pro' && $user->subscription_expires_at && Carbon::now()->greaterThan($user->subscription_expires_at)) {
+        if ($isPro && $user->subscription_expires_at && Carbon::now()->greaterThan($user->subscription_expires_at)) {
             $isExpired = true;
-            // Auto revert to basic
+            // Auto revert to free
             $user->update([
-                'subscription_plan' => 'basic',
+                'subscription_plan'   => 'free',
                 'subscription_status' => 'expired',
-                'commission_rate' => 8.00,
-                'listing_limit' => 10,
+                'commission_rate'     => 8.00,
+                'listing_limit'       => 5,
             ]);
-            $plan = 'basic';
-            $limit = 10;
+            $plan = 'free';
+            $limit = 5;
             $commissionRate = 8.0;
+            $isPro = false;
         }
 
         // Recent billing record
@@ -152,27 +207,28 @@ class SubscriptionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'plan' => $plan,
-                'status' => $user->subscription_status ?: 'active',
-                'expires_at' => $user->subscription_expires_at ? $user->subscription_expires_at->toIso8601String() : null,
+            'data'    => [
+                'plan'            => $plan,
+                'status'          => $user->subscription_status ?: 'active',
+                'expires_at'      => $user->subscription_expires_at ? $user->subscription_expires_at->toIso8601String() : null,
                 'commission_rate' => $commissionRate,
-                'listing_limit' => $limit,
+                'listing_limit'   => $limit,
                 'active_listings' => $activeProductsCount,
                 'can_add_product' => ($limit === null) || ($activeProductsCount < $limit),
-                'is_pro' => ($plan === 'pro'),
-                'latest_payment' => $latestRecord ? [
-                    'amount' => $latestRecord->amount,
-                    'paid_at' => $latestRecord->created_at->toFormattedDateString(),
+                'is_pro'          => $isPro,
+                'billing_cycle'   => $latestRecord?->billing_cycle ?? 'monthly',
+                'latest_payment'  => $latestRecord ? [
+                    'amount'         => $latestRecord->amount,
+                    'paid_at'        => $latestRecord->created_at->toFormattedDateString(),
                     'payment_method' => $latestRecord->payment_method,
-                    'status' => $latestRecord->status,
+                    'status'         => $latestRecord->status,
                 ] : null,
             ]
         ]);
     }
 
     /**
-     * Upgrade artisan to Artisan Pro via PayMongo checkout or dev sandbox.
+     * Upgrade artisan to Basic or Premium tier with Monthly or Annual billing.
      */
     public function upgradeToPro(Request $request)
     {
@@ -184,6 +240,51 @@ class SubscriptionController extends Controller
                 'message' => 'Only artisans can upgrade subscription plans.'
             ], 403);
         }
+
+        $planId = strtolower($request->input('plan_id', $request->input('plan', 'pro')));
+        $billingCycle = strtolower($request->input('billing_cycle', 'monthly')) === 'annual' ? 'annual' : 'monthly';
+
+        // Plan parameters resolution
+        if ($planId === 'basic') {
+            $planKey        = 'basic';
+            $planName       = 'Basic Artisan Maker';
+            $commissionRate = 5.00;
+            $listingLimit   = 25;
+            $pricePhp       = $billingCycle === 'annual' ? self::BASIC_ANNUAL_PRICE_PHP : self::BASIC_MONTHLY_PRICE_PHP;
+            $centavos       = $billingCycle === 'annual' ? self::BASIC_ANNUAL_CENTAVOS : self::BASIC_MONTHLY_CENTAVOS;
+            $description    = "CraftMarket Basic Artisan ({$billingCycle}) - 5% commission, 25 listings";
+        } elseif ($planId === 'free') {
+            $user->update([
+                'subscription_plan'       => 'free',
+                'subscription_status'     => 'active',
+                'subscription_expires_at' => null,
+                'commission_rate'         => 8.00,
+                'listing_limit'           => 5,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'mode'    => 'free',
+                'message' => 'Switched to Free Artisan Starter plan.',
+                'data'    => [
+                    'plan'            => 'free',
+                    'commission_rate' => 8.00,
+                    'listing_limit'   => 5,
+                    'expires_at'      => null,
+                ]
+            ]);
+        } else {
+            // Default: 'pro' or 'premium'
+            $planKey        = 'pro';
+            $planName       = 'Premium Artisan Pro';
+            $commissionRate = 3.00;
+            $listingLimit   = null;
+            $pricePhp       = $billingCycle === 'annual' ? self::PREMIUM_ANNUAL_PRICE_PHP : self::PREMIUM_MONTHLY_PRICE_PHP;
+            $centavos       = $billingCycle === 'annual' ? self::PREMIUM_ANNUAL_CENTAVOS : self::PREMIUM_MONTHLY_CENTAVOS;
+            $description    = "CraftMarket Premium Artisan Pro ({$billingCycle}) - 3% commission, unlimited listings";
+        }
+
+        $duration = $billingCycle === 'annual' ? Carbon::now()->addYear() : Carbon::now()->addMonth();
 
         $secretKey = config('services.paymongo.secret_key');
         $isPayMongoConfigured = !empty($secretKey) && !str_contains($secretKey, 'REPLACE_WITH_YOUR');
@@ -211,15 +312,15 @@ class SubscriptionController extends Controller
                             'line_items'           => [
                                 [
                                     'currency'    => 'PHP',
-                                    'amount'      => self::PRO_MONTHLY_CENTAVOS, // ₱299.00 in centavos
-                                    'name'        => 'CraftMarket Artisan Pro Monthly Membership',
+                                    'amount'      => $centavos,
+                                    'name'        => $planName . ' (' . ucfirst($billingCycle) . ')',
                                     'quantity'    => 1,
-                                    'description' => 'Unlimited craft listings, 3% commission, and Pro Artisan badge',
+                                    'description' => $description,
                                 ]
                             ],
                             'payment_method_types' => ['gcash', 'card', 'paymaya', 'billease', 'dob', 'grab_pay'],
-                            'description'          => 'Artisan Pro Subscription for ' . $user->name,
-                            'reference_number'     => 'PRO-' . $user->id . '-' . time(),
+                            'description'          => "{$planName} Subscription ({$billingCycle}) for {$user->name}",
+                            'reference_number'     => strtoupper($planKey) . '-' . $user->id . '-' . time(),
                             'success_url'          => $successUrl,
                             'cancel_url'           => $cancelUrl,
                         ]
@@ -238,14 +339,14 @@ class SubscriptionController extends Controller
 
                 ArtisanSubscription::create([
                     'user_id'             => $user->id,
-                    'plan_name'           => 'Artisan Pro',
-                    'amount'              => self::PRO_MONTHLY_PRICE_PHP,
-                    'billing_cycle'       => 'monthly',
+                    'plan_name'           => $planName,
+                    'amount'              => $pricePhp,
+                    'billing_cycle'       => $billingCycle,
                     'payment_method'      => 'PayMongo Online',
                     'checkout_session_id' => $sessionId,
                     'status'              => 'pending',
                     'starts_at'           => Carbon::now(),
-                    'expires_at'          => Carbon::now()->addMonth(),
+                    'expires_at'          => $duration,
                 ]);
 
                 return response()->json([
@@ -274,27 +375,26 @@ class SubscriptionController extends Controller
         }
 
         $paymentMethod = $request->input('payment_method', 'Sandbox Simulation (Local Test)');
-        $expiresAt = Carbon::now()->addMonth();
 
         DB::beginTransaction();
         try {
             $user->update([
-                'subscription_plan'       => 'pro',
+                'subscription_plan'       => $planKey,
                 'subscription_status'     => 'active',
-                'subscription_expires_at' => $expiresAt,
-                'commission_rate'         => 3.00,
-                'listing_limit'           => null,
+                'subscription_expires_at' => $duration,
+                'commission_rate'         => $commissionRate,
+                'listing_limit'           => $listingLimit,
             ]);
 
             $record = ArtisanSubscription::create([
                 'user_id'        => $user->id,
-                'plan_name'      => 'Artisan Pro',
-                'amount'         => self::PRO_MONTHLY_PRICE_PHP,
-                'billing_cycle'  => 'monthly',
+                'plan_name'      => $planName,
+                'amount'         => $pricePhp,
+                'billing_cycle'  => $billingCycle,
                 'payment_method' => $paymentMethod . ' (Sandbox)',
                 'status'         => 'active',
                 'starts_at'      => Carbon::now(),
-                'expires_at'     => $expiresAt,
+                'expires_at'     => $duration,
             ]);
 
             DB::commit();
@@ -302,12 +402,13 @@ class SubscriptionController extends Controller
             return response()->json([
                 'success' => true,
                 'mode'    => 'sandbox',
-                'message' => 'Congratulations! You have successfully upgraded to Artisan Pro (Sandbox Mode).',
+                'message' => "Congratulations! You have successfully upgraded to {$planName} ({$billingCycle}) in Sandbox Mode.",
                 'data'    => [
-                    'plan'            => 'pro',
-                    'commission_rate' => 3.00,
-                    'listing_limit'   => null,
-                    'expires_at'      => $expiresAt->toIso8601String(),
+                    'plan'            => $planKey,
+                    'commission_rate' => $commissionRate,
+                    'listing_limit'   => $listingLimit,
+                    'billing_cycle'   => $billingCycle,
+                    'expires_at'      => $duration->toIso8601String(),
                     'billing_id'      => $record->id,
                 ]
             ]);
@@ -418,7 +519,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Cancel artisan subscription (revert to Basic).
+     * Cancel artisan subscription (revert to Free Starter).
      */
     public function cancelSubscription(Request $request)
     {
@@ -432,25 +533,25 @@ class SubscriptionController extends Controller
         }
 
         $user->update([
-            'subscription_plan' => 'basic',
+            'subscription_plan'   => 'free',
             'subscription_status' => 'cancelled',
-            'commission_rate' => 8.00,
-            'listing_limit' => 10,
+            'commission_rate'     => 8.00,
+            'listing_limit'       => 5,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Your subscription has been switched back to the Basic Free tier. Standard 8% commission applies.',
+            'message' => 'Your subscription has been switched back to the Free Artisan Starter tier. Standard 8% commission applies.',
             'data' => [
-                'plan' => 'basic',
+                'plan'            => 'free',
                 'commission_rate' => 8.00,
-                'listing_limit' => 10,
+                'listing_limit'   => 5,
             ]
         ]);
     }
 
     /**
-     * Admin Endpoint: View subscription MRR, active subscribers & metrics.
+     * Admin Endpoint: View subscription MRR, active subscribers & metrics across tiers.
      */
     public function getAdminSubscriptionMetrics(Request $request)
     {
@@ -459,7 +560,7 @@ class SubscriptionController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         }
 
-        // Active Pro subscriptions: status is active and not expired
+        // Active Pro/Premium subscriptions: status is active and not expired
         $activeProUserIds = ArtisanSubscription::where('status', 'active')
             ->where(function ($q) {
                 $q->whereNull('expires_at')->orWhere('expires_at', '>=', Carbon::now());
@@ -472,7 +573,7 @@ class SubscriptionController extends Controller
         if (!empty($activeProUserIds)) {
             User::whereIn('id', $activeProUserIds)
                 ->where('role', 'seller')
-                ->where('subscription_plan', '!=', 'pro')
+                ->whereNotIn('subscription_plan', ['pro', 'premium'])
                 ->update([
                     'subscription_plan'       => 'pro',
                     'subscription_status'     => 'active',
@@ -484,17 +585,23 @@ class SubscriptionController extends Controller
         $totalSellers = User::where('role', 'seller')->count();
         $proSellersCount = User::where('role', 'seller')
             ->where(function ($q) use ($activeProUserIds) {
-                $q->where('subscription_plan', 'pro')
+                $q->whereIn('subscription_plan', ['pro', 'premium'])
                   ->orWhereIn('id', $activeProUserIds);
             })
+            ->where('subscription_status', 'active')
             ->count();
 
-        // Guard: pro count is at least the number of active subscriptions
         $proSellersCount = max($proSellersCount, count($activeProUserIds));
-        $basicSellersCount = max(0, $totalSellers - $proSellersCount);
 
-        // Monthly Recurring Revenue = Active Pro Sellers * ₱299
-        $mrr = $proSellersCount * 299.00;
+        $basicSellersCount = User::where('role', 'seller')
+            ->where('subscription_plan', 'basic')
+            ->where('subscription_status', 'active')
+            ->count();
+
+        $freeSellersCount = max(0, $totalSellers - ($proSellersCount + $basicSellersCount));
+
+        // Monthly Recurring Revenue = (Active Pro * ₱299) + (Active Basic * ₱149)
+        $mrr = round(($proSellersCount * self::PREMIUM_MONTHLY_PRICE_PHP) + ($basicSellersCount * self::BASIC_MONTHLY_PRICE_PHP), 2);
 
         // Total subscription revenue collected all-time
         $allTimeSubscriptionRevenue = (float) ArtisanSubscription::sum('amount');
@@ -508,12 +615,15 @@ class SubscriptionController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'mrr' => $mrr,
-                'all_time_revenue' => (float)$allTimeSubscriptionRevenue,
-                'pro_subscribers_count' => $proSellersCount,
-                'basic_sellers_count' => $basicSellersCount,
-                'conversion_rate' => $totalSellers > 0 ? round(($proSellersCount / $totalSellers) * 100, 1) : 0,
-                'recent_records' => $recentSubscriptions,
+                'mrr'                       => $mrr,
+                'all_time_revenue'          => (float) $allTimeSubscriptionRevenue,
+                'pro_subscribers_count'     => $proSellersCount,
+                'premium_subscribers_count' => $proSellersCount,
+                'basic_subscribers_count'   => $basicSellersCount,
+                'basic_sellers_count'       => $basicSellersCount,
+                'free_sellers_count'        => $freeSellersCount,
+                'conversion_rate'           => $totalSellers > 0 ? round((($proSellersCount + $basicSellersCount) / $totalSellers) * 100, 1) : 0,
+                'recent_records'            => $recentSubscriptions,
             ]
         ]);
     }

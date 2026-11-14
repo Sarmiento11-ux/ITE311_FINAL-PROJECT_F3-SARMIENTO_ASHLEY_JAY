@@ -86,11 +86,22 @@ class SellerController extends Controller
         $totalSales = (float) $validSalesItems->sum('subtotal');
 
         $sellerUser = \App\Models\User::find($sellerId);
-        $isActivePro = $sellerUser
-            && $sellerUser->subscription_plan === 'pro'
-            && ($sellerUser->subscription_status ?? 'active') === 'active'
-            && (!$sellerUser->subscription_expires_at || $sellerUser->subscription_expires_at->isFuture());
-        $commissionRate = $isActivePro ? 3.0 : 8.0;
+        $commissionRate = 8.0;
+        if ($sellerUser) {
+            if ($sellerUser->commission_rate !== null && is_numeric($sellerUser->commission_rate)) {
+                $commissionRate = (float) $sellerUser->commission_rate;
+            } else {
+                $isActive = ($sellerUser->subscription_status ?? 'active') === 'active'
+                    && (!$sellerUser->subscription_expires_at || $sellerUser->subscription_expires_at->isFuture());
+                if ($isActive) {
+                    if (in_array($sellerUser->subscription_plan, ['pro', 'premium'])) {
+                        $commissionRate = 3.0;
+                    } elseif ($sellerUser->subscription_plan === 'basic') {
+                        $commissionRate = 5.0;
+                    }
+                }
+            }
+        }
 
         // Prefer the per-item commission snapshot recorded at checkout.
         $snapshotFees = (float) $validSalesItems->sum(fn($item) => (float) ($item->platform_fee ?? 0));

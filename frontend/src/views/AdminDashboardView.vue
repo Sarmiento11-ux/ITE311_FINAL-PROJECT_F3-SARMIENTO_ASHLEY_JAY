@@ -1232,42 +1232,58 @@
 
           <!-- TAB 8: REVIEWS MODERATION -->
 
-          <!-- TAB 9: SUBSCRIPTIONS & ARTISAN PRO REVENUE -->
+          <!-- TAB 9: SUBSCRIPTIONS & ARTISAN TIERED REVENUE -->
           <div v-else-if="currentTab === 'subscriptions'" class="tab-pane">
             <div class="admin-metrics-grid">
               <div class="metric-card metric-gold">
                 <div class="metric-icon">💎</div>
                 <div class="metric-info">
                   <span class="metric-label">Monthly Recurring Revenue (MRR)</span>
-                  <strong class="metric-value">₱{{ formatMoney(subscriptionMetrics?.mrr ? subscriptionMetrics.mrr : ((subscriptionMetrics?.pro_subscribers_count || (subscriptionMetrics?.recent_records?.filter(r => (r.status || '').toLowerCase() === 'active').length || 0)) * 299)) }}</strong>
-                  <small class="metric-sub">Active Artisan Pro subscribers</small>
+                  <strong class="metric-value">₱{{ formatMoney(subscriptionMetrics?.mrr ?? 0) }}</strong>
+                  <small class="metric-sub">Combined Basic + Premium subscribers</small>
                 </div>
               </div>
 
               <div class="metric-card metric-primary">
                 <div class="metric-icon">⭐</div>
                 <div class="metric-info">
-                  <span class="metric-label">Artisan Pro Makers</span>
-                  <strong class="metric-value">{{ subscriptionMetrics?.pro_subscribers_count || (subscriptionMetrics?.recent_records?.filter(r => (r.status || '').toLowerCase() === 'active').length || 0) }}</strong>
-                  <small class="metric-sub">On 3% commission tier</small>
+                  <span class="metric-label">Premium Artisan Pro</span>
+                  <strong class="metric-value">{{ subscriptionMetrics?.pro_subscribers_count ?? subscriptionMetrics?.premium_subscribers_count ?? 0 }}</strong>
+                  <small class="metric-sub">On 3% commission (₱299/mo or ₱2,990/yr)</small>
                 </div>
               </div>
 
               <div class="metric-card metric-forest">
-                <div class="metric-icon">🏛️</div>
+                <div class="metric-icon">✓</div>
                 <div class="metric-info">
-                  <span class="metric-label">Basic Free Makers</span>
-                  <strong class="metric-value">{{ subscriptionMetrics?.basic_sellers_count != null ? subscriptionMetrics.basic_sellers_count : Math.max(0, (sellers.length || 4) - (subscriptionMetrics?.pro_subscribers_count || (subscriptionMetrics?.recent_records?.filter(r => (r.status || '').toLowerCase() === 'active').length || 0))) }}</strong>
-                  <small class="metric-sub">On standard 8% commission</small>
+                  <span class="metric-label">Basic Artisan Makers</span>
+                  <strong class="metric-value">{{ subscriptionMetrics?.basic_subscribers_count ?? subscriptionMetrics?.basic_sellers_count ?? 0 }}</strong>
+                  <small class="metric-sub">On 5% commission (₱149/mo or ₱1,490/yr)</small>
                 </div>
               </div>
 
               <div class="metric-card metric-amber">
-                <div class="metric-icon">📈</div>
+                <div class="metric-icon">🏛️</div>
                 <div class="metric-info">
-                  <span class="metric-label">All-time Subscription GMV</span>
-                  <strong class="metric-value">₱{{ formatMoney(subscriptionMetrics?.all_time_revenue ?? 0) }}</strong>
-                  <small class="metric-sub">{{ subscriptionMetrics?.conversion_rate ?? 0 }}% conversion rate</small>
+                  <span class="metric-label">Free Artisan Starters</span>
+                  <strong class="metric-value">{{ subscriptionMetrics?.free_sellers_count ?? 0 }}</strong>
+                  <small class="metric-sub">On standard 8% commission • {{ subscriptionMetrics?.conversion_rate ?? 0 }}% paid conversion</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- All-time revenue summary row -->
+            <div style="display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap;">
+              <div class="admin-card" style="flex: 1; min-width: 200px;">
+                <div style="text-align: center; padding: 12px 0;">
+                  <div style="font-size: 0.8rem; color: #7A6F68; margin-bottom: 4px;">All-time Subscription Revenue</div>
+                  <strong style="font-size: 1.5rem; color: #2F4533;">₱{{ formatMoney(subscriptionMetrics?.all_time_revenue ?? 0) }}</strong>
+                </div>
+              </div>
+              <div class="admin-card" style="flex: 1; min-width: 200px;">
+                <div style="text-align: center; padding: 12px 0;">
+                  <div style="font-size: 0.8rem; color: #7A6F68; margin-bottom: 4px;">Paid Subscriber Conversion Rate</div>
+                  <strong style="font-size: 1.5rem; color: #C25E3E;">{{ subscriptionMetrics?.conversion_rate ?? 0 }}%</strong>
                 </div>
               </div>
             </div>
@@ -1300,7 +1316,9 @@
                         <small class="d-block text-muted">{{ sub.user?.email }}</small>
                       </td>
                       <td>
-                        <span class="status-badge badge-active">⭐ Artisan Pro</span>
+                        <span class="status-badge badge-active">
+                          {{ (sub.plan_name || '').toLowerCase().includes('premium') || (sub.plan_name || '').toLowerCase().includes('pro') ? '⭐ Premium Pro' : ((sub.plan_name || '').toLowerCase().includes('basic') ? '✓ Basic Maker' : sub.plan_name || 'Artisan Pro') }}
+                        </span>
                       </td>
                       <td><strong>₱{{ formatMoney(sub.amount) }}</strong></td>
                       <td>{{ sub.payment_method || 'GCash / Online Wallet' }}</td>

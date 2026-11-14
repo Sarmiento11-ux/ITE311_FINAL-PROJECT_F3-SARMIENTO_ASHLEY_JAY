@@ -43,16 +43,18 @@ Route::prefix('auth')->group(function () {
 });
 
 // ─── Public Read-Only Routes (Products / Categories) ─────────────────────────
-// Products and categories are publicly browsable (no login required)
-Route::get('/categories',      [CategoryController::class, 'index']);
-Route::get('/categories/{id}', [CategoryController::class, 'show']);
-Route::get('/subscriptions/plans', [SubscriptionController::class, 'getPlans']);
-Route::get('/products',         [ProductController::class, 'index']);
-Route::get('/products/filters', [ProductController::class, 'filters']);
-Route::get('/products/{id}',    [ProductController::class, 'show']);
+// Products and categories are publicly browsable (guarded by rate limit)
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/categories',      [CategoryController::class, 'index']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
+    Route::get('/subscriptions/plans', [SubscriptionController::class, 'getPlans']);
+    Route::get('/products',         [ProductController::class, 'index']);
+    Route::get('/products/filters', [ProductController::class, 'filters']);
+    Route::get('/products/{id}',    [ProductController::class, 'show']);
 
-// Product reviews: publicly readable, auth required to write
-Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
+    // Product reviews: publicly readable, auth required to write
+    Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
+});
 
 // Headless WordPress CMS Bridge Routes (secrets required — never public)
 Route::prefix('cms-bridge')->middleware('cms.bridge')->group(function () {

@@ -330,16 +330,34 @@ class AdminController extends Controller
             'total_requested' => round((float) PayoutRequest::sum('amount'), 2),
         ];
 
-        // 8. Subscription revenue (Artisan Pro monetization)
+        // 8. Subscription revenue (Tiered Artisan Monetization: Free, Basic, Premium/Pro)
         $proSubscribers = User::where('role', 'seller')
-            ->where('subscription_plan', 'pro')
+            ->whereIn('subscription_plan', ['pro', 'premium'])
             ->where('subscription_status', 'active')
             ->count();
 
+        $basicSubscribers = User::where('role', 'seller')
+            ->where('subscription_plan', 'basic')
+            ->where('subscription_status', 'active')
+            ->count();
+
+        $freeSellers = User::where('role', 'seller')
+            ->where(function ($q) {
+                $q->whereIn('subscription_plan', ['free'])
+                  ->orWhereNull('subscription_plan')
+                  ->orWhere('subscription_status', '!=', 'active');
+            })
+            ->count();
+
+        $mrr = round(($proSubscribers * 299.00) + ($basicSubscribers * 149.00), 2);
+
         $subscriptionRevenue = [
-            'pro_subscribers_count' => $proSubscribers,
-            'mrr'                   => round($proSubscribers * 299.00, 2),
-            'all_time_revenue'      => round((float) \App\Models\ArtisanSubscription::sum('amount'), 2),
+            'pro_subscribers_count'     => $proSubscribers,
+            'premium_subscribers_count' => $proSubscribers,
+            'basic_subscribers_count'   => $basicSubscribers,
+            'free_sellers_count'        => $freeSellers,
+            'mrr'                       => $mrr,
+            'all_time_revenue'          => round((float) \App\Models\ArtisanSubscription::sum('amount'), 2),
         ];
 
         return response()->json([

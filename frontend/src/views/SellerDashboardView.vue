@@ -1832,286 +1832,158 @@
 
 
               <div class="panel-header-row">
-
-
-
                 <div>
-
-
-
-                  <h3 class="panel-heading">Artisan Membership & Subscription</h3>
-
-
-
+                  <h3 class="panel-heading">Artisan Membership & Tiered Subscription</h3>
                   <p class="panel-subheading">Choose the right tier to scale your craft workshop with lower commission and premium marketplace tools.</p>
-
-
-
                 </div>
-
-
-
-                <span class="status-pill" :class="subscriptionData?.is_pro ? 'status-delivered' : 'status-transit'">
-
-
-
-                  {{ subscriptionData?.is_pro ? '⭐ Artisan Pro Active' : 'Basic Free Tier' }}
-
-
-
+                <span class="status-pill" :class="subscriptionData?.is_pro ? 'status-delivered' : (subscriptionData?.plan === 'basic' ? 'status-confirmed' : 'status-transit')">
+                  {{ subscriptionData?.is_pro ? '⭐ Premium Pro Active' : (subscriptionData?.plan === 'basic' ? '✓ Basic Maker Active' : 'Free Artisan Starter') }}
                 </span>
-
-
-
               </div>
 
+              <!-- Billing Cycle Toggle -->
+              <div style="display: flex; justify-content: center; align-items: center; gap: 14px; margin: 24px 0 16px 0; background: #FAF8F5; border: 1px solid #E8DFD5; border-radius: 12px; padding: 12px 20px;">
+                <span style="font-size: 0.92rem; font-weight: 600; cursor: pointer;" :style="{ color: selectedBillingCycle === 'monthly' ? '#2F4533' : '#7A6F68' }" @click="selectedBillingCycle = 'monthly'">
+                  Monthly Billing
+                </span>
+                <button 
+                  type="button" 
+                  @click="selectedBillingCycle = selectedBillingCycle === 'monthly' ? 'annual' : 'monthly'"
+                  style="background: #2F4533; border: none; border-radius: 20px; width: 48px; height: 26px; padding: 2px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s;"
+                  aria-label="Toggle Billing Cycle"
+                >
+                  <span 
+                    style="display: block; width: 22px; height: 22px; border-radius: 50%; background: #FFF; transition: transform 0.2s;"
+                    :style="{ transform: selectedBillingCycle === 'annual' ? 'translateX(22px)' : 'translateX(0)' }"
+                  ></span>
+                </button>
+                <span style="font-size: 0.92rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;" :style="{ color: selectedBillingCycle === 'annual' ? '#2F4533' : '#7A6F68' }" @click="selectedBillingCycle = 'annual'">
+                  Annual Billing
+                  <span style="background: #E8F5E9; color: #2E7D32; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; font-weight: 700;">Save 17% (2 Months Free)</span>
+                </span>
+              </div>
 
-
-
-
-
-
-              <!-- Plan Comparison Grid -->
-
-
-
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px;">
-
-
-
+              <!-- Plan Comparison Grid (3 Tiers: Free, Basic, Premium) -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 16px;">
                 
-
-
-
-                <!-- Plan 1: Basic Plan -->
-
-
-
-                <div style="border: 1px solid #E8DFD5; border-radius: 12px; padding: 24px; background: #FAF8F5;">
-
-
-
-                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7A6F68; font-weight: 700;">STARTER</span>
-
-
-
-                  <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2F4533;">Basic Artisan</h4>
-
-
-
-                  <div style="font-size: 1.8rem; font-weight: 700; color: #2D2420; margin-bottom: 12px;">₱0 <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ month</span></div>
-
-
-
-                  <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">Ideal for emerging crafts makers starting to showcase handmade items online.</p>
-
-
-
-                  
-
-
-
-                  <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
-
-
-
-                    <li>✓ <strong>8%</strong> Platform Escrow Commission</li>
-
-
-
-                    <li>✓ Up to <strong>10 Active</strong> Craft Listings</li>
-
-
-
-                    <li>✓ Standard Marketplace Search Placement</li>
-
-
-
-                    <li>✓ Standard Community Support</li>
-
-
-
-                  </ul>
-
-
-
-
-
-
-
-                  <button 
-
-
-
-                    v-if="subscriptionData?.is_pro"
-
-
-
-                    type="button" 
-
-
-
-                    class="btn btn-secondary" 
-
-
-
-                    style="width: 100%; justify-content: center;"
-
-
-
-                    @click="handleCancelSubscription"
-
-
-
-                    :disabled="isSubmittingSubscription"
-
-
-
-                  >
-
-
-
-                    {{ isSubmittingSubscription ? 'Switching...' : 'Switch to Basic' }}
-
-
-
-                  </button>
-
-
-
-                  <div v-else style="padding: 10px; text-align: center; font-size: 0.85rem; color: #7A6F68; background: #EFE8DE; border-radius: 6px; font-weight: 600;">
-
-
-
-                    ✓ Current Active Plan
-
-
-
+                <!-- Tier 1: Free Artisan Starter -->
+                <div style="border: 1px solid #E8DFD5; border-radius: 12px; padding: 24px; background: #FAF8F5; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7A6F68; font-weight: 700;">STARTER</span>
+                    <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2F4533;">Free Artisan Starter</h4>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #2D2420; margin-bottom: 4px;">₱0</div>
+                    <div style="font-size: 0.82rem; color: #7A6F68; margin-bottom: 14px;">Forever Free • No credit card required</div>
+                    <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">Ideal for emerging crafts makers starting to showcase handmade items online.</p>
+                    
+                    <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                      <li>✓ <strong>8%</strong> Marketplace Commission</li>
+                      <li>✓ Up to <strong>5 Active</strong> Craft Listings</li>
+                      <li>✓ Standard Marketplace Search Placement</li>
+                      <li>✓ Escrow Payouts upon Order Delivery</li>
+                      <li>✓ Standard Email Support</li>
+                    </ul>
                   </div>
 
-
-
+                  <div>
+                    <div v-if="!subscriptionData?.is_pro && subscriptionData?.plan !== 'basic'" style="padding: 10px; text-align: center; font-size: 0.85rem; color: #7A6F68; background: #EFE8DE; border-radius: 6px; font-weight: 600;">
+                      ✓ Current Active Plan
+                    </div>
+                    <button 
+                      v-else
+                      type="button" 
+                      class="btn btn-secondary" 
+                      style="width: 100%; justify-content: center;"
+                      @click="handleCancelSubscription"
+                      :disabled="isSubmittingSubscription"
+                    >
+                      {{ isSubmittingSubscription ? 'Switching...' : 'Switch to Free Tier' }}
+                    </button>
+                  </div>
                 </div>
 
+                <!-- Tier 2: Basic Artisan Maker -->
+                <div style="border: 2px solid #5B8C51; border-radius: 12px; padding: 24px; background: #FFF; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                  <span style="position: absolute; top: -12px; right: 20px; background: #5B8C51; color: #FFF; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">ARTISAN MAKER</span>
+                  <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #5B8C51; font-weight: 700;">GROWTH</span>
+                    <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2D2420;">Basic Artisan Maker</h4>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #5B8C51; margin-bottom: 4px;">
+                      {{ selectedBillingCycle === 'annual' ? '₱1,490' : '₱149' }}
+                      <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ {{ selectedBillingCycle === 'annual' ? 'year' : 'month' }}</span>
+                    </div>
+                    <div style="font-size: 0.82rem; color: #2E7D32; font-weight: 600; margin-bottom: 14px;">
+                      {{ selectedBillingCycle === 'annual' ? '₱124/mo equivalent • Save ₱298/yr' : 'Billed monthly • Cancel anytime' }}
+                    </div>
+                    <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">Designed for growing handmade crafters ready to expand their catalog and reduce fees.</p>
 
+                    <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                      <li>✓ <strong>5%</strong> Reduced Commission (Save 3% on every sale!)</li>
+                      <li>✓ Up to <strong>25 Active</strong> Craft Listings</li>
+                      <li>✓ Verified Artisan Maker Storefront Badge</li>
+                      <li>✓ Priority Catalog Search Indexing</li>
+                      <li>✓ Flexible Monthly & Annual Billing</li>
+                    </ul>
+                  </div>
 
+                  <div>
+                    <div v-if="subscriptionData?.plan === 'basic' && !subscriptionData?.is_pro" style="padding: 10px; text-align: center; font-size: 0.85rem; color: #2E7D32; background: #E8F0EA; border-radius: 6px; font-weight: 700;">
+                      ✓ Basic Maker Active
+                    </div>
+                    <button 
+                      v-else
+                      type="button" 
+                      class="btn btn-primary" 
+                      style="width: 100%; justify-content: center; background: #5B8C51; border-color: #5B8C51;"
+                      @click="handleUpgradeSubscription('basic', selectedBillingCycle)"
+                      :disabled="isSubmittingSubscription"
+                    >
+                      {{ isSubmittingSubscription ? 'Processing...' : (subscriptionData?.is_pro ? 'Switch to Basic Maker' : `Upgrade to Basic Maker (${selectedBillingCycle === 'annual' ? '₱1,490/yr' : '₱149/mo'})`) }}
+                    </button>
+                  </div>
+                </div>
 
-
-
-
-                <!-- Plan 2: Artisan Pro -->
-
-
-
-                <div style="border: 2px solid #C25E3E; border-radius: 12px; padding: 24px; background: #FFF; box-shadow: 0 8px 24px rgba(194, 94, 62, 0.08); position: relative;">
-
-
-
+                <!-- Tier 3: Premium Artisan Pro -->
+                <div style="border: 2px solid #C25E3E; border-radius: 12px; padding: 24px; background: #FFF; box-shadow: 0 8px 24px rgba(194, 94, 62, 0.08); display: flex; flex-direction: column; justify-content: space-between; position: relative;">
                   <span style="position: absolute; top: -12px; right: 20px; background: #C25E3E; color: #FFF; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">RECOMMENDED</span>
-
-
-
-                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #C25E3E; font-weight: 700;">PRO SCALE</span>
-
-
-
-                  <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2D2420;">Artisan Pro ⭐</h4>
-
-
-
-                  <div style="font-size: 1.8rem; font-weight: 700; color: #C25E3E; margin-bottom: 12px;">₱299 <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ month</span></div>
-
-
-
-                  <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">For passionate artisans who want to maximize earnings with minimal commission.</p>
-
-
-
-
-
-
-
-                  <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
-
-
-
-                    <li>✓ <strong>3%</strong> Ultra-Low Commission (Keep 97% Payout!)</li>
-
-
-
-                    <li>✓ <strong>Unlimited</strong> Craft Listings & Workshops</li>
-
-
-
-                    <li>✓ Featured Placement on Marketplace Homepage</li>
-
-
-
-                    <li>✓ Real-Time Analytics & Escrow Priority</li>
-
-
-
-                  </ul>
-
-
-
-
-
-
-
-                  <button 
-
-
-
-                    v-if="!subscriptionData?.is_pro"
-
-
-
-                    type="button" 
-
-
-
-                    class="btn btn-primary" 
-
-
-
-                    style="width: 100%; justify-content: center; background: #C25E3E; border-color: #C25E3E;"
-
-
-
-                    @click="handleUpgradeSubscription"
-
-
-
-                    :disabled="isSubmittingSubscription"
-
-
-
-                  >
-
-
-
-                    {{ isSubmittingSubscription ? 'Upgrading...' : 'Upgrade to Artisan Pro (₱299/mo) →' }}
-
-
-
-                  </button>
-
-
-
-                  <div v-else style="padding: 10px; text-align: center; font-size: 0.85rem; color: #2E7D32; background: #E8F0EA; border-radius: 6px; font-weight: 700;">
-
-
-
-                    ⭐ Artisan Pro Active
-
-
-
+                  <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #C25E3E; font-weight: 700;">PRO SCALE</span>
+                    <h4 style="font-size: 1.3rem; margin: 8px 0; color: #2D2420;">Premium Artisan Pro ⭐</h4>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #C25E3E; margin-bottom: 4px;">
+                      {{ selectedBillingCycle === 'annual' ? '₱2,990' : '₱299' }}
+                      <span style="font-size: 0.85rem; font-weight: 400; color: #7A6F68;">/ {{ selectedBillingCycle === 'annual' ? 'year' : 'month' }}</span>
+                    </div>
+                    <div style="font-size: 0.82rem; color: #C25E3E; font-weight: 600; margin-bottom: 14px;">
+                      {{ selectedBillingCycle === 'annual' ? '₱249/mo equivalent • Save ₱598/yr' : 'Billed monthly • Cancel anytime' }}
+                    </div>
+                    <p style="font-size: 0.88rem; color: #5C524B; line-height: 1.6; margin-bottom: 20px;">For established master artisans who want maximum payouts, unlimited listings, and priority exposure.</p>
+
+                    <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; font-size: 0.86rem; color: #423B36; line-height: 2;">
+                      <li>✓ <strong>3%</strong> Ultra-Low Commission (Keep 97% Payout!)</li>
+                      <li>✓ <strong>Unlimited</strong> Craft Listings & Workshops</li>
+                      <li>✓ ⭐ Featured Placement on Marketplace Homepage</li>
+                      <li>✓ ⭐ Pro Artisan Badge on Storefront & Products</li>
+                      <li>✓ Real-Time Analytics & Escrow Payout Priority</li>
+                    </ul>
                   </div>
 
-
-
+                  <div>
+                    <div v-if="subscriptionData?.is_pro" style="padding: 10px; text-align: center; font-size: 0.85rem; color: #2E7D32; background: #E8F0EA; border-radius: 6px; font-weight: 700;">
+                      ⭐ Premium Pro Active
+                    </div>
+                    <button 
+                      v-else
+                      type="button" 
+                      class="btn btn-primary" 
+                      style="width: 100%; justify-content: center; background: #C25E3E; border-color: #C25E3E;"
+                      @click="handleUpgradeSubscription('pro', selectedBillingCycle)"
+                      :disabled="isSubmittingSubscription"
+                    >
+                      {{ isSubmittingSubscription ? 'Processing...' : `Upgrade to Artisan Pro (${selectedBillingCycle === 'annual' ? '₱2,990/yr' : '₱299/mo'})` }}
+                    </button>
+                  </div>
                 </div>
+
+              </div>
 
 
 
@@ -2128,10 +2000,6 @@
 
 
             </div>
-
-
-
-          </div>
 
 
 
@@ -2726,10 +2594,8 @@ const isEditMode = ref(false);
 
 
 const subscriptionData = ref(null);
-
-
-
 const isSubmittingSubscription = ref(false);
+const selectedBillingCycle = ref('monthly');
 
 
 
@@ -3188,15 +3054,17 @@ const formatCompact = (value) => {
 
 
 const openAddModal = async () => {
-  const isPro = !!subscriptionData.value?.is_pro;
-  const listingLimit = subscriptionData.value?.listing_limit || 10;
+  const plan = subscriptionData.value?.plan || (subscriptionData.value?.is_pro ? 'pro' : 'free');
+  const isPro = ['pro', 'premium'].includes(plan);
+  const defaultLimit = plan === 'basic' ? 25 : 5;
+  const listingLimit = subscriptionData.value?.listing_limit ?? defaultLimit;
   if (!isPro && products.value.length >= listingLimit) {
+    const planName = plan === 'basic' ? 'Basic Artisan Maker' : 'Free Artisan Starter';
+    const upgradeTarget = plan === 'basic' ? 'Premium Artisan Pro' : 'Basic Maker or Artisan Pro';
     const wantsUpgrade = await askConfirm(
       "Listing Limit Reached",
-      `You have reached the ${listingLimit}-product limit for the Basic Artisan plan.
-
-Would you like to explore Artisan Pro to unlock unlimited craft listings?`,
-      "Explore Artisan Pro"
+      `You have reached the ${listingLimit}-craft limit on your ${planName} plan.\n\nWould you like to upgrade to ${upgradeTarget} to unlock more craft listings?`,
+      "Upgrade Plan"
     );
     if (wantsUpgrade) {
       currentTab.value = 'subscription';
@@ -3838,138 +3706,59 @@ const formatPayoutDate = (value) => {
 
 
 
-const handleUpgradeSubscription = async () => {
-
-
+const handleUpgradeSubscription = async (targetPlan = 'pro', targetCycle = null) => {
+  const cycle = targetCycle || selectedBillingCycle.value;
+  const isAnnual = cycle === 'annual';
+  const planName = targetPlan === 'basic' ? 'Basic Artisan Maker' : 'Premium Artisan Pro';
+  const priceText = targetPlan === 'basic'
+    ? (isAnnual ? '₱1,490/year (₱124/mo equivalent • Save 17%)' : '₱149/month')
+    : (isAnnual ? '₱2,990/year (₱249/mo equivalent • Save 17%)' : '₱299/month');
+  const commissionText = targetPlan === 'basic' ? '5%' : '3%';
+  const listingText = targetPlan === 'basic' ? 'up to 25 craft listings' : 'unlimited craft listings';
 
   const confirmed = await askConfirm(
-    "Confirm Artisan Pro Upgrade",
-    "Confirm upgrading to Artisan Pro for ₱299/month? You will unlock 3% platform commission and unlimited craft listings.",
-    "Upgrade to Pro"
+    `Confirm ${planName} Upgrade`,
+    `Upgrade to ${planName} for ${priceText}? You will unlock ${commissionText} platform commission and ${listingText}.`,
+    `Upgrade to ${planName}`
   );
   if (!confirmed) return;
 
-
-
   isSubmittingSubscription.value = true;
-
-
-
   try {
-
-
-
-    const res = await subscriptionService.upgradeToPro('PayMongo Online');
-
-
-
+    const res = await subscriptionService.upgradeToPro(targetPlan, cycle, 'PayMongo Online');
     if (res && res.checkout_url) {
-
-
-
       window.location.href = res.checkout_url;
-
-
-
       return;
-
-
-
     }
-
-
-
-    showToast(res.message || 'Upgraded to Artisan Pro successfully!');
-
-
-
+    showToast(res.message || `Upgraded to ${planName} successfully!`);
     await initShopProfileForm();
-  loadSellerData();
-
-
-
+    loadSellerData();
   } catch (err) {
-
-
-
     showToast(err.response?.data?.message || 'Error processing upgrade.', true);
-
-
-
   } finally {
-
-
-
     isSubmittingSubscription.value = false;
-
-
-
   }
-
-
-
 };
 
-
-
-
-
-
-
 const handleCancelSubscription = async () => {
-
-
-
   const confirmed = await askConfirm(
-    "Switch to Basic Plan",
-    "Are you sure you want to switch back to the Basic Free tier? Your commission rate will return to 8% and listings will be capped at 10.",
-    "Switch to Basic"
+    "Switch to Free Starter Plan",
+    "Are you sure you want to switch back to the Free Artisan Starter tier? Your marketplace commission rate will return to 8% and craft listings will be capped at 5.",
+    "Switch to Free Tier"
   );
   if (!confirmed) return;
 
-
-
   isSubmittingSubscription.value = true;
-
-
-
   try {
-
-
-
     const res = await subscriptionService.cancelSubscription();
-
-
-
-    showToast(res.message || 'Switched back to Basic Free tier.');
-
-
-
+    showToast(res.message || 'Switched back to Free Artisan Starter tier.');
     await initShopProfileForm();
-  loadSellerData();
-
-
-
+    loadSellerData();
   } catch (err) {
-
-
-
     showToast(err.response?.data?.message || 'Error updating subscription.', true);
-
-
-
   } finally {
-
-
-
     isSubmittingSubscription.value = false;
-
-
-
   }
-
-
-
 };
 
 

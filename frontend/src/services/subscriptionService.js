@@ -18,10 +18,14 @@ export const subscriptionService = {
   },
 
   /**
-   * Upgrade artisan account to Artisan Pro (₱299/mo).
+   * Upgrade artisan account to tiered subscription (Free, Basic, Premium/Pro).
    */
-  async upgradeToPro(paymentMethod = 'GCash / Online Wallet') {
-    const res = await api.post('/seller/subscription/upgrade', { payment_method: paymentMethod });
+  async upgradeToPro(planId = 'pro', billingCycle = 'monthly', paymentMethod = 'PayMongo Online') {
+    const res = await api.post('/seller/subscription/upgrade', {
+      plan_id: planId,
+      billing_cycle: billingCycle,
+      payment_method: paymentMethod,
+    });
     return res.data;
   },
 

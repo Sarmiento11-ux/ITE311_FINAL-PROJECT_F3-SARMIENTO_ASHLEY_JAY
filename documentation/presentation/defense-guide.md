@@ -134,7 +134,7 @@ Expected: all suites pass, including `SecurityAndAuthorizationTest` (9 tests / 4
 
 ### 3.1 Opening (1 min) — Rubric: Presentation
 
-> “CraftMarket is a decoupled marketplace that helps Filipino artisans sell beyond social media. It combines verified storefronts, escrow-protected payments, and two revenue streams: an 8% commission, reduced to 3% on our ₱299 Artisan Pro plan. The system is a Vue 3 SPA, a Laravel 12 REST API, and a MySQL database with a headless WordPress content sidecar.”
+> “CraftMarket is a decoupled marketplace that helps Filipino artisans sell beyond social media. It combines verified storefronts, escrow-protected payments, and dual revenue streams: tiered commissions (8% Free, 5% Basic, 3% Premium Pro) alongside tiered monthly and annual subscriptions (Free, ₱149/mo Basic, ₱299/mo Premium Pro with 17% annual savings). The system is a Vue 3 SPA, a Laravel 12 REST API, and a MySQL database with a headless WordPress content sidecar.”
 
 State the architecture and the business model **before** clicking anything. This frames the whole demo.
 
@@ -206,7 +206,7 @@ State the architecture and the business model **before** clicking anything. This
 3. Open `documentation/business-model.md`; quote break-even and unit economics.
 4. Close with:
 
-> “CraftMarket is not just a CRUD app. The escrow ledger, immutable commission snapshots, verification-gated catalog, role-safety guards, and payout ceiling are all enforced server-side and covered by automated tests. The business becomes self-sustaining at roughly 215 Basic orders per month, and Pro subscriptions can cover fixed costs before that.”
+> “CraftMarket is not just a CRUD app. The escrow ledger, immutable commission snapshots, verification-gated catalog, role-safety guards, and payout ceiling are all enforced server-side and covered by automated tests. The business becomes self-sustaining at roughly 215 Free Starter orders per month, and tiered Basic/Pro subscriptions can cover fixed costs even sooner.”
 
 ---
 
@@ -350,7 +350,7 @@ A: Login and registration use `throttle:5,1` per IP, returning `429` after five 
 ### Business
 
 **Q: Why would a seller pay 8%?**  
-A: Because the alternative is unpaid DMs and no buyer protection. The 8% funds escrow, dispute handling, and demand generation. Pro reduces it to 3%, and five orders a month already pays for the subscription.
+A: Because the alternative is unpaid DMs and no buyer protection. The 8% funds escrow, dispute handling, and demand generation. Upgrading to Basic Maker (₱149/mo) reduces it to 5%, and Premium Pro (₱299/mo) reduces it to 3% with unlimited listings. Five orders a month already pays for the subscription.
 
 **Q: How do you make money if everyone stays on Basic?**  
 A: 8% of GMV. At a ₱1,200 average order and ~5.2% variable cost, each order contributes about ₱33.60. Fixed costs are ₱7,200/month, so break-even is about 215 orders/month.
@@ -411,7 +411,7 @@ A: A guest hitting `/api/admin/reports` gets `401`; a customer or seller gets `4
 ## 8. One-Sentence Answers (Emergency Cheat Sheet)
 
 - **What is CraftMarket?** A verified, escrow-protected marketplace for Filipino handmade crafts.
-- **How does it make money?** 8% commission (3% on Pro) plus ₱299/month Artisan Pro subscriptions.
+- **How does it make money?** Tiered commissions (8% Free, 5% Basic, 3% Pro) plus recurring subscriptions (₱149/mo Basic, ₱299/mo Premium Pro, with 17% annual discount).
 - **What is escrow?** The platform holds payment until the buyer receives the item, then releases the seller's share.
 - **Why is verification important?** It prevents fake shops and keeps the public catalog trustworthy.
 - **What is the core security control?** Server-side RBAC plus ownership checks, backed by Sanctum tokens.

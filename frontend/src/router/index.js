@@ -1,20 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authService } from '../services/authService.js';
-import HomeView from '../views/HomeView.vue';
-import ProductsView from '../views/ProductsView.vue';
-import ProductDetailsView from '../views/ProductDetailsView.vue';
-import RegisterView from '../views/RegisterView.vue';
-import LoginView from '../views/LoginView.vue';
-import ProfileView from '../views/ProfileView.vue';
-import CustomerDashboardView from '../views/CustomerDashboardView.vue';
-import SellerDashboardView from '../views/SellerDashboardView.vue';
-import CartView from '../views/CartView.vue';
-import WishlistView from '../views/WishlistView.vue';
-import CheckoutView from '../views/CheckoutView.vue';
-import OrdersView from '../views/OrdersView.vue';
-import PaymentStatusView from '../views/PaymentStatusView.vue';
-import SandboxCheckoutView from '../views/SandboxCheckoutView.vue';
-import AdminDashboardView from '../views/AdminDashboardView.vue';
+
+// Lazy-loaded route views (code-split for optimal initial page-load performance)
+const HomeView = () => import('../views/HomeView.vue');
+const ProductsView = () => import('../views/ProductsView.vue');
+const ProductDetailsView = () => import('../views/ProductDetailsView.vue');
+const RegisterView = () => import('../views/RegisterView.vue');
+const LoginView = () => import('../views/LoginView.vue');
+const ProfileView = () => import('../views/ProfileView.vue');
+const CustomerDashboardView = () => import('../views/CustomerDashboardView.vue');
+const SellerDashboardView = () => import('../views/SellerDashboardView.vue');
+const CartView = () => import('../views/CartView.vue');
+const WishlistView = () => import('../views/WishlistView.vue');
+const CheckoutView = () => import('../views/CheckoutView.vue');
+const OrdersView = () => import('../views/OrdersView.vue');
+const PaymentStatusView = () => import('../views/PaymentStatusView.vue');
+const SandboxCheckoutView = () => import('../views/SandboxCheckoutView.vue');
+const AdminDashboardView = () => import('../views/AdminDashboardView.vue');
 
 // Route meta fields:
 //   requiresAuth: true  — must be logged in
@@ -26,6 +28,10 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/about',
+    redirect: { path: '/', hash: '#about' }
   },
   {
     path: '/products',

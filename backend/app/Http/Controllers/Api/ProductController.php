@@ -286,22 +286,28 @@ class ProductController extends Controller
 
         $user = $request->user();
 
-        // Seller listing limit enforcement (10 for Basic, unlimited for Pro)
+        // Seller listing limit enforcement (Free: 5, Basic: 25, Pro/Premium: unlimited)
         if ($user && $user->role === 'seller') {
-            $isPro = $user->subscription_plan === 'pro'
+            $isUnlimited = in_array($user->subscription_plan, ['pro', 'premium'])
                 && ($user->subscription_status ?? 'active') === 'active'
                 && (!$user->subscription_expires_at || $user->subscription_expires_at->isFuture());
 
-            if (!$isPro) {
-                $limit = $user->listing_limit ?? 10;
+            if (!$isUnlimited) {
+                $isBasic = $user->subscription_plan === 'basic'
+                    && ($user->subscription_status ?? 'active') === 'active'
+                    && (!$user->subscription_expires_at || $user->subscription_expires_at->isFuture());
+
+                $limit = $user->listing_limit ?? ($isBasic ? 25 : 5);
                 $currentCount = Product::where('seller_id', $user->id)
                     ->where('status', '!=', 'archived')
                     ->count();
 
                 if ($currentCount >= $limit) {
+                    $planLabel = $isBasic ? 'Basic Artisan Maker' : 'Free Artisan Starter';
+                    $upgradeTarget = $isBasic ? 'Artisan Pro' : 'Basic Maker or Artisan Pro';
                     return response()->json([
                         'success' => false,
-                        'message' => "You have reached your {$limit}-product listing limit on the Basic Artisan plan. Upgrade to Artisan Pro to unlock unlimited craft listings.",
+                        'message' => "You have reached your {$limit}-product listing limit on the {$planLabel} plan. Upgrade to {$upgradeTarget} to unlock more craft listings.",
                         'data'    => null,
                     ], 422);
                 }

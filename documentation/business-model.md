@@ -7,7 +7,7 @@
 | **Application** | CraftMarket — Local Handmade Products Marketplace |
 | **Courses** | Web Systems and Technologies 2 / System Integration and Architecture 1 (ITE311) |
 | **Student** | Ashley Jay Sarmiento (BSIT F3) |
-| **Document version** | 2.1 |
+| **Document version** | 3.0 |
 | **Status** | Implemented and verified |
 | **Last updated** | November 2026 |
 
@@ -19,8 +19,8 @@ CraftMarket is a **commission-based multi-vendor marketplace** for Philippine ha
 
 The platform earns money in two complementary ways:
 
-1. **Transaction commission** — 8% of every completed Basic-plan sale, reduced to 3% on the Artisan Pro plan.
-2. **Artisan Pro subscription** — ₱299/month for unlimited listings, the lower commission rate, and a verified Pro badge.
+1. **Transaction commission** — 8% (Free), 5% (Basic), or 3% (Premium Pro) of every completed sale.
+2. **Tiered Artisan Subscriptions** — ₱149/month (or ₱1,490/year) for Basic, ₱299/month (or ₱2,990/year) for Premium Pro — with annual billing offering ~17% savings (2 months free).
 
 CraftMarket holds **no inventory and owns no warehouse**. It monetizes the transaction layer: discovery, trust (escrow + reviews), fulfilment coordination, and settlement. This keeps fixed costs low and lets the platform scale with artisan activity rather than capital.
 
@@ -82,26 +82,42 @@ Start with **ceramics, woven goods, and home decor** in Metro Manila and nearby 
 
 ## 5. Revenue Model & Income Generation Strategy (Component A.4)
 
+### 5.1 Tiered Subscription Plans
+
+CraftMarket uses a **Freemium + Tiered Subscription** business model with **three plans** and **two billing cycles** (Monthly and Annual).
+
+| Plan | Monthly Price | Annual Price | Savings | Commission | Listing Limit |
+|---|---|---|---|---|---|
+| **Free Artisan Starter** | ₱0 | ₱0 | — | 8% per sale | 5 listings |
+| **Basic Artisan Maker** | ₱149/mo | ₱1,490/yr | Save 17% (2 months free) | 5% per sale | 25 listings |
+| **Premium Artisan Pro** | ₱299/mo | ₱2,990/yr | Save 17% (2 months free) | 3% per sale | Unlimited |
+
+> Annual billing offers ~17% savings (equivalent to 2 months free) for both Basic and Premium tiers.
+
+### 5.2 Revenue Streams
+
 | # | Stream | Mechanism | Rate | Implementation |
 |---|---|---|---|---|
-| R1 | **Basic commission** | Deducted from each completed line item | **8%** of item subtotal | `order_items.commission_rate = 8.00`, `platform_fee`, `seller_payout` |
-| R2 | **Artisan Pro commission** | Reduced commission for subscribers | **3%** of item subtotal | `users.commission_rate = 3.00`, snapshot on each line item |
-| R3 | **Artisan Pro subscription** | Recurring monthly plan | **₱299/month** | `artisan_subscriptions`, `subscription_plan = pro` |
-| R4 | **Shipping fee** (pass-through) | Charged to buyer, not revenue | ₱150 below ₱1,500; free at ₱1,500+ | `orders.shipping_fee` |
-| R5 | *Future* — Featured placement | Paid homepage/category boost | TBD | `products.is_featured` already exists |
-| R6 | *Future* — Pro annual plan | Prepaid yearly discount | TBD | `billing_cycle` supports annual |
+| R1 | **Free commission** | Deducted from each completed line item | **8%** of item subtotal | `commission_rate = 8.00`, `platform_fee`, `seller_payout` |
+| R2 | **Basic commission** | Reduced commission for Basic subscribers | **5%** of item subtotal | `commission_rate = 5.00`, snapshot on each line item |
+| R3 | **Premium Pro commission** | Further reduced commission for Pro subscribers | **3%** of item subtotal | `commission_rate = 3.00`, snapshot on each line item |
+| R4 | **Basic subscription** | Recurring plan (monthly or annual) | **₱149/mo** or **₱1,490/yr** | `artisan_subscriptions`, `subscription_plan = basic`, `billing_cycle` |
+| R5 | **Premium Pro subscription** | Recurring plan (monthly or annual) | **₱299/mo** or **₱2,990/yr** | `artisan_subscriptions`, `subscription_plan = pro`, `billing_cycle` |
+| R6 | **Shipping fee** (pass-through) | Charged to buyer, not revenue | ₱150 below ₱1,500; free at ₱1,500+ | `orders.shipping_fee` |
+| R7 | *Future* — Featured placement | Paid homepage/category boost | TBD | `products.is_featured` already exists |
 
-> R4 is deliberately **not** counted as revenue. It covers courier cost and is passed through to fulfilment.
+> R6 is deliberately **not** counted as revenue. It covers courier cost and is passed through to fulfilment.
 
-### 4.1 Why 8% and 3%?
+### 5.3 Why these prices?
 
-- **8%** sits below the effective take rate of general marketplaces once ads and boosts are included, while still funding escrow operations and support.
-- **3%** is a strong, concrete upgrade incentive: a Pro seller saves **5 percentage points** on every sale.
-- **₱299** is priced below the monthly savings of a modestly active seller, making the upgrade an obvious rational decision (see §6.2).
+- **Free (8%):** Entry point that eliminates barriers. Artisan can start immediately with 5 listings.
+- **Basic (5% / ₱149):** A rational upgrade for any active seller. 3% savings on every sale. Five ₱1,000 sales/month saves ₱150 — more than the subscription cost.
+- **Premium Pro (3% / ₱299):** Maximum benefit for established artisans. Five ₱1,200 sales/month saves ₱300, breaking even on the subscription with unlimited listings and Pro badge exposure.
+- **Annual billing at 17% discount:** Improves cash flow predictability and reduces churn by pre-committing sellers.
 
-### 4.2 Commission example
+### 5.4 Commission examples
 
-A Basic seller sells a ₱1,250 mug:
+**Free Artisan Starter** sells a ₱1,250 mug:
 
 | Line | Amount |
 |---|---|
@@ -109,15 +125,21 @@ A Basic seller sells a ₱1,250 mug:
 | Platform commission (8%) | ₱100.00 |
 | Seller payout (92%) | ₱1,150.00 |
 
-The same sale on Artisan Pro:
+**Basic Artisan Maker** sells a ₱1,250 mug:
+
+| Line | Amount |
+|---|---|
+| Item subtotal | ₱1,250.00 |
+| Platform commission (5%) | ₱62.50 |
+| Seller payout (95%) | ₱1,187.50 |
+
+**Premium Artisan Pro** sells a ₱1,250 mug:
 
 | Line | Amount |
 |---|---|
 | Item subtotal | ₱1,250.00 |
 | Platform commission (3%) | ₱37.50 |
 | Seller payout (97%) | ₱1,212.50 |
-
-The seller keeps **₱62.50 more per sale** on Pro. Five such sales per month (₱312.50 saved) already exceed the ₱299 subscription.
 
 ---
 
