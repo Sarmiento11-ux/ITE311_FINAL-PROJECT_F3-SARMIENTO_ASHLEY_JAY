@@ -38,9 +38,9 @@
         <circle cx="12" cy="7" r="4"></circle>
       </svg>
     </div>
-    <div>
-      <div class="stat-card-title">{{ title }}</div>
-      <div class="stat-card-value">{{ value }}</div>
+    <div class="stat-card-content">
+      <div class="stat-card-title" :title="title">{{ title }}</div>
+      <div class="stat-card-value" :title="String(value)">{{ value }}</div>
     </div>
   </div>
 </template>
@@ -84,12 +84,14 @@ const iconKey = computed(() => {
   background: #ffffff;
   border: 1px solid #efe8de;
   border-radius: 14px;
-  padding: 20px 22px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   transition: box-shadow 0.2s ease;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .stat-card-box:hover {
@@ -98,8 +100,10 @@ const iconKey = computed(() => {
 
 /* Icon container */
 .stat-card-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -118,19 +122,34 @@ const iconKey = computed(() => {
 .rose-bg     { background: #fdeef0; color: #b54a5e; }
 
 /* Text */
+.stat-card-content {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .stat-card-title {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #9e8f85;
   margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat-card-value {
-  font-size: 1.65rem;
+  font-size: clamp(1.2rem, 1.8vw, 1.55rem);
   font-weight: 800;
   color: #2d2420;
-  line-height: 1.1;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 </style>

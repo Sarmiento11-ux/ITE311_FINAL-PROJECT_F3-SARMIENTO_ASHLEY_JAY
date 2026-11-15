@@ -173,9 +173,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Total Users</span>
-                  <strong class="metric-value">{{ stats?.total_users ?? 0 }}</strong>
-                  <small class="metric-sub">{{ stats?.total_customers ?? 0 }} Customers · {{ stats?.total_sellers ?? 0 }} Sellers</small>
+                  <span class="metric-label" title="Total Users">Total Users</span>
+                  <strong class="metric-value" :title="String(stats?.total_users ?? 0)">{{ stats?.total_users ?? 0 }}</strong>
+                  <small class="metric-sub" :title="`${stats?.total_customers ?? 0} Customers · ${stats?.total_sellers ?? 0} Sellers`">{{ stats?.total_customers ?? 0 }} Customers · {{ stats?.total_sellers ?? 0 }} Sellers</small>
                 </div>
               </div>
 
@@ -187,9 +187,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Registered Artisans</span>
-                  <strong class="metric-value">{{ stats?.total_sellers ?? 0 }}</strong>
-                  <small class="metric-sub">Local craft workshops</small>
+                  <span class="metric-label" title="Registered Artisans">Registered Artisans</span>
+                  <strong class="metric-value" :title="String(stats?.total_sellers ?? 0)">{{ stats?.total_sellers ?? 0 }}</strong>
+                  <small class="metric-sub" title="Local craft workshops">Local craft workshops</small>
                 </div>
               </div>
 
@@ -202,9 +202,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Active Customers</span>
-                  <strong class="metric-value">{{ stats?.total_customers ?? 0 }}</strong>
-                  <small class="metric-sub">Registered buyers</small>
+                  <span class="metric-label" title="Active Customers">Active Customers</span>
+                  <strong class="metric-value" :title="String(stats?.total_customers ?? 0)">{{ stats?.total_customers ?? 0 }}</strong>
+                  <small class="metric-sub" title="Registered buyers">Registered buyers</small>
                 </div>
               </div>
 
@@ -217,9 +217,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Catalog Products</span>
-                  <strong class="metric-value">{{ stats?.total_products ?? 0 }}</strong>
-                  <small class="metric-sub">Handmade listings</small>
+                  <span class="metric-label" title="Catalog Products">Catalog Products</span>
+                  <strong class="metric-value" :title="String(stats?.total_products ?? 0)">{{ stats?.total_products ?? 0 }}</strong>
+                  <small class="metric-sub" title="Handmade listings">Handmade listings</small>
                 </div>
               </div>
 
@@ -231,9 +231,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Total Orders</span>
-                  <strong class="metric-value">{{ stats?.total_orders ?? 0 }}</strong>
-                  <small class="metric-sub">{{ stats?.orders_pending ?? 0 }} pending fulfillment</small>
+                  <span class="metric-label" title="Total Orders">Total Orders</span>
+                  <strong class="metric-value" :title="String(stats?.total_orders ?? 0)">{{ stats?.total_orders ?? 0 }}</strong>
+                  <small class="metric-sub" :title="`${stats?.orders_pending ?? 0} pending fulfillment`">{{ stats?.orders_pending ?? 0 }} pending fulfillment</small>
                 </div>
               </div>
 
@@ -245,9 +245,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Total Sales Volume</span>
-                  <strong class="metric-value">₱{{ formatMoney(stats?.total_sales ?? 0) }}</strong>
-                  <small class="metric-sub">{{ stats?.orders_paid ?? 0 }} confirmed transactions</small>
+                  <span class="metric-label" title="Total Sales Volume">Total Sales Volume</span>
+                  <strong class="metric-value" :title="'₱' + formatMoney(stats?.total_sales ?? 0)">₱{{ formatMoney(stats?.total_sales ?? 0) }}</strong>
+                  <small class="metric-sub" :title="`${stats?.orders_paid ?? 0} confirmed transactions`">{{ stats?.orders_paid ?? 0 }} confirmed transactions</small>
                 </div>
               </div>
             </div>
@@ -882,26 +882,26 @@
                 </button>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px;">
-                <div style="padding: 14px; border-radius: 10px; background: #fff8e1; border: 1px solid #fde68a;">
-                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #92400e; font-weight: 700;">Pending</span>
-                  <div style="font-size: 1.35rem; font-weight: 700; color: #b45309; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.pending_amount ?? 0) }}</div>
-                  <small style="color: #92400e;">{{ payoutsData?.summary?.pending_count ?? 0 }} request(s)</small>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px;">
+                <div style="padding: 14px 16px; border-radius: 10px; background: #fff8e1; border: 1px solid #fde68a; min-width: 0;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #92400e; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Pending">Pending</span>
+                  <div :title="'₱' + formatMoney(payoutsData?.summary?.pending_amount ?? 0)" style="font-size: clamp(1.15rem, 1.6vw, 1.35rem); font-weight: 700; color: #b45309; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ formatMoney(payoutsData?.summary?.pending_amount ?? 0) }}</div>
+                  <small style="color: #92400e; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="`${payoutsData?.summary?.pending_count ?? 0} request(s)`">{{ payoutsData?.summary?.pending_count ?? 0 }} request(s)</small>
                 </div>
-                <div style="padding: 14px; border-radius: 10px; background: #eff6ff; border: 1px solid #bfdbfe;">
-                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #1e40af; font-weight: 700;">Approved / Queued</span>
-                  <div style="font-size: 1.35rem; font-weight: 700; color: #1d4ed8; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.approved_amount ?? 0) }}</div>
-                  <small style="color: #1e40af;">{{ payoutsData?.summary?.approved_count ?? 0 }} request(s)</small>
+                <div style="padding: 14px 16px; border-radius: 10px; background: #eff6ff; border: 1px solid #bfdbfe; min-width: 0;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #1e40af; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Approved / Queued">Approved / Queued</span>
+                  <div :title="'₱' + formatMoney(payoutsData?.summary?.approved_amount ?? 0)" style="font-size: clamp(1.15rem, 1.6vw, 1.35rem); font-weight: 700; color: #1d4ed8; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ formatMoney(payoutsData?.summary?.approved_amount ?? 0) }}</div>
+                  <small style="color: #1e40af; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="`${payoutsData?.summary?.approved_count ?? 0} request(s)`">{{ payoutsData?.summary?.approved_count ?? 0 }} request(s)</small>
                 </div>
-                <div style="padding: 14px; border-radius: 10px; background: #e8f5e9; border: 1px solid #c8e6c9;">
-                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #166534; font-weight: 700;">Paid Out</span>
-                  <div style="font-size: 1.35rem; font-weight: 700; color: #2e7d32; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.paid_amount ?? 0) }}</div>
-                  <small style="color: #166534;">{{ payoutsData?.summary?.paid_count ?? 0 }} request(s)</small>
+                <div style="padding: 14px 16px; border-radius: 10px; background: #e8f5e9; border: 1px solid #c8e6c9; min-width: 0;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #166534; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Paid Out">Paid Out</span>
+                  <div :title="'₱' + formatMoney(payoutsData?.summary?.paid_amount ?? 0)" style="font-size: clamp(1.15rem, 1.6vw, 1.35rem); font-weight: 700; color: #2e7d32; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ formatMoney(payoutsData?.summary?.paid_amount ?? 0) }}</div>
+                  <small style="color: #166534; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="`${payoutsData?.summary?.paid_count ?? 0} request(s)`">{{ payoutsData?.summary?.paid_count ?? 0 }} request(s)</small>
                 </div>
-                <div style="padding: 14px; border-radius: 10px; background: #ffebee; border: 1px solid #fecaca;">
-                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #991b1b; font-weight: 700;">Rejected</span>
-                  <div style="font-size: 1.35rem; font-weight: 700; color: #c62828; margin-top: 3px;">₱{{ formatMoney(payoutsData?.summary?.rejected_amount ?? 0) }}</div>
-                  <small style="color: #991b1b;">request(s)</small>
+                <div style="padding: 14px 16px; border-radius: 10px; background: #ffebee; border: 1px solid #fecaca; min-width: 0;">
+                  <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #991b1b; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Rejected">Rejected</span>
+                  <div :title="'₱' + formatMoney(payoutsData?.summary?.rejected_amount ?? 0)" style="font-size: clamp(1.15rem, 1.6vw, 1.35rem); font-weight: 700; color: #c62828; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ formatMoney(payoutsData?.summary?.rejected_amount ?? 0) }}</div>
+                  <small style="color: #991b1b; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="`${payoutsData?.summary?.rejected_count ?? 0} request(s)`">{{ payoutsData?.summary?.rejected_count ?? 0 }} request(s)</small>
                 </div>
               </div>
 
@@ -1024,9 +1024,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Total Realized Revenue</span>
-                  <strong class="metric-value">₱{{ formatMoney(reports?.total_sales ?? 0) }}</strong>
-                  <small class="metric-sub">Paid & delivered artisan orders</small>
+                  <span class="metric-label" title="Total Realized Revenue">Total Realized Revenue</span>
+                  <strong class="metric-value" :title="'₱' + formatMoney(reports?.total_sales ?? 0)">₱{{ formatMoney(reports?.total_sales ?? 0) }}</strong>
+                  <small class="metric-sub" title="Paid & delivered artisan orders">Paid & delivered artisan orders</small>
                 </div>
               </div>
 
@@ -1038,9 +1038,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">All-time Orders</span>
-                  <strong class="metric-value">{{ reports?.total_orders ?? 0 }}</strong>
-                  <small class="metric-sub">Recorded in MySQL database</small>
+                  <span class="metric-label" title="All-time Orders">All-time Orders</span>
+                  <strong class="metric-value" :title="String(reports?.total_orders ?? 0)">{{ reports?.total_orders ?? 0 }}</strong>
+                  <small class="metric-sub" title="Recorded in MySQL database">Recorded in MySQL database</small>
                 </div>
               </div>
 
@@ -1052,11 +1052,9 @@
                   </svg>
                 </div>
                 <div class="metric-info">
-                  <span class="metric-label">Average Order Value</span>
-                  <strong class="metric-value">
-                    ₱{{ formatMoney(reports?.average_order_value ?? (reports?.completed_orders_count ? (reports.total_sales / reports.completed_orders_count) : (reports?.total_orders ? (reports.total_sales / reports.total_orders) : 0))) }}
-                  </strong>
-                  <small class="metric-sub">Per completed transaction</small>
+                  <span class="metric-label" title="Average Order Value">Average Order Value</span>
+                  <strong class="metric-value" :title="'₱' + formatMoney(reports?.average_order_value ?? (reports?.completed_orders_count ? (reports.total_sales / reports.completed_orders_count) : (reports?.total_orders ? (reports.total_sales / reports.total_orders) : 0)))">₱{{ formatMoney(reports?.average_order_value ?? (reports?.completed_orders_count ? (reports.total_sales / reports.completed_orders_count) : (reports?.total_orders ? (reports.total_sales / reports.total_orders) : 0))) }}</strong>
+                  <small class="metric-sub" title="Per completed transaction">Per completed transaction</small>
                 </div>
               </div>
             </div>
@@ -1071,21 +1069,21 @@
                   </div>
                 </div>
 
-                <div class="admin-metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 16px;">
+                <div class="admin-metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 16px;">
                   <div class="metric-card metric-gold">
                     <div class="metric-icon">₱</div>
                     <div class="metric-info">
-                      <span class="metric-label">Total Commission</span>
-                      <strong class="metric-value">₱{{ formatMoney(reports?.total_commission ?? 0) }}</strong>
-                      <small class="metric-sub">Non-cancelled orders</small>
+                      <span class="metric-label" title="Total Commission">Total Commission</span>
+                      <strong class="metric-value" :title="'₱' + formatMoney(reports?.total_commission ?? 0)">₱{{ formatMoney(reports?.total_commission ?? 0) }}</strong>
+                      <small class="metric-sub" title="Non-cancelled orders">Non-cancelled orders</small>
                     </div>
                   </div>
                   <div class="metric-card metric-forest">
                     <div class="metric-icon">💎</div>
                     <div class="metric-info">
-                      <span class="metric-label">Artisan Pro MRR</span>
-                      <strong class="metric-value">₱{{ formatMoney(reports?.subscription_revenue?.mrr ?? 0) }}</strong>
-                      <small class="metric-sub">{{ reports?.subscription_revenue?.pro_subscribers_count ?? 0 }} active Pro artisan(s)</small>
+                      <span class="metric-label" title="Artisan Pro MRR">Artisan Pro MRR</span>
+                      <strong class="metric-value" :title="'₱' + formatMoney(reports?.subscription_revenue?.mrr ?? 0)">₱{{ formatMoney(reports?.subscription_revenue?.mrr ?? 0) }}</strong>
+                      <small class="metric-sub" :title="`${reports?.subscription_revenue?.pro_subscribers_count ?? 0} active Pro artisan(s)`">{{ reports?.subscription_revenue?.pro_subscribers_count ?? 0 }} active Pro artisan(s)</small>
                     </div>
                   </div>
                 </div>
@@ -1123,37 +1121,37 @@
                   </div>
                 </div>
 
-                <div class="admin-metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                <div class="admin-metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));">
                   <div class="metric-card metric-amber">
                     <div class="metric-icon">⏳</div>
                     <div class="metric-info">
-                      <span class="metric-label">Pending Payouts</span>
-                      <strong class="metric-value">₱{{ formatMoney(reports?.payout_summary?.pending_amount ?? 0) }}</strong>
-                      <small class="metric-sub">{{ reports?.payout_summary?.pending_count ?? 0 }} request(s)</small>
+                      <span class="metric-label" title="Pending Payouts">Pending Payouts</span>
+                      <strong class="metric-value" :title="'₱' + formatMoney(reports?.payout_summary?.pending_amount ?? 0)">₱{{ formatMoney(reports?.payout_summary?.pending_amount ?? 0) }}</strong>
+                      <small class="metric-sub" :title="`${reports?.payout_summary?.pending_count ?? 0} request(s)`">{{ reports?.payout_summary?.pending_count ?? 0 }} request(s)</small>
                     </div>
                   </div>
                   <div class="metric-card metric-primary">
                     <div class="metric-icon">✓</div>
                     <div class="metric-info">
-                      <span class="metric-label">Approved / Queued</span>
-                      <strong class="metric-value">₱{{ formatMoney(reports?.payout_summary?.approved_amount ?? 0) }}</strong>
-                      <small class="metric-sub">{{ reports?.payout_summary?.approved_count ?? 0 }} request(s)</small>
+                      <span class="metric-label" title="Approved / Queued">Approved / Queued</span>
+                      <strong class="metric-value" :title="'₱' + formatMoney(reports?.payout_summary?.approved_amount ?? 0)">₱{{ formatMoney(reports?.payout_summary?.approved_amount ?? 0) }}</strong>
+                      <small class="metric-sub" :title="`${reports?.payout_summary?.approved_count ?? 0} request(s)`">{{ reports?.payout_summary?.approved_count ?? 0 }} request(s)</small>
                     </div>
                   </div>
                   <div class="metric-card metric-forest">
                     <div class="metric-icon">₱</div>
                     <div class="metric-info">
-                      <span class="metric-label">Paid Out</span>
-                      <strong class="metric-value">₱{{ formatMoney(reports?.payout_summary?.paid_amount ?? 0) }}</strong>
-                      <small class="metric-sub">{{ reports?.payout_summary?.paid_count ?? 0 }} request(s)</small>
+                      <span class="metric-label" title="Paid Out">Paid Out</span>
+                      <strong class="metric-value" :title="'₱' + formatMoney(reports?.payout_summary?.paid_amount ?? 0)">₱{{ formatMoney(reports?.payout_summary?.paid_amount ?? 0) }}</strong>
+                      <small class="metric-sub" :title="`${reports?.payout_summary?.paid_count ?? 0} request(s)`">{{ reports?.payout_summary?.paid_count ?? 0 }} request(s)</small>
                     </div>
                   </div>
                   <div class="metric-card metric-danger">
                     <div class="metric-icon">✕</div>
                     <div class="metric-info">
-                      <span class="metric-label">Rejected</span>
-                      <strong class="metric-value">{{ reports?.payout_summary?.rejected_count ?? 0 }}</strong>
-                      <small class="metric-sub">request(s)</small>
+                      <span class="metric-label" title="Rejected Payouts">Rejected Payouts</span>
+                      <strong class="metric-value" :title="`${reports?.payout_summary?.rejected_count ?? 0} request(s)`">{{ reports?.payout_summary?.rejected_count ?? 0 }}</strong>
+                      <small class="metric-sub" title="Denied requests">denied request(s)</small>
                     </div>
                   </div>
                 </div>
@@ -1264,36 +1262,36 @@
               <div class="metric-card metric-gold">
                 <div class="metric-icon">💎</div>
                 <div class="metric-info">
-                  <span class="metric-label">Monthly Recurring Revenue (MRR)</span>
-                  <strong class="metric-value">₱{{ formatMoney(subscriptionMetrics?.mrr ?? 0) }}</strong>
-                  <small class="metric-sub">Combined Basic + Premium subscribers</small>
+                  <span class="metric-label" title="Monthly Recurring Revenue (MRR)">Monthly Recurring Revenue (MRR)</span>
+                  <strong class="metric-value" :title="'₱' + formatMoney(subscriptionMetrics?.mrr ?? 0)">₱{{ formatMoney(subscriptionMetrics?.mrr ?? 0) }}</strong>
+                  <small class="metric-sub" title="Combined Basic + Premium subscribers">Combined Basic + Premium subscribers</small>
                 </div>
               </div>
 
               <div class="metric-card metric-primary">
                 <div class="metric-icon">⭐</div>
                 <div class="metric-info">
-                  <span class="metric-label">Premium Artisan Pro</span>
-                  <strong class="metric-value">{{ subscriptionMetrics?.pro_subscribers_count ?? subscriptionMetrics?.premium_subscribers_count ?? 0 }}</strong>
-                  <small class="metric-sub">On 3% commission (₱299/mo or ₱2,990/yr)</small>
+                  <span class="metric-label" title="Premium Artisan Pro">Premium Artisan Pro</span>
+                  <strong class="metric-value" :title="String(subscriptionMetrics?.pro_subscribers_count ?? subscriptionMetrics?.premium_subscribers_count ?? 0)">{{ subscriptionMetrics?.pro_subscribers_count ?? subscriptionMetrics?.premium_subscribers_count ?? 0 }}</strong>
+                  <small class="metric-sub" title="On 3% commission (₱299/mo or ₱2,990/yr)">On 3% commission (₱299/mo or ₱2,990/yr)</small>
                 </div>
               </div>
 
               <div class="metric-card metric-forest">
                 <div class="metric-icon">✓</div>
                 <div class="metric-info">
-                  <span class="metric-label">Basic Artisan Makers</span>
-                  <strong class="metric-value">{{ subscriptionMetrics?.basic_subscribers_count ?? subscriptionMetrics?.basic_sellers_count ?? 0 }}</strong>
-                  <small class="metric-sub">On 5% commission (₱149/mo or ₱1,490/yr)</small>
+                  <span class="metric-label" title="Basic Artisan Makers">Basic Artisan Makers</span>
+                  <strong class="metric-value" :title="String(subscriptionMetrics?.basic_subscribers_count ?? subscriptionMetrics?.basic_sellers_count ?? 0)">{{ subscriptionMetrics?.basic_subscribers_count ?? subscriptionMetrics?.basic_sellers_count ?? 0 }}</strong>
+                  <small class="metric-sub" title="On 5% commission (₱149/mo or ₱1,490/yr)">On 5% commission (₱149/mo or ₱1,490/yr)</small>
                 </div>
               </div>
 
               <div class="metric-card metric-amber">
                 <div class="metric-icon">🏛️</div>
                 <div class="metric-info">
-                  <span class="metric-label">Free Artisan Starters</span>
-                  <strong class="metric-value">{{ subscriptionMetrics?.free_sellers_count ?? 0 }}</strong>
-                  <small class="metric-sub">On standard 8% commission • {{ subscriptionMetrics?.conversion_rate ?? 0 }}% paid conversion</small>
+                  <span class="metric-label" title="Free Artisan Starters">Free Artisan Starters</span>
+                  <strong class="metric-value" :title="String(subscriptionMetrics?.free_sellers_count ?? 0)">{{ subscriptionMetrics?.free_sellers_count ?? 0 }}</strong>
+                  <small class="metric-sub" :title="`On standard 8% commission • ${subscriptionMetrics?.conversion_rate ?? 0}% paid conversion`">On standard 8% commission • {{ subscriptionMetrics?.conversion_rate ?? 0 }}% paid conversion</small>
                 </div>
               </div>
             </div>
@@ -3002,7 +3000,7 @@ const fetchSubscriptionMetrics = async () => {
 /* Cards & Metrics */
 .admin-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -3011,12 +3009,14 @@ const fetchSubscriptionMetrics = async () => {
   background: #ffffff;
   border: 1px solid #efe8de;
   border-radius: 14px;
-  padding: 20px;
+  padding: 16px 18px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.02);
   border-left: 4px solid #3e5943;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .metric-primary   { border-left-color: #3e5943; }
 .metric-forest    { border-left-color: #2f6940; }
@@ -3027,14 +3027,16 @@ const fetchSubscriptionMetrics = async () => {
 .metric-danger    { border-left-color: #c62828; }
 
 .metric-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 12px;
   background: #faf6f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   flex-shrink: 0;
   color: #7a6f68;
 }
@@ -3044,28 +3046,42 @@ const fetchSubscriptionMetrics = async () => {
 .metric-sand       .metric-icon { background: #fdf8f0; color: #9a7a45; }
 .metric-amber      .metric-icon { background: #fff9ec; color: #b07800; }
 .metric-gold       .metric-icon { background: #f0fdf6; color: #059669; }
+.metric-danger     .metric-icon { background: #fef2f2; color: #dc2626; }
 
 .metric-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 .metric-label {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   color: #7a6f68;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .metric-value {
-  font-size: 1.55rem;
+  font-size: clamp(1.2rem, 1.7vw, 1.45rem);
   font-weight: 700;
   color: #2c2c2c;
-  line-height: 1.2;
+  line-height: 1.25;
   margin: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 .metric-sub {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: #9c8a80;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Two Column Layout */
@@ -3297,12 +3313,14 @@ const fetchSubscriptionMetrics = async () => {
 .user-avatar-circle {
   width: 40px;
   height: 40px;
+  min-width: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 .table-product-thumb {
@@ -3339,21 +3357,28 @@ const fetchSubscriptionMetrics = async () => {
   border-radius: 10px;
   border: 1px solid #efe8de;
   background: #faf6f0;
+  min-width: 0;
 }
 .recent-user-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 .user-email-text {
   font-size: 0.78rem;
   color: #7a6f68;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .recent-user-meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 /* Activities Timeline */
@@ -3407,7 +3432,7 @@ const fetchSubscriptionMetrics = async () => {
 /* Status Breakdown Grid */
 .status-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 14px;
 }
 .status-summary-card {
@@ -3416,13 +3441,18 @@ const fetchSubscriptionMetrics = async () => {
   border-radius: 12px;
   padding: 16px;
   text-align: center;
+  min-width: 0;
+  overflow: hidden;
 }
 .status-count-val {
   display: block;
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
   font-weight: 700;
   color: #2c2c2c;
   margin: 6px 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .status-count-lbl {
   font-size: 0.75rem;
@@ -3524,7 +3554,7 @@ const fetchSubscriptionMetrics = async () => {
 /* Seller details modal */
 .seller-details-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
   background: #faf6f0;
   border: 1px solid #efe8de;
@@ -3535,16 +3565,24 @@ const fetchSubscriptionMetrics = async () => {
 .detail-stat {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
 }
 .detail-stat span {
   font-size: 0.72rem;
   color: #7a6f68;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .detail-stat strong {
   font-size: 1rem;
   color: #2c2c2c;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .seller-bio-card {
   background: #ffffff;

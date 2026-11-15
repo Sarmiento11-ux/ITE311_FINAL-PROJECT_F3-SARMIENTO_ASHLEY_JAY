@@ -742,20 +742,20 @@
               </div>
               <div class="analytics-summary-grid">
                 <div class="analytics-summary-item">
-                  <span>This Month</span>
-                  <strong>₱{{ Number(liveStats?.revenue_this_month ?? 0).toFixed(2) }}</strong>
+                  <span title="This Month">This Month</span>
+                  <strong :title="'₱' + Number(liveStats?.revenue_this_month ?? 0).toFixed(2)">₱{{ Number(liveStats?.revenue_this_month ?? 0).toFixed(2) }}</strong>
                 </div>
                 <div class="analytics-summary-item">
-                  <span>Last Month</span>
-                  <strong>₱{{ Number(liveStats?.revenue_last_month ?? 0).toFixed(2) }}</strong>
+                  <span title="Last Month">Last Month</span>
+                  <strong :title="'₱' + Number(liveStats?.revenue_last_month ?? 0).toFixed(2)">₱{{ Number(liveStats?.revenue_last_month ?? 0).toFixed(2) }}</strong>
                 </div>
                 <div class="analytics-summary-item">
-                  <span>Average Order Value</span>
-                  <strong>₱{{ averageOrderValue.toFixed(2) }}</strong>
+                  <span title="Average Order Value">Average Order Value</span>
+                  <strong :title="'₱' + averageOrderValue.toFixed(2)">₱{{ averageOrderValue.toFixed(2) }}</strong>
                 </div>
                 <div class="analytics-summary-item">
-                  <span>Commission Rate</span>
-                  <strong>{{ Number(liveStats?.commission_rate ?? (subscriptionData?.is_pro ? 3 : 8)).toFixed(0) }}%</strong>
+                  <span title="Commission Rate">Commission Rate</span>
+                  <strong :title="Number(liveStats?.commission_rate ?? (subscriptionData?.is_pro ? 3 : 8)).toFixed(0) + '%'">{{ Number(liveStats?.commission_rate ?? (subscriptionData?.is_pro ? 3 : 8)).toFixed(0) }}%</strong>
                 </div>
               </div>
               <div class="analytics-two-col">
@@ -1150,74 +1150,23 @@
 
 
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 18px;">
-
-
-
-                <div style="padding: 16px; border-radius: 10px; background: #E8F0EA; border: 1px solid #C8DCCB;">
-
-
-
-                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #2F4533; font-weight: 700;">Available to Request</span>
-
-
-
-                  <div style="font-size: 1.45rem; font-weight: 700; color: #2E7D32; margin-top: 4px;">₱{{ Number(payoutsData?.available_balance ?? 0).toFixed(2) }}</div>
-
-
-
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-top: 18px;">
+                <div style="padding: 16px; border-radius: 10px; background: #E8F0EA; border: 1px solid #C8DCCB; min-width: 0; box-sizing: border-box;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #2F4533; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Available to Request">Available to Request</span>
+                  <div :title="'₱' + Number(payoutsData?.available_balance ?? 0).toFixed(2)" style="font-size: clamp(1.2rem, 1.8vw, 1.45rem); font-weight: 700; color: #2E7D32; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ Number(payoutsData?.available_balance ?? 0).toFixed(2) }}</div>
                 </div>
-
-
-
-                <div style="padding: 16px; border-radius: 10px; background: #FAF6F0; border: 1px solid #E8DFD5;">
-
-
-
-                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #7A6F68; font-weight: 700;">Released Earnings</span>
-
-
-
-                  <div style="font-size: 1.45rem; font-weight: 700; color: #2D2420; margin-top: 4px;">₱{{ Number(payoutsData?.released_earnings ?? 0).toFixed(2) }}</div>
-
-
-
+                <div style="padding: 16px; border-radius: 10px; background: #FAF6F0; border: 1px solid #E8DFD5; min-width: 0; box-sizing: border-box;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #7A6F68; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Released Earnings">Released Earnings</span>
+                  <div :title="'₱' + Number(payoutsData?.released_earnings ?? 0).toFixed(2)" style="font-size: clamp(1.2rem, 1.8vw, 1.45rem); font-weight: 700; color: #2D2420; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ Number(payoutsData?.released_earnings ?? 0).toFixed(2) }}</div>
                 </div>
-
-
-
-                <div style="padding: 16px; border-radius: 10px; background: #FFF7ED; border: 1px solid #FED7AA;">
-
-
-
-                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9A3412; font-weight: 700;">Reserved / Pending</span>
-
-
-
-                  <div style="font-size: 1.45rem; font-weight: 700; color: #C2410C; margin-top: 4px;">₱{{ Number(payoutsData?.reserved_amount ?? 0).toFixed(2) }}</div>
-
-
-
+                <div style="padding: 16px; border-radius: 10px; background: #FFF7ED; border: 1px solid #FED7AA; min-width: 0; box-sizing: border-box;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9A3412; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Reserved / Pending">Reserved / Pending</span>
+                  <div :title="'₱' + Number(payoutsData?.reserved_amount ?? 0).toFixed(2)" style="font-size: clamp(1.2rem, 1.8vw, 1.45rem); font-weight: 700; color: #C2410C; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ Number(payoutsData?.reserved_amount ?? 0).toFixed(2) }}</div>
                 </div>
-
-
-
-                <div style="padding: 16px; border-radius: 10px; background: #EFF6FF; border: 1px solid #BFDBFE;">
-
-
-
-                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF; font-weight: 700;">Paid Out</span>
-
-
-
-                  <div style="font-size: 1.45rem; font-weight: 700; color: #1D4ED8; margin-top: 4px;">₱{{ Number(payoutsData?.paid_amount ?? 0).toFixed(2) }}</div>
-
-
-
+                <div style="padding: 16px; border-radius: 10px; background: #EFF6FF; border: 1px solid #BFDBFE; min-width: 0; box-sizing: border-box;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Paid Out">Paid Out</span>
+                  <div :title="'₱' + Number(payoutsData?.paid_amount ?? 0).toFixed(2)" style="font-size: clamp(1.2rem, 1.8vw, 1.45rem); font-weight: 700; color: #1D4ED8; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">₱{{ Number(payoutsData?.paid_amount ?? 0).toFixed(2) }}</div>
                 </div>
-
-
-
               </div>
 
 
@@ -3907,7 +3856,7 @@ const exportPayoutsToCsv = () => {
 /* Revenue analytics */
 .analytics-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
   margin-top: 18px;
 }
@@ -3916,6 +3865,9 @@ const exportPayoutsToCsv = () => {
   border: 1px solid #E8DFD5;
   border-radius: 10px;
   background: #FAF6F0;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .analytics-summary-item span {
   display: block;
@@ -3924,12 +3876,18 @@ const exportPayoutsToCsv = () => {
   text-transform: uppercase;
   color: #7A6F68;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .analytics-summary-item strong {
   display: block;
   margin-top: 4px;
-  font-size: 1.2rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
   color: #2D2420;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .analytics-two-col {
   display: grid;
