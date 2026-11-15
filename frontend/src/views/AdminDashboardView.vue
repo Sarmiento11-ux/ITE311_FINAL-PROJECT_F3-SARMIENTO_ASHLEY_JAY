@@ -542,39 +542,48 @@
                       <td><strong>{{ s.products_count }}</strong> crafts</td>
                       <td><strong>₱{{ formatMoney(s.total_sales) }}</strong></td>
                       <td>
-                        <span class="status-badge" :class="s.is_active ? 'badge-active' : 'badge-inactive'">
-                          {{ s.is_active ? 'Active' : 'Deactivated' }}
-                        </span>
-                        <span class="status-badge" :class="verificationBadgeClass(s.verification_status)" style="margin-left: 5px;">
-                          {{ s.verification_status || 'pending' }}
-                        </span>
+                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                          <span class="status-badge" :class="s.is_active ? 'badge-active' : 'badge-inactive'">
+                            {{ s.is_active ? 'Active' : 'Deactivated' }}
+                          </span>
+                          <span class="status-badge" :class="verificationBadgeClass(s.verification_status)">
+                            Verification: {{ s.verification_status || 'pending' }}
+                          </span>
+                        </div>
                       </td>
                       <td>
                         <div class="action-buttons-group">
-                          <button type="button" class="btn-action btn-view" @click="viewSellerDetails(s.id)">
+                          <button type="button" class="btn-action btn-view" @click="viewSellerDetails(s.id)" title="Inspect seller profile and workshop">
                             View Shop
                           </button>
+
+                          <!-- Approve Storefront (only if pending or rejected) -->
                           <button
                             v-if="s.verification_status !== 'approved'"
                             type="button"
-                            class="btn-action"
-                            style="background: #dcfce7; color: #166534;"
+                            class="btn-action btn-approve"
                             @click="reviewSellerVerification(s, 'approved')"
+                            title="Approve artisan verification"
                           >
                             Approve
                           </button>
+
+                          <!-- Reject Storefront (only if pending; approved storefronts cannot be casually rejected from the table) -->
                           <button
-                            v-if="s.verification_status !== 'rejected'"
+                            v-if="s.verification_status === 'pending'"
                             type="button"
                             class="btn-action btn-delete"
                             @click="reviewSellerVerification(s, 'rejected')"
+                            title="Reject pending verification application"
                           >
                             Reject
                           </button>
+
+                          <!-- Account Active Toggle -->
                           <button 
                             type="button" 
                             class="btn-action" 
-                            :class="s.is_active ? 'btn-delete' : 'btn-view'"
+                            :class="s.is_active ? 'btn-deactivate' : 'btn-activate'"
                             @click="toggleSellerActive(s)"
                             :title="s.is_active ? 'Deactivate seller account' : 'Reactivate seller account'"
                           >
@@ -3259,8 +3268,12 @@ const fetchSubscriptionMetrics = async () => {
 .btn-view:hover { background: #bae6fd; }
 .btn-delete     { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
 .btn-delete:hover{ background: #ffcdd2; }
+.btn-approve    { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+.btn-approve:hover { background: #c8e6c9; }
 .btn-activate   { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+.btn-activate:hover { background: #c8e6c9; }
 .btn-deactivate { background: #fff8e1; color: #b78103; border-color: #fde68a; }
+.btn-deactivate:hover { background: #fef08a; }
 
 /* User cells & thumbs */
 .user-cell {
