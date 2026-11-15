@@ -102,6 +102,34 @@ const handleAddToCart = () => {
 </script>
 
 <style scoped>
+.product-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
+}
+
+.product-artisan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.artisan-byline {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 65%;
+  font-size: 0.78rem;
+}
+
 .product-media-link {
   display: block;
   width: 100%;

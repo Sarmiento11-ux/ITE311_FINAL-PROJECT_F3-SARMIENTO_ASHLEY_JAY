@@ -34,7 +34,7 @@
               </span>
             </td>
             <td>
-              <div style="display: flex; gap: 6px; align-items: center;">
+              <div style="display: flex; gap: 6px; align-items: center; white-space: nowrap;">
                 <button 
                   type="button" 
                   class="btn-table-action btn-action-view" 
@@ -49,7 +49,7 @@
                   title="Print Official Order Receipt"
                   @click="invoiceOrder = order"
                 >
-                  <span>🧾</span>
+                  <span>🧾 Receipt</span>
                 </button>
               </div>
             </td>

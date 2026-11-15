@@ -3249,8 +3249,11 @@ const fetchSubscriptionMetrics = async () => {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 .btn-action {
+  white-space: nowrap;
   padding: 5px 10px;
   border-radius: 6px;
   font-size: 0.78rem;
