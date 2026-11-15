@@ -1979,49 +1979,60 @@
         </div>
 
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <!-- Left: Administrative Dispute & Escrow Governance Controls -->
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <label style="font-weight: 600; font-size: 0.85rem; color: #4b5563;">Update Status:</label>
-            <select v-model="selectedNewStatus" class="form-select" style="min-width: 175px; padding: 6px 10px; font-size: 0.875rem;">
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered (Release Escrow)</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="refunded">Refunded</option>
-            </select>
-            <button 
-              type="button" 
-              class="btn btn-primary btn-sm" 
-              :disabled="isUpdatingOrderStatus || selectedNewStatus === activeOrder?.status"
-              @click="handleUpdateOrderStatus(activeOrder, selectedNewStatus)"
-            >
-              <span v-if="isUpdatingOrderStatus">Updating...</span>
-              <span v-else>Apply Status</span>
-            </button>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-weight: 600; font-size: 0.82rem; color: #4b5563;">Admin Resolution:</label>
+              <select v-model="selectedNewStatus" class="form-select" style="min-width: 160px; padding: 5px 8px; font-size: 0.82rem;">
+                <option value="" disabled>Select Resolution</option>
+                <option value="cancelled">Cancel Order (Dispute)</option>
+                <option value="refunded">Refund Order (Return Funds)</option>
+              </select>
+              <button 
+                type="button" 
+                class="btn btn-primary btn-sm" 
+                style="padding: 5px 10px; font-size: 0.82rem;"
+                :disabled="isUpdatingOrderStatus || !selectedNewStatus || selectedNewStatus === activeOrder?.status"
+                @click="handleUpdateOrderStatus(activeOrder, selectedNewStatus)"
+              >
+                <span v-if="isUpdatingOrderStatus">Updating...</span>
+                <span v-else>Apply Resolution</span>
+              </button>
+            </div>
 
             <span style="width: 1px; height: 22px; background: #e5e7eb;"></span>
 
+            <!-- Escrow Actions -->
             <button
               type="button"
               class="btn btn-sm"
-              style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;"
+              style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-size: 0.82rem; padding: 5px 10px;"
               :disabled="activeOrder?.escrow_status === 'released_to_seller' || activeOrder?.payment_status !== 'paid'"
               @click="handleEscrowAction(activeOrder, 'release')"
+              title="Manual override to release locked funds to artisan"
             >
               Release Escrow
             </button>
             <button
               type="button"
               class="btn btn-sm"
-              style="background: #fff8e1; color: #92400e; border: 1px solid #fde68a;"
+              style="background: #fff8e1; color: #92400e; border: 1px solid #fde68a; font-size: 0.82rem; padding: 5px 10px;"
               :disabled="activeOrder?.escrow_status === 'held'"
               @click="handleEscrowAction(activeOrder, 'hold')"
+              title="Freeze funds in escrow pending dispute investigation"
             >
               Hold Escrow
             </button>
           </div>
+
+          <!-- Right: Close Button -->
           <button type="button" class="btn btn-secondary" @click="showOrderModal = false">Close</button>
+        </div>
+
+        <!-- Clarification Banner: Seller Fulfillment Responsibility -->
+        <div style="padding: 10px 20px; background: #FAF8F5; border-top: 1px solid #E8DFD5; font-size: 0.78rem; color: #7A6F68; display: flex; align-items: center; gap: 8px;">
+          <span>ℹ️</span>
+          <span><strong>Note on Fulfillment:</strong> Workshop preparation, packaging, courier dispatch, and delivery tracking are directly managed by the artisan seller in their workshop dashboard.</span>
         </div>
       </div>
     </div>
