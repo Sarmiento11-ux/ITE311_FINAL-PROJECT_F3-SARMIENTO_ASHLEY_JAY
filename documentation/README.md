@@ -97,9 +97,9 @@ npm run build
 | `SellerPayoutAndVerificationTest` | 4 passed |
 | `SecurityAndAuthorizationTest` | 9 passed |
 | `PhaseCFeatureTest` | 4 passed |
-| `CmsBridgeTest` | 6 passed |
+| `CmsBridgeTest` | 13 passed |
 | `SandboxPaymentSimulationTest` | 5 passed |
-| **Total** | **35 passed / 191 assertions** |
+| **Total** | **47 passed / 261 assertions** |
 | Frontend build | Success (chunk-size warning acceptable) |
 
 ---
@@ -115,7 +115,7 @@ npm run build
 7. **Safe role management** — no self-demotion, no self-deactivation, no last-admin demotion.
 8. **Two revenue streams** — 8%/3% commission plus ₱299 Artisan Pro.
 9. **Fail-closed CMS bridge** — shared secret, constant-time comparison, `503` when unconfigured.
-10. **Least-privilege CMS writes** — WordPress can only moderate product status and activate/deactivate accounts, with nonces and capability checks.
+10. **Least-privilege CMS writes** — WordPress can moderate product status, manage category taxonomy, approve/reject storefronts, and activate/deactivate accounts, with nonces and capability checks.
 11. **Documentation as code** — Mermaid diagrams versioned beside the implementation.
 
 ---

@@ -10,6 +10,7 @@ use App\Mail\OrderStatusUpdatedCustomerMail;
 use App\Mail\PaymentSuccessCustomerMail;
 use App\Mail\SellerItemFulfillmentMail;
 use App\Mail\SellerNewOrderMail;
+use App\Mail\SellerVerificationUpdateMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
@@ -22,6 +23,15 @@ class NotificationService
      * In-memory deduplication cache for the current request lifecycle.
      */
     private static array $sentCache = [];
+
+    /**
+     * Clear the deduplication cache. Intended for automated tests that reuse
+     * the same database identifiers across cases.
+     */
+    public static function flushSentCache(): void
+    {
+        self::$sentCache = [];
+    }
 
     /**
      * Get all admin emails configured or present in the database.
@@ -72,6 +82,29 @@ class NotificationService
             }
         } catch (\Throwable $e) {
             Log::error("[NotificationService] Failed to send new seller alert to admins: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify an artisan that their storefront verification status changed.
+     */
+    public static function sendSellerVerificationUpdate(User $seller, string $status, ?string $notes = null): void
+    {
+        $key = "seller_verification_{$seller->id}_{$status}";
+        if (isset(self::$sentCache[$key])) return;
+        self::$sentCache[$key] = true;
+
+        $seller->loadMissing('sellerProfile');
+
+        try {
+            if ($seller->email) {
+                Mail::to($seller->email, $seller->name)->send(
+                    new SellerVerificationUpdateMail($seller, $status, $notes)
+                );
+                Log::info("[NotificationService] Storefront verification ({$status}) sent to {$seller->email}");
+            }
+        } catch (\Throwable $e) {
+            Log::error("[NotificationService] Failed to send storefront verification email: " . $e->getMessage());
         }
     }
 

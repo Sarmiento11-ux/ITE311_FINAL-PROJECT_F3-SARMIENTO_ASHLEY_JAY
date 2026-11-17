@@ -246,16 +246,16 @@ flowchart LR
 | Field | Detail |
 |---|---|
 | **Actor** | Administrator |
-| **Main flow** | 1. Admin opens the Sellers tab and filters by verification status.<br>2. Admin reviews shop name, bio, location, and contact details.<br>3. `PATCH /api/admin/sellers/{id}/verification` sets `approved` or `rejected`, writes notes, and stamps `verified_at` / `verification_reviewed_at`.<br>4. Approval flips `is_verified = true`; the seller's crafts become publicly visible.<br>5. Rejection hides the storefront and returns a reason to the seller. |
-| **Postcondition** | Public visibility is directly controlled by admin approval. |
-| **Traceability** | FR-ADM-01…FR-ADM-03 |
+| **Main flow** | 1. Admin opens the WordPress CMS → Artisan Verification page and filters by verification status.<br>2. Admin reviews shop name, bio, location, and contact details from `GET /api/cms-bridge/sellers`.<br>3. `PATCH /api/cms-bridge/sellers/{id}/verification` sets `approved` or `rejected`, writes notes, stamps `verified_at` / `verification_reviewed_at`, and emails the artisan.<br>4. Approval flips `is_verified = true`; the seller's crafts become publicly visible.<br>5. Rejection hides the storefront and returns the moderator's reason to the seller. The Vue Admin Dashboard remains a read-only verification overview. |
+| **Postcondition** | Public visibility is directly controlled by admin approval in the CMS. |
+| **Traceability** | FR-ADM-01…FR-ADM-03, FR-CMS-09 |
 
 ### UC-16 Moderate Products, Reviews & Categories
 
 | Field | Detail |
 |---|---|
 | **Actor** | Administrator |
-| **Main flow** | 1. Admin uses `GET /api/admin/products` to see **all** products, including pending/rejected storefronts.<br>2. Admin edits or archives inappropriate listings.<br>3. Admin reviews flagged reviews and deletes policy violations.<br>4. Admin creates, renames, or deactivates categories. |
+| **Main flow** | 1. Admin uses `GET /api/admin/products` to see **all** products, including pending/rejected storefronts.<br>2. Admin edits or archives inappropriate listings.<br>3. Admin reviews flagged reviews and deletes policy violations.<br>4. Admin manages category taxonomy in the WordPress CMS (add, rename, activate/deactivate, delete when empty). |
 | **Postcondition** | Admin oversight is broader than the public catalog, without weakening public filtering. |
 | **Traceability** | FR-ADM-04…FR-ADM-06 |
 
@@ -302,10 +302,10 @@ flowchart LR
 | Field | Detail |
 |---|---|
 | **Actor** | WordPress CMS Administrator |
-| **Main flow** | 1. The plugin calls `/api/cms-bridge/products`, `/users`, or `/reports` with the `X-CMS-Bridge-Key` header.<br>2. API compares the header to `CMS_BRIDGE_KEY` using a constant-time comparison.<br>3. Matching requests receive JSON data; missing or incorrect keys receive `401`.<br>4. For moderation, the administrator submits a nonce-protected WordPress form.<br>5. The plugin calls `PATCH /api/cms-bridge/products/{id}/status` or `PATCH /api/cms-bridge/users/{id}/toggle-active`.<br>6. Laravel validates the value, applies the change, and revokes tokens when an account is deactivated. |
-| **Alternate flow** | A1. Key not configured on the server → `503` (fail closed).<br>A2. Invalid product status → `422`.<br>A3. Attempt to deactivate an administrator → `422`. |
-| **Postcondition** | Catalog and account state reflect the CMS action, while orders, payments, escrow, and payouts remain read-only in Laravel. |
-| **Traceability** | FR-CMS-01…FR-CMS-07, NFR-SEC-06 |
+| **Main flow** | 1. The plugin calls `/api/cms-bridge/products`, `/categories`, `/sellers`, `/users`, or `/reports` with the `X-CMS-Bridge-Key` header.<br>2. API compares the header to `CMS_BRIDGE_KEY` using a constant-time comparison.<br>3. Matching requests receive JSON data; missing or incorrect keys receive `401`.<br>4. For moderation, the administrator submits a nonce-protected WordPress form.<br>5. The plugin calls `PATCH /api/cms-bridge/products/{id}/status`, `POST/PUT/DELETE /api/cms-bridge/categories`, `PATCH /api/cms-bridge/sellers/{id}/verification`, or `PATCH /api/cms-bridge/users/{id}/toggle-active`.<br>6. Laravel validates the value, applies the change, emails the artisan on verification decisions, and revokes tokens when an account is deactivated. |
+| **Alternate flow** | A1. Key not configured on the server → `503` (fail closed).<br>A2. Invalid product status → `422`.<br>A3. Attempt to deactivate an administrator → `422`.<br>A4. Delete a category that still owns products → `422` with `product_count`. |
+| **Postcondition** | Catalog, taxonomy, storefront state, and account state reflect the CMS action, while orders, payments, escrow, and payouts remain read-only in Laravel. |
+| **Traceability** | FR-CMS-01…FR-CMS-09, NFR-SEC-06 |
 
 ### UC-22 Process Payment Webhook
 

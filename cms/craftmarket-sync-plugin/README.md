@@ -7,14 +7,18 @@ This plugin connects your WordPress installation (`craftmarket-cms`) directly wi
 1. **Website Content:** Managed in standard WordPress Pages (Hero Banner, About Us, Policies).
 2. **Announcements:** Managed in standard WordPress Posts (Notice Bar & Promos).
 3. **Products & Services:** Live synchronized catalog from `/api/cms-bridge/products`, with status moderation (`active`, `inactive`, `out_of_stock`, `archived`).
-4. **User Data Management:** Live synchronized view of Shoppers, Sellers, and Admins from `/api/cms-bridge/users`, with activate/deactivate controls.
-5. **Sales & Reports:** GMV, commission, escrow ledger, payout summary, MRR, order breakdown, and best sellers from `/api/cms-bridge/reports`.
+4. **Category Taxonomy:** Add, edit, and delete product categories through `/api/cms-bridge/categories`; deletion is blocked while products still reference the category.
+5. **Artisan Verification:** Review storefront applications from `/api/cms-bridge/sellers`, then approve or reject with moderator notes through `/api/cms-bridge/sellers/{id}/verification`; the artisan receives an email.
+6. **User Data Management:** Live synchronized view of Shoppers, Sellers, and Admins from `/api/cms-bridge/users`, with activate/deactivate controls.
+7. **Sales & Reports:** GMV, commission, escrow ledger, payout summary, MRR, order breakdown, and best sellers from `/api/cms-bridge/reports`.
 
 ## Management Actions
 
 | Action | Guard |
 |---|---|
 | Change product status | WordPress nonce + `manage_options`; Laravel enum validation |
+| Add / edit / delete category | WordPress nonce + `manage_options`; Laravel validates unique slug; delete blocked while products exist |
+| Approve / reject storefront | WordPress nonce + `manage_options`; Laravel validates status enum and emails the artisan |
 | Activate / deactivate account | WordPress nonce + `manage_options`; deactivation revokes Sanctum tokens; admins are protected |
 
 The bridge cannot modify orders, payments, escrow, payouts, or product pricing.
@@ -26,7 +30,7 @@ The bridge cannot modify orders, payments, escrow, payouts, or product pricing.
 2. Log in to WordPress Admin (`http://localhost/craftmarket-cms/wp-admin`).
 3. Navigate to **Plugins** &rarr; **Installed Plugins**.
 4. Click **Activate** under **CraftMarket CMS Bridge & Sync**.
-5. You will see the new **CraftMarket CMS** menu with Products, Users, and Reports in your WordPress sidebar.
+5. You will see the new **CraftMarket CMS** menu with Products, Categories, Artisan Verification, Users, and Reports in your WordPress sidebar.
 
 ## Configuration
 

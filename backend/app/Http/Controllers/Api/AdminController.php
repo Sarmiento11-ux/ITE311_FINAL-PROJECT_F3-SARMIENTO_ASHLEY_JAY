@@ -9,6 +9,7 @@ use App\Models\PayoutRequest;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Category;
+use App\Services\SellerVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -544,27 +545,12 @@ class AdminController extends Controller
         }
 
         $status = $validated['status'];
-        $profile->update([
-            'verification_status'      => $status,
-            'is_verified'              => $status === 'approved',
-            'verification_notes'       => $validated['notes'] ?? $profile->verification_notes,
-            'verification_reviewed_at' => now(),
-            'verified_at'              => $status === 'approved'
-                ? ($profile->verified_at ?? now())
-                : null,
-        ]);
+        $data = SellerVerificationService::update($seller, $status, $validated['notes'] ?? null);
 
         return response()->json([
             'success' => true,
             'message' => "Artisan storefront {$status} successfully.",
-            'data'    => [
-                'id'                  => $seller->id,
-                'shop_name'           => $profile->shop_name,
-                'is_verified'         => (bool) $profile->fresh()->is_verified,
-                'verification_status' => $profile->fresh()->verification_status,
-                'verification_notes'  => $profile->fresh()->verification_notes,
-                'verified_at'         => $profile->fresh()->verified_at?->toISOString(),
-            ],
+            'data'    => $data,
         ]);
     }
 

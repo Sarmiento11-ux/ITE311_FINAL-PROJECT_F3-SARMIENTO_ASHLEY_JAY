@@ -60,7 +60,7 @@ flowchart LR
 | **Seller** | Storefront profile, listings, images, fulfilment updates, dispatch confirmation, payout request | Seller-scoped orders, revenue analytics, payout status, verification outcome | `/api/seller/*`, `/api/products` (seller role) |
 | **Administrator** | Verification decision, moderation actions, role assignment, escrow/payout decisions | Full user list, seller queue, product oversight, combined reports | `/api/admin/*`, `/api/users` (admin role) |
 | **PayMongo** | Hosted checkout, signed payment events | Checkout session, line items, success/cancel URLs | `POST /api/payments/checkout-session`, `POST /api/webhooks/paymongo` |
-| **WordPress CMS** | Editorial content references and CMS-side reporting requests | Aggregate user/report JSON behind `X-CMS-Bridge-Key` | `/api/cms-bridge/users`, `/api/cms-bridge/reports` |
+| **WordPress CMS** | Editorial content references, category changes, storefront verification decisions, and CMS-side reporting requests | Aggregate catalog/category/storefront/user/report JSON behind `X-CMS-Bridge-Key` | `/api/cms-bridge/categories`, `/api/cms-bridge/sellers`, `/api/cms-bridge/users`, `/api/cms-bridge/reports` |
 | **Mail channel** | Delivery of transactional messages | Order and status notifications | Laravel notification service (SMTP / log driver in development) |
 
 ---
@@ -81,8 +81,9 @@ flowchart LR
 | DF-10 | Seller → System | Status transition, dispatch code, payout request | State machine + balance rules enforced. |
 | DF-11 | System → Administrator | Verification queue, all-product oversight, reports, ledger | Admin-only middleware. |
 | DF-12 | Administrator → System | Approve/reject storefront, role change, payout decision | Self-demotion and last-admin guards. |
-| DF-13 | System → WordPress | Aggregate users and financial reports | Requires shared secret; fails closed if unset. |
-| DF-14 | System → Mail | Order confirmation, status notifications | Queued/logged in development. |
+| DF-13 | System → WordPress | Aggregate catalog, category taxonomy, storefront queue, users, and financial reports | Requires shared secret; fails closed if unset. |
+| DF-14 | WordPress → System | Category CRUD and storefront verification decisions | Nonce + `manage_options`; delete guard; seller email notification. |
+| DF-15 | System → Mail | Order confirmation, status notifications, storefront verification updates | Queued/logged in development. |
 
 ---
 

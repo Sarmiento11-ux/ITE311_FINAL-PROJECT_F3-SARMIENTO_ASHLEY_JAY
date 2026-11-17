@@ -183,9 +183,9 @@ State the architecture and the business model **before** clicking anything. This
 ### 3.5 Admin flow (3 min) — Functionality, Security, Business Model
 
 1. Log out; log in as `admin@example.com`.
-2. Open **Sellers**; show the verification queue.
-3. Open a pending storefront, add a note, and approve it.
-4. Switch back to the public catalog and show that the shop's products are now visible.
+2. Open **Sellers**; show the read-only verification queue and **View Shop** detail.
+3. Open **WordPress → CraftMarket CMS → Artisan Verification**; approve the pending storefront with a note.
+4. Switch back to the public catalog and show that the shop's products are now visible (the artisan also receives an approval email).
 5. Open **Users**; open a user audit modal.
 6. Show the role dropdown and **Save Role**.
 7. Attempt to demote your own admin account — show the `422` error.
@@ -285,9 +285,9 @@ State the architecture and the business model **before** clicking anything. This
 - `throttle:5,1` on login/register.
 - HMAC-SHA256 webhook verification.
 - CMS bridge shared secret with `hash_equals`.
-- WordPress CMS writes require a nonce and `manage_options`; admins cannot be deactivated from the bridge.
+- WordPress CMS writes require a nonce and `manage_options`; category deletes are blocked while products exist, storefront decisions email the artisan, and admins cannot be deactivated from the bridge.
 - Upload MIME/size validation with UUID names.
-- 35 automated tests / 191 assertions.
+- 47 automated tests / 261 assertions.
 
 ### 4.6 Documentation & System Design (10%)
 

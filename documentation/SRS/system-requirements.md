@@ -104,7 +104,7 @@ CraftMarket is a **three-tier decoupled system**:
 | **Customer** | Registered shopper | Buy safely, track orders, save favorites, review purchases |
 | **Seller** | Verified artisan | List products, fulfil orders, understand sales, get paid |
 | **Administrator** | Platform operator | Trust and safety, user management, financial oversight |
-| **WordPress CMS** | System actor | Read aggregate data and moderate product status / account activation |
+| **WordPress CMS** | System actor | Read aggregate data and moderate product status, category taxonomy, storefront verification, and account activation |
 
 ### 2.3 Operating environment
 
@@ -222,7 +222,7 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | ID | Requirement | Priority | Acceptance criteria |
 |---|---|---|---|
 | FR-ADM-01 | Admins can view the storefront verification queue. | M | List supports search and status filtering. |
-| FR-ADM-02 | Admins can approve or reject a storefront with notes. | M | `verification_status`, `is_verified`, `verified_at`, `verification_reviewed_at` update correctly. |
+| FR-ADM-02 | Admins can approve or reject a storefront with notes. | M | `verification_status`, `is_verified`, `verified_at`, `verification_reviewed_at` update correctly. The WordPress CMS is the primary moderation surface; the artisan receives an email notification. |
 | FR-ADM-03 | Approval directly controls public visibility. | M | Approved shops' products appear; rejected shops' products do not. |
 | FR-ADM-04 | Admins can view all products including unverified shops. | M | `GET /api/admin/products` returns the full oversight list. |
 | FR-ADM-05 | Admins can moderate products, reviews, and categories. | M | Edit/archive/delete actions succeed; deleted reviews disappear publicly. |
@@ -265,6 +265,8 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | FR-CMS-05 | Administrators can activate or deactivate marketplace accounts from the CMS. | M | `PATCH /api/cms-bridge/users/{id}/toggle-active` updates `is_active`; deactivation revokes all Sanctum tokens; admin deactivation returns `422`. |
 | FR-CMS-06 | The CMS reports page exposes revenue, escrow, payout, and subscription summaries. | M | `GET /api/cms-bridge/reports` returns `total_sales`, `total_commission`, `commission_ledger`, `payout_summary`, and `subscription_revenue`. |
 | FR-CMS-07 | Every CMS write action is protected against CSRF and unauthorized use. | M | WordPress handlers require a valid nonce and `manage_options`; Laravel validates all input. |
+| FR-CMS-08 | Administrators can add, edit, and delete product categories from the CMS. | M | `GET/POST /api/cms-bridge/categories`, `PUT/DELETE /api/cms-bridge/categories/{id}`; delete returns `422` with `product_count` while products reference the category. |
+| FR-CMS-09 | Administrators can approve or reject artisan storefronts from the CMS. | M | `GET /api/cms-bridge/sellers`, `PATCH /api/cms-bridge/sellers/{id}/verification`; status enum is validated, verification fields update, and the artisan receives an email notification. |
 
 ---
 
@@ -359,6 +361,10 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | `GET/PUT` | `/api/users/{id}` | Admin | User management / role assignment |
 | `GET` | `/api/cms-bridge/products` | Shared secret | CMS catalog |
 | `PATCH` | `/api/cms-bridge/products/{id}/status` | Shared secret | CMS product moderation |
+| `GET/POST` | `/api/cms-bridge/categories` | Shared secret | CMS category listing / creation |
+| `PUT/DELETE` | `/api/cms-bridge/categories/{id}` | Shared secret | CMS category update / guarded delete |
+| `GET` | `/api/cms-bridge/sellers` | Shared secret | CMS storefront verification queue |
+| `PATCH` | `/api/cms-bridge/sellers/{id}/verification` | Shared secret | CMS approve / reject storefront |
 | `GET` | `/api/cms-bridge/users` | Shared secret | CMS user directory |
 | `PATCH` | `/api/cms-bridge/users/{id}/toggle-active` | Shared secret | CMS account activation |
 | `GET` | `/api/cms-bridge/reports` | Shared secret | CMS reporting |
@@ -368,7 +374,7 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | Interface | Protocol | Data |
 |---|---|---|
 | PayMongo | HTTPS REST + webhooks | Checkout sessions, payment events |
-| WordPress | HTTPS REST | Catalog/users/reports, product-status and account moderation, editorial content |
+| WordPress | HTTPS REST | Catalog/categories/storefront verification/users/reports, product-status and account moderation, editorial content |
 | SMTP | SMTP/TLS | Transactional email |
 | Database | MySQL protocol | Persistent relational data |
 
@@ -398,7 +404,7 @@ None beyond standard client devices and commodity servers.
 | **UI/UX & Responsiveness (15%)** | NFR-USE-01…05 | Wireframes, design tokens, responsive matrix | Responsive Vue views |
 | **Business Model & Revenue (15%)** | FR-PAY-02/03/08/12, FR-SUB | `business-model.md` | Commission ledger, Pro MRR, payout summary in Reports |
 | **Database Design (10%)** | FR-ORD-07, NFR-REL-01…04 | ERD + schema.sql | Migrations, FKs, snapshot columns |
-| **Security & Validation (10%)** | FR-AUTH-04, FR-ADM-09/12, FR-CMS-01…07, NFR-SEC-01…10 | `security-controls.md` | `SecurityAndAuthorizationTest` (9 tests), `CmsBridgeTest` (6 tests) |
+| **Security & Validation (10%)** | FR-AUTH-04, FR-ADM-09/12, FR-CMS-01…09, NFR-SEC-01…10 | `security-controls.md` | `SecurityAndAuthorizationTest` (9 tests), `CmsBridgeTest` (13 tests) |
 | **Documentation & System Design (10%)** | All | SRS, use case, ERD, context, architecture, schema, wireframes | This documentation set |
 | **Presentation & Defense (10%)** | All | `presentation/defense-guide.md` | Demo script and Q&A prep |
 
@@ -423,7 +429,8 @@ Current status:
 | `OrderEscrowTest` | 5 passed — commission split, Pro payout, escrow on payment, release on delivery, refund on cancel |
 | `SellerPayoutAndVerificationTest` | 4 passed — storefront approval, payout balance rules, manual escrow release, QR dispatch |
 | `SecurityAndAuthorizationTest` | 9 passed / 43 assertions — RBAC, role guards, catalog visibility, admin oversight, analytics, CMS bridge, reports |
-| `CmsBridgeTest` | 6 passed — secret/fail-closed guard, catalog, product moderation, token revocation, admin protection |
+| `CmsBridgeTest` | 13 passed — secret/fail-closed guard, catalog, product moderation, category CRUD + delete guard, storefront listing, approve/reject with email, token revocation, admin protection |
+| **Total** | **47 passed / 261 assertions** |
 | Frontend production build | Passed (chunk-size warning only) |
 
 ### 8.2 Manual acceptance scenarios

@@ -83,7 +83,7 @@ sequenceDiagram
 | Payouts | Seller sees and cancels only own requests | `SellerController::payouts`, `cancelPayout` |
 | Reviews | Edit/delete only by author (or admin for moderation) | `ProductReviewController` |
 | Products in catalog | Public visibility requires approved storefront | `ProductController::index`, `filters`, `show` |
-| CMS bridge | Constant-time shared-secret comparison; write actions limited to product status and user activation | `VerifyCmsBridgeKey`, `CmsBridgeController` |
+| CMS bridge | Constant-time shared-secret comparison; write actions limited to product status, category CRUD, storefront verification, and user activation | `VerifyCmsBridgeKey`, `CmsBridgeController` |
 
 ### 3.3 Administrative safety rails
 
@@ -96,8 +96,10 @@ sequenceDiagram
 | Token invalidation | Role change or deactivation revokes all tokens | `UserController::update` |
 | Admin product oversight | `/api/admin/products` can include unverified shops, public catalog cannot | `test_admin_product_oversight_includes_pending_storefronts` |
 | CMS admin protection | The CMS bridge cannot deactivate an administrator → `422` | `test_cms_bridge_cannot_deactivate_administrators` |
+| CMS category delete guard | Deleting a category that still owns products returns `422` with `product_count` | `test_cms_bridge_deletes_empty_categories_but_blocks_linked_ones` |
+| CMS storefront verification | Status enum is validated; approval/rejection stamps review fields and emails the artisan | `test_cms_bridge_approves_storefront_and_emails_the_artisan`, `test_cms_bridge_rejects_storefront_with_moderator_notes` |
 | CMS write CSRF | Every WordPress write action requires a nonce and `manage_options` | `craftmarket-cms-sync.php` |
-| CMS audit trail | Product-status and account-activation changes are written to the Laravel log | `CmsBridgeController` |
+| CMS audit trail | Product-status, category, storefront-verification, and account-activation changes are written to the Laravel log | `CmsBridgeController` |
 
 ---
 
@@ -115,6 +117,8 @@ sequenceDiagram
 | Payouts | Positive amount, method/account required, amount ≤ available balance | Prevents over-withdrawal |
 | Uploads | File required, `image`, MIME `jpeg/jpg/png/webp`, max size, UUID filename | Prevents executable uploads and traversal |
 | Admin updates | Role enum, boolean `is_active`, optional password hashed | Stops arbitrary privilege strings |
+| Categories (CMS) | `name` required, unique `slug`, bounded text, boolean `is_active`; delete blocked while products exist | Prevents duplicate slugs and orphaned listings |
+| Storefront verification (CMS) | `status` enum `pending/approved/rejected`, notes ≤ 2000 characters, seller must have a profile | Prevents arbitrary states and orphaned decisions |
 
 **Server-side authority:** the API **never trusts** client-supplied prices, subtotals, commission, shipping, or totals. It reloads products, locks rows, recalculates every amount, and snapshots the result.
 
@@ -211,7 +215,7 @@ sequenceDiagram
 | `test_cms_bridge_requires_a_shared_secret` | Missing/wrong key → `401`; correct key → `200` |
 | `test_admin_reports_include_payout_and_subscription_summary` | Financial summaries are admin-only and correct |
 
-Additional coverage: `OrderEscrowTest` (5 tests) verifies commission split, Pro payout, escrow on payment, release on delivery, and refund on cancellation. `SellerPayoutAndVerificationTest` (4 tests) verifies storefront approval, payout balance rules, manual escrow release, and QR dispatch confirmation. `CmsBridgeTest` (6 tests) verifies the bridge secret, fail-closed behaviour, catalog listing, product moderation, token revocation, and admin protection.
+Additional coverage: `OrderEscrowTest` (5 tests) verifies commission split, Pro payout, escrow on payment, release on delivery, and refund on cancellation. `SellerPayoutAndVerificationTest` (4 tests) verifies storefront approval, payout balance rules, manual escrow release, and QR dispatch confirmation. `CmsBridgeTest` (13 tests) verifies the bridge secret, fail-closed behaviour, catalog listing, product moderation, category CRUD and delete guard, storefront listing, approve/reject with email notification, token revocation, and admin protection.
 
 ```powershell
 cd backend

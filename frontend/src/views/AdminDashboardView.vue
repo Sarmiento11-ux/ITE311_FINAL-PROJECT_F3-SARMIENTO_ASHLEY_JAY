@@ -513,8 +513,8 @@
             <div class="admin-card">
               <div class="admin-card-header">
                 <div>
-                  <h3>Artisan & Seller Management</h3>
-                  <p class="admin-card-sub">Oversight of registered artisans, workshop storefronts, inventory volume, and performance.</p>
+                  <h3>Artisan & Seller Overview</h3>
+                  <p class="admin-card-sub">Oversight of registered artisans, workshop storefronts, inventory volume, and performance. Storefront verification decisions are handled in the WordPress CMS.</p>
                 </div>
               </div>
 
@@ -588,27 +588,10 @@
                             View Shop
                           </button>
 
-                          <!-- Approve Storefront (only if pending or rejected) -->
-                          <button
-                            v-if="s.verification_status !== 'approved'"
-                            type="button"
-                            class="btn-action btn-approve"
-                            @click="reviewSellerVerification(s, 'approved')"
-                            title="Approve artisan verification"
-                          >
-                            Approve
-                          </button>
-
-                          <!-- Reject Storefront (only if pending; approved storefronts cannot be casually rejected from the table) -->
-                          <button
-                            v-if="s.verification_status === 'pending'"
-                            type="button"
-                            class="btn-action btn-delete"
-                            @click="reviewSellerVerification(s, 'rejected')"
-                            title="Reject pending verification application"
-                          >
-                            Reject
-                          </button>
+                          <!-- Storefront approval/rejection is performed in the WordPress CMS. -->
+                          <span class="text-muted" style="font-size: 12px; align-self: center;">
+                            Verification: WordPress CMS
+                          </span>
 
                           <!-- Account Active Toggle -->
                           <button 
@@ -733,12 +716,9 @@
             <div class="admin-card">
               <div class="admin-card-header">
                 <div>
-                  <h3>Category Management</h3>
-                  <p class="admin-card-sub">Organize artisanal craftsmanship taxonomy. Prevents accidental deletion of categories containing live products.</p>
+                  <h3>Category Overview</h3>
+                  <p class="admin-card-sub">Read-only catalog taxonomy. Category add, edit, and delete are managed in the WordPress CMS.</p>
                 </div>
-                <button type="button" class="btn btn-primary" @click="openCreateCategoryModal">
-                  + Add New Category
-                </button>
               </div>
 
               <!-- Categories Table -->
@@ -752,7 +732,6 @@
                       <th>Description</th>
                       <th>Associated Crafts</th>
                       <th>Status</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -771,24 +750,9 @@
                           {{ c.is_active ? 'Active' : 'Inactive' }}
                         </span>
                       </td>
-                      <td>
-                        <div class="action-buttons-group">
-                          <button type="button" class="btn-action btn-edit" @click="openEditCategoryModal(c)">
-                            Edit
-                          </button>
-                          <button 
-                            type="button" 
-                            class="btn-action btn-delete" 
-                            @click="handleDeleteCategory(c)"
-                            :title="c.products_count > 0 ? 'Cannot delete: Category has active products' : 'Delete category'"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                     <tr v-if="!categories.length">
-                      <td colspan="7" class="empty-cell">No categories found in database.</td>
+                      <td colspan="6" class="empty-cell">No categories found in database.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1775,24 +1739,10 @@
         </div>
 
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button
-              v-if="activeSeller?.verification_status !== 'approved'"
-              type="button"
-              class="btn btn-sm btn-primary"
-              style="background: #166534; border-color: #166534;"
-              @click="reviewSellerVerification(activeSeller, 'approved')"
-            >
-              Approve Storefront
-            </button>
-            <button
-              v-if="activeSeller?.verification_status !== 'rejected'"
-              type="button"
-              class="btn btn-sm btn-danger"
-              @click="reviewSellerVerification(activeSeller, 'rejected')"
-            >
-              Reject Storefront
-            </button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <span class="text-muted" style="font-size: 12px;">
+              Storefront approval and rejection are handled in the WordPress CMS.
+            </span>
             <button 
               type="button" 
               class="btn btn-sm" 
@@ -1804,75 +1754,6 @@
           </div>
           <button type="button" class="btn btn-secondary" @click="showSellerDetailsModal = false">Close</button>
         </div>
-      </div>
-    </div>
-
-    <!-- ─── MODAL 3: CREATE / EDIT CATEGORY MODAL ────────────────────────── -->
-    <div v-if="showCategoryModal" class="admin-modal-backdrop" @click.self="showCategoryModal = false">
-      <div class="admin-modal-box">
-        <div class="modal-header">
-          <h3>{{ isEditingCategory ? 'Edit Category' : 'Add New Category' }}</h3>
-          <button type="button" class="btn-modal-close" @click="showCategoryModal = false"></button>
-        </div>
-        <form @submit.prevent="saveCategory" class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Category Name <span class="required">*</span></label>
-            <input 
-              type="text" 
-              v-model="categoryForm.name" 
-              @input="onCategoryNameInput" 
-              required 
-              placeholder="e.g. Traditional Handweaves" 
-              class="form-control" 
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">URL Slug <span class="required">*</span></label>
-            <input 
-              type="text" 
-              v-model="categoryForm.slug" 
-              required 
-              placeholder="traditional-handweaves" 
-              class="form-control" 
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Description</label>
-            <textarea 
-              v-model="categoryForm.description" 
-              rows="2" 
-              placeholder="Brief summary of crafts grouped into this category…" 
-              class="form-control"
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Image URL</label>
-            <input 
-              type="url" 
-              v-model="categoryForm.image" 
-              placeholder="https://images.unsplash.com/..." 
-              class="form-control" 
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Status</label>
-            <select v-model="categoryForm.is_active" class="form-select">
-              <option :value="true">Active (Visible in catalog)</option>
-              <option :value="false">Inactive (Hidden)</option>
-            </select>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="showCategoryModal = false">Cancel</button>
-            <button type="submit" class="btn btn-primary" :disabled="isSavingCategory">
-              {{ isSavingCategory ? 'Saving…' : (isEditingCategory ? 'Update Category' : 'Create Category') }}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -2179,18 +2060,6 @@ const isSavingUserRole = ref(false);
 const showSellerDetailsModal = ref(false);
 const activeSeller = ref(null);
 
-const showCategoryModal = ref(false);
-const isEditingCategory = ref(false);
-const isSavingCategory = ref(false);
-const categoryForm = reactive({
-  id: null,
-  name: '',
-  slug: '',
-  description: '',
-  image: '',
-  is_active: true
-});
-
 const showProductDetailsModal = ref(false);
 const activeProduct = ref(null);
 
@@ -2399,36 +2268,6 @@ const verificationBadgeClass = (status) => {
   return 'badge-pending';
 };
 
-const reviewSellerVerification = async (seller, status) => {
-  if (!seller) return;
-
-  const verb = status === 'approved' ? 'approve' : 'reject';
-  if (!confirm(`Are you sure you want to ${verb} the storefront of ${seller.shop_name || seller.name}?`)) return;
-
-  let notes = null;
-  if (status === 'rejected') {
-    notes = prompt('Optional: enter the reason for rejecting this storefront.') || null;
-  }
-
-  try {
-    const res = await adminService.updateSellerVerification(seller.id, { status, notes });
-    if (res?.success) {
-      seller.verification_status = res.data.verification_status;
-      seller.is_verified = res.data.is_verified;
-
-      if (activeSeller.value && activeSeller.value.id === seller.id) {
-        activeSeller.value.verification_status = res.data.verification_status;
-        activeSeller.value.is_verified = res.data.is_verified;
-      }
-
-      showToast(`Storefront for "${seller.shop_name || seller.name}" ${res.data.verification_status}.`, 'alert-success');
-      await fetchSellers();
-    }
-  } catch (err) {
-    showToast(err.response?.data?.message || err.message || 'Failed to update storefront verification.', 'alert-danger');
-  }
-};
-
 // ─── Product Actions ─────────────────────────────────────────────────────────
 const updateProductStatus = async (product, newStatus) => {
   try {
@@ -2453,87 +2292,6 @@ const handleDeleteProduct = async (product) => {
     }
   } catch (err) {
     showToast(err.response?.data?.message || err.message || 'Failed to remove product.', 'alert-danger');
-  }
-};
-
-// ─── Category Actions ────────────────────────────────────────────────────────
-const openCreateCategoryModal = () => {
-  isEditingCategory.value = false;
-  categoryForm.id = null;
-  categoryForm.name = '';
-  categoryForm.slug = '';
-  categoryForm.description = '';
-  categoryForm.image = '';
-  categoryForm.is_active = true;
-  showCategoryModal.value = true;
-};
-
-const openEditCategoryModal = (cat) => {
-  isEditingCategory.value = true;
-  categoryForm.id = cat.id;
-  categoryForm.name = cat.name;
-  categoryForm.slug = cat.slug;
-  categoryForm.description = cat.description || '';
-  categoryForm.image = cat.image || '';
-  categoryForm.is_active = Boolean(cat.is_active);
-  showCategoryModal.value = true;
-};
-
-const onCategoryNameInput = () => {
-  if (!isEditingCategory.value) {
-    categoryForm.slug = categoryForm.name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-');
-  }
-};
-
-const saveCategory = async () => {
-  isSavingCategory.value = true;
-  try {
-    const payload = {
-      name: categoryForm.name.trim(),
-      slug: categoryForm.slug.trim(),
-      description: categoryForm.description.trim(),
-      image: categoryForm.image.trim() || undefined,
-      is_active: categoryForm.is_active
-    };
-
-    let res;
-    if (isEditingCategory.value) {
-      res = await adminService.updateCategory(categoryForm.id, payload);
-      showToast(` Category "${res.data.name}" updated successfully.`, 'alert-success');
-    } else {
-      res = await adminService.createCategory(payload);
-      showToast(` New category "${res.data.name}" added to catalog taxonomy.`, 'alert-success');
-    }
-
-    showCategoryModal.value = false;
-    await fetchCategories();
-  } catch (err) {
-    showToast(err.response?.data?.message || err.message || 'Failed to save category.', 'alert-danger');
-  } finally {
-    isSavingCategory.value = false;
-  }
-};
-
-const handleDeleteCategory = async (cat) => {
-  if (cat.products_count > 0) {
-    alert(`Cannot Delete Category:\n\n"${cat.name}" is currently associated with ${cat.products_count} active product listing(s).\n\nPlease reassign or delete these products first to prevent orphaned listings.`);
-    return;
-  }
-
-  if (!confirm(`Are you sure you want to delete category "${cat.name}"?`)) return;
-
-  try {
-    const res = await adminService.deleteCategory(cat.id);
-    if (res && res.success) {
-      categories.value = categories.value.filter(c => c.id !== cat.id);
-      showToast(` Category "${cat.name}" deleted.`, 'alert-success');
-    }
-  } catch (err) {
-    showToast(err.response?.data?.message || err.message || 'Failed to delete category.', 'alert-danger');
   }
 };
 

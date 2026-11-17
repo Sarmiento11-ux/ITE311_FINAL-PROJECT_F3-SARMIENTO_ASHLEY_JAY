@@ -23,7 +23,7 @@ This document maps every required component and every rubric criterion to the ex
 | G. User Roles (≥2) | ✅ 3 roles | Admin, Seller, Customer |
 | Required documentation (SRS + 6 design artifacts) | ✅ Complete | [`README.md`](README.md) |
 
-Automated evidence: **35 feature tests / 191 assertions passing** (`php artisan test`).
+Automated evidence: **47 feature tests / 261 assertions passing** (`php artisan test`).
 
 ---
 
@@ -93,12 +93,21 @@ flowchart LR
 | **4. User Data** | **CraftMarket CMS → Marketplace Users** | `GET /api/cms-bridge/users` · `PATCH /api/cms-bridge/users/{id}/toggle-active` | ✅ Activate / deactivate (revokes tokens; admins protected) |
 | **5. Reports** | **CraftMarket CMS → Escrow Reports** | `GET /api/cms-bridge/reports` | Read-only aggregate dashboard |
 
+**CMS management extensions (Requirement C depth):** category taxonomy CRUD and artisan storefront verification are also owned by WordPress. These are moderation surfaces layered on top of the five required CMS functions, not replacements for them.
+
+| Extension | CMS surface | Laravel endpoint | Write support |
+|---|---|---|---|
+| **Category taxonomy** | **CraftMarket CMS → Categories** | `GET/POST /api/cms-bridge/categories` · `PUT/DELETE /api/cms-bridge/categories/{id}` | ✅ Add / edit / delete; delete blocked while products reference the category |
+| **Artisan verification** | **CraftMarket CMS → Artisan Verification** | `GET /api/cms-bridge/sellers` · `PATCH /api/cms-bridge/sellers/{id}/verification` | ✅ Approve / reject / reset with moderator notes and seller email |
+
 ### 3.2 CMS management actions added for this requirement
 
 | Action | UI | Server guard |
 |---|---|---|
 | Change product status | Per-row select + **Update** button | `admin-post.php` + `wp_nonce_field('craftmarket_product_status')` + `current_user_can('manage_options')`; API validates enum |
 | Activate / deactivate user | Per-row **Activate** / **Deactivate** button | `wp_nonce_field('craftmarket_toggle_user')` + capability check; API blocks admin deactivation and revokes Sanctum tokens |
+| Create / edit / delete category | Categories page form and per-row **Edit** / **Delete** controls | Nonce (`craftmarket_category_create`, `_update`, `_delete`) + capability check; delete returns `422` with `product_count` when listings exist |
+| Approve / reject storefront | Artisan Verification page status select + notes + **Save Decision** | Nonce (`craftmarket_seller_verification`) + capability check; Laravel updates verification fields and emails the artisan |
 | Rich reporting | Cards + escrow ledger + payout summary + MRR + order breakdown + best sellers | `AdminController::reports` aggregate payload |
 
 ### 3.3 CMS bridge security
@@ -111,9 +120,9 @@ flowchart LR
 | Least privilege | Bridge cannot touch orders, payments, escrow, payouts, or pricing |
 | CSRF | Every WordPress write action uses a nonce |
 | Capability | `manage_options` required on every handler |
-| Audit trail | `Log::info` records product-status and user-activation changes |
+| Audit trail | `Log::info` records product-status, user-activation, category, and storefront-verification changes |
 
-**Demo path:** `http://localhost/craftmarket-cms/wp-admin` → **CraftMarket CMS** → Products / Users / Escrow Reports.
+**Demo path:** `http://localhost/craftmarket-cms/wp-admin` → **CraftMarket CMS** → Products / Categories / Artisan Verification / Users / Escrow Reports.
 
 ---
 
@@ -215,7 +224,7 @@ Minimum two roles required; **three** implemented.
 
 | # | Criterion | Weight | Why CraftMarket earns a high rating | Where to show it |
 |---|---|---:|---|---|
-| 1 | **System Functionality** | 30% | End-to-end workflows: registration → catalog → cart → escrow checkout → fulfilment → release → payout → reports. CRUD, auth, reporting, and CMS management all work; 35 automated tests pass | Live demo + `php artisan test` |
+| 1 | **System Functionality** | 30% | End-to-end workflows: registration → catalog → cart → escrow checkout → fulfilment → release → payout → reports. CRUD, auth, reporting, and CMS management all work; 47 automated tests pass | Live demo + `php artisan test` |
 | 2 | **UI/UX & Responsiveness** | 15% | Consistent design tokens, responsive grids, mobile nav, loading/empty/error states, accessible forms | Resize browser; wireframes §responsive matrix |
 | 3 | **Business Model & Revenue** | 15% | Two revenue streams, unit economics, break-even, MRR and commission reporting, target market | `business-model.md`, CMS reports |
 | 4 | **Database Design** | 10% | 12 normalized tables, FKs, snapshot columns, transactions, indexes, ERD | ERD + `schema.sql` + migrations |
@@ -247,10 +256,10 @@ Minimum two roles required; **three** implemented.
 | 6 | Seller | Generate dispatch QR → request payout | QR integration + payout rules |
 | 7 | Admin | Release escrow → approve/pay payout | Escrow lifecycle and ledger |
 | 8 | Admin | Open `/dashboard/admin` reports | Commission, MRR, payout summary |
-| 9 | Admin | WordPress → CraftMarket CMS | Five CMS functions |
-| 10 | Admin | Change product status; deactivate a customer | CMS write actions, token revocation |
-| 11 | Admin | Show product back online / user reactivated | Reversible moderation |
-| 12 | — | `php artisan test` | 35 passing tests, 191 assertions |
+| 9 | Admin | WordPress → CraftMarket CMS | Five CMS functions + category taxonomy + storefront verification |
+| 10 | Admin | Change product status; add/edit a category; approve a pending artisan | CMS write actions and seller email notification |
+| 11 | Admin | Deactivate a customer; show product back online / user reactivated | Reversible moderation and token revocation |
+| 12 | — | `php artisan test` | 47 passing tests, 261 assertions |
 
 ---
 
@@ -269,7 +278,7 @@ Minimum two roles required; **three** implemented.
 ## 12. Verification Commands
 
 ```powershell
-# Backend tests (expect 35 passed)
+# Backend tests (expect 47 passed)
 cd backend
 php artisan test
 
@@ -289,6 +298,12 @@ php -l ../cms/craftmarket-sync-plugin/craftmarket-cms-sync.php
 ```text
 GET    api/cms-bridge/products
 PATCH  api/cms-bridge/products/{id}/status
+GET    api/cms-bridge/categories
+POST   api/cms-bridge/categories
+PUT    api/cms-bridge/categories/{id}
+DELETE api/cms-bridge/categories/{id}
+GET    api/cms-bridge/sellers
+PATCH  api/cms-bridge/sellers/{id}/verification
 GET    api/cms-bridge/reports
 GET    api/cms-bridge/users
 PATCH  api/cms-bridge/users/{id}/toggle-active

@@ -62,14 +62,24 @@ Route::middleware('throttle:60,1')->group(function () {
 
 // Headless WordPress CMS Bridge Routes (secrets required — never public)
 Route::prefix('cms-bridge')->middleware('cms.bridge')->group(function () {
-    // Read: catalog, users, and financial/operational reports.
-    Route::get('/products', [CmsBridgeController::class, 'products']);
-    Route::get('/users',    [UserController::class, 'index']);
-    Route::get('/reports',  [AdminController::class, 'reports']);
+    // Read: catalog, taxonomy, storefront applications, users, and reports.
+    Route::get('/products',   [CmsBridgeController::class, 'products']);
+    Route::get('/categories', [CmsBridgeController::class, 'categories']);
+    Route::get('/sellers',    [CmsBridgeController::class, 'sellers']);
+    Route::get('/users',      [UserController::class, 'index']);
+    Route::get('/reports',    [AdminController::class, 'reports']);
 
     // Write: moderation only. Orders, payments, escrow, and payouts stay off-limits.
     Route::patch('/products/{id}/status',     [CmsBridgeController::class, 'updateProductStatus']);
     Route::patch('/users/{id}/toggle-active', [CmsBridgeController::class, 'toggleUser']);
+
+    // Write: category taxonomy CRUD (delete is blocked while products exist).
+    Route::post('/categories',        [CmsBridgeController::class, 'storeCategory']);
+    Route::put('/categories/{id}',    [CmsBridgeController::class, 'updateCategory']);
+    Route::delete('/categories/{id}', [CmsBridgeController::class, 'deleteCategory']);
+
+    // Write: artisan storefront verification decisions.
+    Route::patch('/sellers/{id}/verification', [CmsBridgeController::class, 'updateSellerVerification']);
 });
 
 // ─── Authenticated Routes (any logged-in user) ───────────────────────────────
