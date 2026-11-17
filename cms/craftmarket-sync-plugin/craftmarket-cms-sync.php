@@ -626,6 +626,21 @@ class CraftMarket_CMS_Bridge {
                                         <textarea name="notes" rows="2" class="large-text" placeholder="Moderator notes emailed to the artisan (optional)…"><?php echo esc_textarea($notes); ?></textarea>
                                         <?php submit_button('Save Decision', 'primary small', '', false); ?>
                                     </form>
+
+                                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top: 8px;">
+                                        <input type="hidden" name="action" value="craftmarket_toggle_user" />
+                                        <input type="hidden" name="user_id" value="<?php echo esc_attr($s['id']); ?>" />
+                                        <input type="hidden" name="is_active" value="<?php echo !empty($s['is_active']) ? '0' : '1'; ?>" />
+                                        <input type="hidden" name="redirect_to" value="craftmarket-sellers" />
+                                        <?php wp_nonce_field('craftmarket_toggle_user'); ?>
+                                        <?php submit_button(
+                                            !empty($s['is_active']) ? 'Deactivate Account' : 'Activate Account',
+                                            !empty($s['is_active']) ? 'delete small' : 'secondary small',
+                                            '',
+                                            false,
+                                            ['onclick' => !empty($s['is_active']) ? "return confirm('Deactivating this artisan will revoke their active login sessions. Proceed?');" : '']
+                                        ); ?>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -909,9 +924,12 @@ class CraftMarket_CMS_Bridge {
 
         $user_id  = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
         $isActive = isset($_POST['is_active']) ? (bool) absint($_POST['is_active']) : null;
+        $redirectPage = isset($_POST['redirect_to']) && in_array($_POST['redirect_to'], ['craftmarket-sellers', 'craftmarket-users'], true)
+            ? $_POST['redirect_to']
+            : 'craftmarket-users';
 
         if (!$user_id || $isActive === null) {
-            $this->redirect_with_notice('craftmarket-users', false, 'Invalid user or activation value.');
+            $this->redirect_with_notice($redirectPage, false, 'Invalid user or activation value.');
         }
 
         $result = $this->request_api(
@@ -920,7 +938,7 @@ class CraftMarket_CMS_Bridge {
             'PATCH'
         );
 
-        $this->redirect_with_notice('craftmarket-users', $result['ok'], $result['message']);
+        $this->redirect_with_notice($redirectPage, $result['ok'], $result['message']);
     }
 
     /**

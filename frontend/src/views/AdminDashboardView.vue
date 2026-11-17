@@ -588,21 +588,10 @@
                             View Shop
                           </button>
 
-                          <!-- Storefront approval/rejection is performed in the WordPress CMS. -->
+                          <!-- Storefront verification and account status are managed in WordPress CMS. -->
                           <span class="text-muted" style="font-size: 12px; align-self: center;">
-                            Verification: WordPress CMS
+                            Managed in WordPress CMS
                           </span>
-
-                          <!-- Account Active Toggle -->
-                          <button 
-                            type="button" 
-                            class="btn-action" 
-                            :class="s.is_active ? 'btn-deactivate' : 'btn-activate'"
-                            @click="toggleSellerActive(s)"
-                            :title="s.is_active ? 'Deactivate seller account' : 'Reactivate seller account'"
-                          >
-                            {{ s.is_active ? 'Deactivate' : 'Activate' }}
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1741,16 +1730,8 @@
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
             <span class="text-muted" style="font-size: 12px;">
-              Storefront approval and rejection are handled in the WordPress CMS.
+              Storefront verification and account lifecycle are managed in WordPress CMS.
             </span>
-            <button 
-              type="button" 
-              class="btn btn-sm" 
-              :class="activeSeller?.is_active ? 'btn-danger' : 'btn-primary'"
-              @click="toggleSellerActive(activeSeller); if (activeSeller) activeSeller.is_active = !activeSeller.is_active;"
-            >
-              {{ activeSeller?.is_active ? 'Deactivate Artisan Workshop' : 'Activate Artisan Workshop' }}
-            </button>
           </div>
           <button type="button" class="btn btn-secondary" @click="showSellerDetailsModal = false">Close</button>
         </div>
@@ -2255,11 +2236,6 @@ const viewSellerDetails = async (sellerId) => {
   } catch (err) {
     showToast(err.message || 'Failed to retrieve seller profile details.', 'alert-danger');
   }
-};
-
-const toggleSellerActive = async (s) => {
-  await toggleUserActive(s);
-  await fetchSellers();
 };
 
 const verificationBadgeClass = (status) => {
