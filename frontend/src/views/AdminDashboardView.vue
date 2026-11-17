@@ -223,20 +223,6 @@
                 </div>
               </div>
 
-              <div class="metric-card metric-amber">
-                <div class="metric-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                  </svg>
-                </div>
-                <div class="metric-info">
-                  <span class="metric-label" title="Total Orders">Total Orders</span>
-                  <strong class="metric-value" :title="String(stats?.total_orders ?? 0)">{{ stats?.total_orders ?? 0 }}</strong>
-                  <small class="metric-sub" :title="`${stats?.orders_pending ?? 0} pending fulfillment`">{{ stats?.orders_pending ?? 0 }} pending fulfillment</small>
-                </div>
-              </div>
-
               <div class="metric-card metric-gold">
                 <div class="metric-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -248,6 +234,51 @@
                   <span class="metric-label" title="Total Sales Volume">Total Sales Volume</span>
                   <strong class="metric-value" :title="'₱' + formatMoney(stats?.total_sales ?? 0)">₱{{ formatMoney(stats?.total_sales ?? 0) }}</strong>
                   <small class="metric-sub" :title="`${stats?.orders_paid ?? 0} confirmed transactions`">{{ stats?.orders_paid ?? 0 }} confirmed transactions</small>
+                </div>
+              </div>
+
+              <!-- CraftMarket Monetization Cards -->
+              <div class="metric-card metric-forest">
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                    <line x1="12" y1="6" x2="12" y2="8"></line>
+                    <line x1="12" y1="16" x2="12" y2="18"></line>
+                  </svg>
+                </div>
+                <div class="metric-info">
+                  <span class="metric-label" title="Platform Commission">Platform Commission</span>
+                  <strong class="metric-value" :title="'₱' + formatMoney(stats?.commission_earned ?? 0)">₱{{ formatMoney(stats?.commission_earned ?? 0) }}</strong>
+                  <small class="metric-sub" title="8% Basic · 3% Pro marketplace fee">8% Basic / 3% Pro fee</small>
+                </div>
+              </div>
+
+              <div class="metric-card metric-primary">
+                <div class="metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <div class="metric-info">
+                  <span class="metric-label" title="Subscription Revenue">Subscription Revenue</span>
+                  <strong class="metric-value" :title="'₱' + formatMoney(stats?.subscription_revenue ?? 0)">₱{{ formatMoney(stats?.subscription_revenue ?? 0) }}</strong>
+                  <small class="metric-sub" :title="`${stats?.pro_sellers_count ?? 0} active Pro artisan(s)`">{{ stats?.pro_sellers_count ?? 0 }} active Pro artisan(s)</small>
+                </div>
+              </div>
+
+              <div class="metric-card metric-gold" style="border-left-color: #2F4533; background: #FAFDF9;">
+                <div class="metric-icon" style="background: #E8F5E9; color: #1E3A2F;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                </div>
+                <div class="metric-info">
+                  <span class="metric-label" style="color: #1E3A2F; font-weight: 700;" title="Total Platform Net Earnings">Net Platform Revenue</span>
+                  <strong class="metric-value" style="color: #1E3A2F;" :title="'₱' + formatMoney(stats?.total_platform_revenue ?? ((stats?.commission_earned ?? 0) + (stats?.subscription_revenue ?? 0)))">₱{{ formatMoney(stats?.total_platform_revenue ?? ((stats?.commission_earned ?? 0) + (stats?.subscription_revenue ?? 0))) }}</strong>
+                  <small class="metric-sub" style="color: #2E7D32;" title="Commission + Subscriptions">Commission + Subscriptions</small>
                 </div>
               </div>
             </div>
@@ -3263,16 +3294,17 @@ const fetchSubscriptionMetrics = async () => {
 /* Action buttons */
 .action-buttons-group {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   white-space: nowrap;
+  max-width: 220px;
 }
 .btn-action {
   white-space: nowrap;
-  padding: 5px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
   border: 1px solid transparent;
   cursor: pointer;
@@ -3280,6 +3312,7 @@ const fetchSubscriptionMetrics = async () => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  line-height: 1.4;
 }
 .btn-edit       { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
 .btn-edit:hover { background: #e5e7eb; }

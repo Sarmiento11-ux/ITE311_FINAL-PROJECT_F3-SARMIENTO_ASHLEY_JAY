@@ -42,6 +42,7 @@ class CartController extends Controller
                 'price'        => $unitPrice,
                 'image'        => $product ? $product->image : null,
                 'stock'        => $product ? $product->stock : 0,
+                'seller_id'    => $product?->seller_id,
                 'seller_name'  => $product?->seller?->name ?? 'Artisan Maker',
                 'category'     => $product?->category?->name ?? 'Handmade',
                 'subtotal'     => $itemSubtotal,

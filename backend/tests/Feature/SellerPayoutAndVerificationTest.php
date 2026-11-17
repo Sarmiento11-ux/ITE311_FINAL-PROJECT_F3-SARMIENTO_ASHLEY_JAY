@@ -38,6 +38,7 @@ class SellerPayoutAndVerificationTest extends TestCase
             'user_id' => $seller->id,
             'shop_name' => 'Test Artisan Workshop',
             'shop_slug' => 'test-artisan-' . uniqid(),
+            'location' => 'Baguio City, Philippines',
             'verification_status' => 'pending',
             'is_verified' => false,
             'is_active' => true,

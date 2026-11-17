@@ -52,6 +52,17 @@
 
       </div>
 
+      <!-- Multi-Artisan Cart Guard -->
+      <div v-if="isMultiSeller" class="checkout-alert-msg" style="background-color: #FFF3E0; border: 1.5px solid #FFB74D; color: #7B5E00; margin-bottom: 24px;">
+        ⚠️ <strong>Multi-Artisan Basket Notice:</strong> Your basket contains handmade items from <strong>{{ uniqueSellers.length }} different artisan workshops</strong> ({{ uniqueSellers.join(', ') }}).
+        To ensure accurate zone-based delivery calculation, please checkout one artisan at a time.
+        <div style="margin-top: 10px;">
+          <router-link to="/cart" class="btn btn-secondary" style="display: inline-block; padding: 6px 14px; font-size: 0.85rem;">
+            ← Return to Basket & Adjust Items
+          </router-link>
+        </div>
+      </div>
+
 
 
       <!-- Empty Cart Redirection — only shown after loading is done -->
@@ -416,7 +427,12 @@
 
               <span v-if="cart.subtotal >= 1500" class="free-shipping-tag">FREE (₱0.00)</span>
 
-              <span v-else>₱150.00</span>
+              <span v-else style="text-align: right;">
+                ₱{{ Number(shippingFee).toFixed(2) }}
+                <small v-if="shippingLabel" style="display: block; font-size: 0.76rem; color: #7B5E00; font-weight: normal;">
+                  {{ shippingLabel }}
+                </small>
+              </span>
 
             </div>
 
@@ -428,7 +444,7 @@
 
               <span class="total-amount-highlight">
 
-                ₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}
+                ₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : Number(shippingFee))).toFixed(2) }}
 
               </span>
 
@@ -444,7 +460,7 @@
 
             :class="{ 'btn-paymongo': selectedPayment === 'paymongo' }"
 
-            :disabled="isSubmitting || isAdmin"
+            :disabled="isSubmitting || isAdmin || isMultiSeller"
 
           >
 
@@ -598,7 +614,7 @@
 
 <script setup>
 
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 
 import { useRouter } from 'vue-router';
 
@@ -629,6 +645,64 @@ const placedOrder   = ref(null);
 const selectedPayment = ref('cod'); // 'cod' | 'paymongo'
 
 const isAdmin = ref(authService.getRole() === 'admin');
+
+const shippingFee = ref(150);
+const shippingZone = ref('standard');
+const shippingLabel = ref('Standard Delivery');
+const isCalculatingShipping = ref(false);
+
+const uniqueSellers = computed(() => {
+  const sellers = (cart.items || []).map(i => i.seller || 'Artisan Maker').filter(Boolean);
+  return [...new Set(sellers)];
+});
+
+const isMultiSeller = computed(() => uniqueSellers.value.length > 1);
+
+const calculateShipping = async () => {
+  if (cart.subtotal >= 1500) {
+    shippingFee.value = 0;
+    shippingZone.value = 'free';
+    shippingLabel.value = 'Free Shipping (₱1,500+ Qualified)';
+    return;
+  }
+
+  const firstItem = (cart.items || [])[0];
+  const sellerId = firstItem?.sellerId || firstItem?.seller_id || 1;
+  const address = form.shippingAddress ? form.shippingAddress.trim() : '';
+
+  if (!address) {
+    shippingFee.value = 150;
+    shippingZone.value = 'standard';
+    shippingLabel.value = 'Standard Delivery (enter address for zone rate)';
+    return;
+  }
+
+  isCalculatingShipping.value = true;
+  try {
+    const res = await orderService.getShippingEstimate(sellerId, address, cart.subtotal);
+    if (res) {
+      shippingFee.value = Number(res.fee);
+      shippingZone.value = res.zone;
+      shippingLabel.value = res.label;
+    }
+  } catch (err) {
+    console.warn('[CheckoutView] Failed to calculate shipping estimate:', err);
+  } finally {
+    isCalculatingShipping.value = false;
+  }
+};
+
+let shippingDebounce = null;
+watch(() => form.shippingAddress, () => {
+  if (shippingDebounce) clearTimeout(shippingDebounce);
+  shippingDebounce = setTimeout(() => {
+    calculateShipping();
+  }, 500);
+});
+
+watch(() => cart.subtotal, () => {
+  calculateShipping();
+});
 
 
 
@@ -695,6 +769,10 @@ onMounted(async () => {
     form.contactNumber = user.phone || user.contact_number || '';
 
     form.shippingAddress = user.address || '';
+
+    if (form.shippingAddress) {
+      await calculateShipping();
+    }
 
   }
 
@@ -810,6 +888,13 @@ const handlePlaceOrder = async () => {
 
     return;
 
+  }
+
+  if (isMultiSeller.value) {
+    alertMsg.value = 'Your basket contains items from multiple artisans. Please checkout one artisan at a time.';
+    alertClass.value = 'alert-danger';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
   }
 
 

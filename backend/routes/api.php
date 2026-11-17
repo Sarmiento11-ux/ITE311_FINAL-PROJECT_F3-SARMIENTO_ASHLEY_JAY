@@ -55,6 +55,9 @@ Route::middleware('throttle:60,1')->group(function () {
 
     // Product reviews: publicly readable, auth required to write
     Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'index']);
+
+    // Shipping fee estimate (zone calculation)
+    Route::get('/shipping/estimate', [OrderController::class, 'shippingEstimate']);
 });
 
 // Headless WordPress CMS Bridge Routes (secrets required — never public)

@@ -54,23 +54,38 @@ class AdminController extends Controller
         $payoutsPending = (float) PayoutRequest::whereIn('status', ['pending', 'approved'])->sum('amount');
         $payoutsPaid    = (float) PayoutRequest::where('status', 'paid')->sum('amount');
 
+        // Platform Monetization: Commission + Pro Subscriptions
+        $subscriptionRevenue = class_exists(\App\Models\ArtisanSubscription::class)
+            ? (float) \App\Models\ArtisanSubscription::sum('amount')
+            : 0.0;
+        $proSellersCount = User::where('role', 'seller')
+            ->whereIn('subscription_plan', ['pro', 'premium'])
+            ->where('subscription_status', 'active')
+            ->count();
+        $subscriptionMrr = $proSellersCount * 299.00;
+        $totalPlatformRevenue = $commissionEarned + $subscriptionRevenue;
+
         return response()->json([
             'success' => true,
             'message' => 'Admin dashboard statistics retrieved successfully.',
             'data'    => [
-                'total_users'     => $totalUsers,
-                'total_sellers'   => $totalSellers,
-                'total_customers' => $totalCustomers,
-                'total_products'  => $totalProducts,
-                'total_orders'    => $totalOrders,
-                'total_sales'     => round($totalSales, 2),
-                'orders_pending'  => $ordersPending,
-                'orders_paid'     => $ordersPaid,
-                'commission_earned' => round($commissionEarned, 2),
-                'escrow_held'       => round($escrowHeld, 2),
-                'escrow_released'   => round($escrowReleased, 2),
-                'payouts_pending'   => round($payoutsPending, 2),
-                'payouts_paid'      => round($payoutsPaid, 2),
+                'total_users'            => $totalUsers,
+                'total_sellers'          => $totalSellers,
+                'total_customers'        => $totalCustomers,
+                'total_products'         => $totalProducts,
+                'total_orders'           => $totalOrders,
+                'total_sales'            => round($totalSales, 2),
+                'orders_pending'         => $ordersPending,
+                'orders_paid'            => $ordersPaid,
+                'commission_earned'      => round($commissionEarned, 2),
+                'subscription_revenue'   => round($subscriptionRevenue, 2),
+                'subscription_mrr'       => round($subscriptionMrr, 2),
+                'total_platform_revenue' => round($totalPlatformRevenue, 2),
+                'pro_sellers_count'      => $proSellersCount,
+                'escrow_held'            => round($escrowHeld, 2),
+                'escrow_released'        => round($escrowReleased, 2),
+                'payouts_pending'        => round($payoutsPending, 2),
+                'payouts_paid'           => round($payoutsPaid, 2),
             ],
         ]);
     }

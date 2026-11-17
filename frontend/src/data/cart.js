@@ -105,6 +105,7 @@ export const cart = reactive({
           quantity:   Number(item.quantity),
           stock:      Number(item.stock),
           image:      item.image,
+          sellerId:   item.seller_id,
           seller:     item.seller_name,
           category:   item.category,
           inStock:    item.in_stock,
@@ -177,6 +178,7 @@ export const cart = reactive({
         quantity:  quantity,
         stock:     availStock,
         image:     product.image,
+        sellerId:  product.sellerId || product.seller_id || null,
         seller:    product.seller || product.seller_name || 'Artisan Maker',
         category:  product.category || 'Handmade',
       });

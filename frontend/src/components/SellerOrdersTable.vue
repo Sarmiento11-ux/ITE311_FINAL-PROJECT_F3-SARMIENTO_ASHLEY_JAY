@@ -92,8 +92,12 @@
               <strong>Platform Commission ({{ Number(activeOrder.commissionRate ?? 8).toFixed(2) }}%):</strong>
               −₱{{ Number(activeOrder.platformFee ?? 0).toFixed(2) }}
             </p>
+            <p v-if="activeOrder.shippingFee > 0" style="margin: 0 0 4px; color: #2E7D32;">
+              <strong>Shipping Fee (Reimbursed):</strong> +₱{{ Number(activeOrder.shippingFee).toFixed(2) }}
+              <span v-if="activeOrder.shippingZone" style="font-size: 0.8rem; color: #666;">({{ activeOrder.shippingZone }})</span>
+            </p>
             <p style="margin: 0 0 6px; color: #2E7D32;">
-              <strong>Your Payout:</strong> ₱{{ Number(activeOrder.sellerPayout ?? activeOrder.totalAmount).toFixed(2) }}
+              <strong>Your Payout:</strong> ₱{{ (Number(activeOrder.sellerPayout ?? activeOrder.totalAmount) + Number(activeOrder.shippingFee || 0)).toFixed(2) }}
             </p>
             <p style="margin: 0;">
               <strong>Escrow Status:</strong>

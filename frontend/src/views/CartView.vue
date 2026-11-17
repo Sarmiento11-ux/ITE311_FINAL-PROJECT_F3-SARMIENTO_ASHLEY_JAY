@@ -155,7 +155,7 @@
             <span>Estimated Delivery Fee</span>
             <span class="summary-val">
               <span v-if="cart.subtotal >= 1500" class="free-shipping-tag">FREE</span>
-              <span v-else>₱150.00</span>
+              <span v-else>₱80 – ₱200 (Zone-based)</span>
             </span>
           </div>
 
@@ -170,9 +170,9 @@
           </div>
 
           <div class="summary-total-row">
-            <span>Total Amount</span>
+            <span>Estimated Total</span>
             <span class="summary-total-val">
-              ₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 150)).toFixed(2) }}
+              ₱{{ (cart.subtotal + (cart.subtotal >= 1500 ? 0 : 100)).toFixed(2) }}
             </span>
           </div>
 
@@ -210,6 +210,22 @@
             </p>
           </div>
 
+          <!-- Multi-artisan warning: Etsy model single-artisan checkout -->
+          <div v-else-if="isMultiSeller" class="multi-artisan-cart-block" style="margin-bottom: 12px;">
+            <div style="padding: 12px; background: #FFF3E0; border: 1px solid #FFB74D; border-radius: 8px; font-size: 0.84rem; color: #7B5E00; line-height: 1.5; margin-bottom: 8px;">
+              ⚠️ <strong>Multi-Artisan Cart:</strong> Your cart has items from <strong>{{ uniqueSellers.length }} different artisans</strong> ({{ uniqueSellers.join(', ') }}).
+              To ensure accurate zone-based shipping calculations, please checkout one artisan at a time.
+            </div>
+            <button
+              type="button"
+              disabled
+              class="btn btn-secondary btn-checkout-main"
+              style="opacity: 0.7; cursor: not-allowed; width: 100%;"
+            >
+              <span>Checkout One Artisan at a Time</span>
+            </button>
+          </div>
+
           <router-link
             v-else
             to="/dashboard/customer?tab=checkout"
@@ -236,13 +252,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { cart } from '../data/cart.js';
 import { auth } from '../data/auth.js';
 
 const alertMsg    = ref('');
 const alertClass  = ref('');
 const fallbackImg = 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=400&q=80';
+
+const uniqueSellers = computed(() => {
+  const sellers = (cart.items || []).map(i => i.seller || 'Artisan Maker').filter(Boolean);
+  return [...new Set(sellers)];
+});
+
+const isMultiSeller = computed(() => uniqueSellers.value.length > 1);
 
 onMounted(async () => {
   // force=true so CartView always gets a fresh fetch when the page is visited

@@ -392,6 +392,19 @@
 
         <section class="dashboard-main-area">
 
+          <!-- Workshop Location Warning -->
+          <div v-if="!seller.address && !seller.location" style="background: #FFF8E1; border: 1.5px solid #FFD54F; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div>
+              <strong style="color: #B78103; font-size: 0.92rem;">📍 Workshop Location Required</strong>
+              <p style="margin: 4px 0 0; font-size: 0.84rem; color: #6D4C41;">
+                Please set your workshop location in your profile so buyers can calculate zone-based shipping rates for your crafts.
+              </p>
+            </div>
+            <router-link to="/profile" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.82rem; white-space: nowrap; text-decoration: none;">
+              Set Location →
+            </router-link>
+          </div>
+
 
 
           

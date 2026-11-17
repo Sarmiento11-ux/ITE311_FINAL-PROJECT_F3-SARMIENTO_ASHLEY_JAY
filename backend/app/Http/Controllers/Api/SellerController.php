@@ -294,9 +294,18 @@ class SellerController extends Controller
                     'payment_status' => $isPaid ? 'refunded' : $order->payment_status,
                 ]);
                 NotificationService::sendOrderStatusUpdate($order, 'cancelled');
-            } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {
-                $order->update(['status' => 'processing']);
-                NotificationService::sendOrderStatusUpdate($order, 'processing');
+            } else {
+                // Check if ALL items are now shipped (or delivered) → escalate order to 'shipped'
+                $allShipped = $allItems->every(fn($i) => in_array($i->status, ['shipped', 'delivered']));
+                if ($allShipped) {
+                    if ($order->status !== 'delivered') {
+                        $order->update(['status' => 'shipped']);
+                        NotificationService::sendOrderStatusUpdate($order, 'shipped');
+                    }
+                } elseif (in_array($newStatus, ['processing', 'shipped']) && $order->status === 'pending') {
+                    $order->update(['status' => 'processing']);
+                    NotificationService::sendOrderStatusUpdate($order, 'processing');
+                }
             }
         }
 

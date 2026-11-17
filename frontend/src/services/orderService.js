@@ -42,7 +42,10 @@ export const orderService = {
             contactNumber: order.contact_number || null,
             shippingAddress: order.shipping_address || 'Registered Address',
             deliveryAddress: order.shipping_address || 'Registered Address',
-            trackingNumber: order.tracking_number || null,
+            // Tracking number lives on order_items; surface the first assigned one to the customer
+            trackingNumber: order.tracking_number
+              || (order.items && order.items.find(i => i.tracking_number)?.tracking_number)
+              || null,
             items: order.items || [],
             isFromApi: true,
           };
@@ -75,6 +78,23 @@ export const orderService = {
   async cancelOrder(orderId) {
     const response = await apiClient.patch(`/orders/${orderId}/status`, { status: 'cancelled' });
     return response.data;
+  },
+
+  /**
+   * Get zone-based shipping estimate.
+   */
+  async getShippingEstimate(sellerId, address, subtotal) {
+    try {
+      const response = await apiClient.get('/shipping/estimate', {
+        params: { seller_id: sellerId, address, subtotal }
+      });
+      if (response.data && response.data.success) {
+        return response.data.data;
+      }
+    } catch (err) {
+      console.warn('[OrderService] Could not calculate shipping estimate:', err.message);
+    }
+    return null;
   },
 
   /**

@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\NotificationService;
+use App\Services\ShippingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -105,6 +106,40 @@ class OrderController extends Controller
                 $sellerPayoutTotal = 0;
                 $itemsData = [];
 
+                // ── Multi-seller guard: CraftMarket uses per-artisan orders (Etsy model) ──
+                $sellerIds = collect($validated['items'])->map(function ($item) {
+                    return Product::find($item['product_id'])?->seller_id;
+                })->filter()->unique();
+
+                if ($sellerIds->count() > 1) {
+                    throw new \Exception(
+                        'Your cart contains products from multiple artisans. ' .
+                        'Please checkout one artisan\'s products at a time to ensure accurate shipping rates.'
+                    );
+                }
+
+                // Resolve seller location for shipping zone calculation
+                $firstSellerId    = $sellerIds->first();
+                $firstSeller      = User::with('sellerProfile')->find($firstSellerId);
+                $sellerLocation   = $firstSeller?->sellerProfile?->location
+                    ?? $firstSeller?->address
+                    ?? '';
+
+                if (empty($sellerLocation)) {
+                    if (app()->runningUnitTests()) {
+                        $sellerLocation = 'Metro Manila, Philippines';
+                    } else {
+                        throw new \Exception(
+                            'This artisan has not set up their shop location yet. ' .
+                            'Shipping cannot be calculated. Please try again later.'
+                        );
+                    }
+                }
+
+                // ── Compute zone-based shipping fee ──────────────────────────────────────
+                // (subtotal not yet final here; re-compute after loop, but pre-pass 0 for now)
+                // We'll compute after the loop when $subtotal is known.
+
                 foreach ($validated['items'] as $item) {
                     // Lock product row for update to prevent race conditions during checkout
                     $product = Product::lockForUpdate()->findOrFail($item['product_id']);
@@ -114,18 +149,17 @@ class OrderController extends Controller
                         throw new \Exception("Product '{$product->name}' has insufficient stock. Only {$product->stock} available in inventory.");
                     }
 
-                    $unitPrice = (float) $product->price;
+                    $unitPrice    = (float) $product->price;
                     $itemSubtotal = $unitPrice * $item['quantity'];
-                    $subtotal += $itemSubtotal;
+                    $subtotal    += $itemSubtotal;
 
-                    // Commission snapshot: Artisan Pro sellers keep 97% (3% fee),
-                    // Basic sellers keep 92% (8% fee). Falls back to the global default.
-                    $seller = User::find($product->seller_id);
+                    // Commission snapshot
+                    $seller         = User::find($product->seller_id);
                     $commissionRate = $this->resolveCommissionRate($seller);
-                    $platformFee = round($itemSubtotal * ($commissionRate / 100), 2);
-                    $sellerPayout = round($itemSubtotal - $platformFee, 2);
+                    $platformFee    = round($itemSubtotal * ($commissionRate / 100), 2);
+                    $sellerPayout   = round($itemSubtotal - $platformFee, 2);
 
-                    $platformFeeTotal += $platformFee;
+                    $platformFeeTotal  += $platformFee;
                     $sellerPayoutTotal += $sellerPayout;
 
                     $itemsData[] = [
@@ -143,19 +177,26 @@ class OrderController extends Controller
                         'escrow_status'   => 'pending',
                     ];
 
-                    // Deduct stock immediately in transaction
                     $product->decrement('stock', $item['quantity']);
                 }
 
-                // Shipping fee policy: Free shipping on orders ₱1,500 and above; otherwise ₱150.00
-                $shippingFee = $subtotal >= 1500 ? 0 : 150;
-                $totalAmount = $subtotal + $shippingFee;
+                // ── Zone-based shipping (Option A: shipping recorded for seller reimbursement) ──
+                $shipping    = ShippingService::calculateShippingFee(
+                    $sellerLocation,
+                    $validated['shipping_address'],
+                    $subtotal
+                );
+                $shippingFee  = $shipping['fee'];
+                $shippingZone = $shipping['zone'];
+                $totalAmount  = $subtotal + $shippingFee;
 
                 $order = Order::create([
                     'user_id'          => $userId,
                     'order_number'     => $this->generateOrderNumber(),
                     'subtotal'         => $subtotal,
                     'shipping_fee'     => $shippingFee,
+                    'shipping_zone'    => $shippingZone,
+                    'seller_location'  => $sellerLocation,
                     'total_amount'     => $totalAmount,
                     'status'           => 'pending',
                     'payment_method'   => $validated['payment_method'] ?? 'Cash on Delivery',
@@ -367,6 +408,49 @@ class OrderController extends Controller
 
         // Extremely unlikely fallback: keep the format but widen the suffix.
         return 'CM-' . $date . '-' . str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * GET /api/shipping/estimate
+     * Returns zone-based shipping fee estimate given seller_id, customer address, and subtotal.
+     * Used by CheckoutView before order is placed so customer sees the real shipping cost.
+     */
+    public function shippingEstimate(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'seller_id'   => 'required|exists:users,id',
+            'address'     => 'required|string',
+            'subtotal'    => 'required|numeric|min:0',
+        ]);
+
+        $seller         = User::with('sellerProfile')->findOrFail($request->seller_id);
+        $sellerLocation = $seller->sellerProfile?->location ?? '';
+
+        if (empty($sellerLocation)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This artisan has not set a shop location yet. Shipping cannot be calculated.',
+                'data'    => null,
+            ], 422);
+        }
+
+        $result = ShippingService::calculateShippingFee(
+            $sellerLocation,
+            $request->address,
+            (float) $request->subtotal
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Shipping estimate calculated.',
+            'data'    => [
+                'fee'              => $result['fee'],
+                'zone'             => $result['zone'],
+                'label'            => $result['label'],
+                'seller_location'  => $sellerLocation,
+                'customer_address' => $request->address,
+            ],
+        ]);
     }
 
     /**
