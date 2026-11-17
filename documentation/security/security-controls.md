@@ -70,7 +70,7 @@ sequenceDiagram
 | Product create/update/delete, image upload | `auth:sanctum` + `role:seller,admin` | Seller, Admin |
 | `/api/seller/*` dashboard, fulfilment, payouts | `auth:sanctum` + `role:seller,admin` | Seller, Admin |
 | `/api/admin/*`, category CRUD, user management | `auth:sanctum` + `role:admin` | Admin only |
-| `/api/cms-bridge/*` | `cms.bridge` (shared secret) | WordPress bridge |
+| `/api/cms-bridge/*` | `cms.bridge` (shared secret) | WordPress bridge (read + limited moderation) |
 
 ### 3.2 Ownership and object-level checks
 
@@ -83,7 +83,7 @@ sequenceDiagram
 | Payouts | Seller sees and cancels only own requests | `SellerController::payouts`, `cancelPayout` |
 | Reviews | Edit/delete only by author (or admin for moderation) | `ProductReviewController` |
 | Products in catalog | Public visibility requires approved storefront | `ProductController::index`, `filters`, `show` |
-| CMS bridge | Constant-time shared-secret comparison | `VerifyCmsBridgeKey` |
+| CMS bridge | Constant-time shared-secret comparison; write actions limited to product status and user activation | `VerifyCmsBridgeKey`, `CmsBridgeController` |
 
 ### 3.3 Administrative safety rails
 
@@ -95,6 +95,9 @@ sequenceDiagram
 | Seller provisioning | Promotion to seller creates a `pending` storefront automatically | `test_admin_can_assign_a_role_and_provisions_a_pending_storefront` |
 | Token invalidation | Role change or deactivation revokes all tokens | `UserController::update` |
 | Admin product oversight | `/api/admin/products` can include unverified shops, public catalog cannot | `test_admin_product_oversight_includes_pending_storefronts` |
+| CMS admin protection | The CMS bridge cannot deactivate an administrator → `422` | `test_cms_bridge_cannot_deactivate_administrators` |
+| CMS write CSRF | Every WordPress write action requires a nonce and `manage_options` | `craftmarket-cms-sync.php` |
+| CMS audit trail | Product-status and account-activation changes are written to the Laravel log | `CmsBridgeController` |
 
 ---
 
@@ -208,7 +211,7 @@ sequenceDiagram
 | `test_cms_bridge_requires_a_shared_secret` | Missing/wrong key → `401`; correct key → `200` |
 | `test_admin_reports_include_payout_and_subscription_summary` | Financial summaries are admin-only and correct |
 
-Additional coverage: `OrderEscrowTest` (5 tests) verifies commission split, Pro payout, escrow on payment, release on delivery, and refund on cancellation. `SellerPayoutAndVerificationTest` (8 tests) verifies storefront approval and payout balance rules.
+Additional coverage: `OrderEscrowTest` (5 tests) verifies commission split, Pro payout, escrow on payment, release on delivery, and refund on cancellation. `SellerPayoutAndVerificationTest` (4 tests) verifies storefront approval, payout balance rules, manual escrow release, and QR dispatch confirmation. `CmsBridgeTest` (6 tests) verifies the bridge secret, fail-closed behaviour, catalog listing, product moderation, token revocation, and admin protection.
 
 ```powershell
 cd backend

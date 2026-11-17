@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CmsBridgeController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
@@ -58,8 +59,14 @@ Route::middleware('throttle:60,1')->group(function () {
 
 // Headless WordPress CMS Bridge Routes (secrets required — never public)
 Route::prefix('cms-bridge')->middleware('cms.bridge')->group(function () {
-    Route::get('/users',   [\App\Http\Controllers\Api\UserController::class, 'index']);
-    Route::get('/reports', [\App\Http\Controllers\Api\AdminController::class, 'reports']);
+    // Read: catalog, users, and financial/operational reports.
+    Route::get('/products', [CmsBridgeController::class, 'products']);
+    Route::get('/users',    [UserController::class, 'index']);
+    Route::get('/reports',  [AdminController::class, 'reports']);
+
+    // Write: moderation only. Orders, payments, escrow, and payouts stay off-limits.
+    Route::patch('/products/{id}/status',     [CmsBridgeController::class, 'updateProductStatus']);
+    Route::patch('/users/{id}/toggle-active', [CmsBridgeController::class, 'toggleUser']);
 });
 
 // ─── Authenticated Routes (any logged-in user) ───────────────────────────────

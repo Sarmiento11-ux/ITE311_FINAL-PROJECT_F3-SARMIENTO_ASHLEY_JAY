@@ -223,7 +223,7 @@ State the architecture and the business model **before** clicking anything. This
 - QR dispatch: `dispatch_code`, `dispatched_at`, `dispatch_confirmed_at`.
 - Reviews require a delivered purchase.
 - Artisan Pro changes commission and listing limits.
-- CMS bridge feeds editorial content without touching transactional tables.
+- CMS bridge feeds editorial content and limited moderation without touching orders, payments, escrow, or payouts.
 
 ### 4.2 UI/UX & Responsiveness (15%)
 
@@ -285,8 +285,9 @@ State the architecture and the business model **before** clicking anything. This
 - `throttle:5,1` on login/register.
 - HMAC-SHA256 webhook verification.
 - CMS bridge shared secret with `hash_equals`.
+- WordPress CMS writes require a nonce and `manage_options`; admins cannot be deactivated from the bridge.
 - Upload MIME/size validation with UUID names.
-- 9 security tests / 43 assertions.
+- 35 automated tests / 191 assertions.
 
 ### 4.6 Documentation & System Design (10%)
 
@@ -342,7 +343,7 @@ A: Three guards: no self-demotion, no self-deactivation, and no demotion of the 
 A: CraftMarket never receives card data. PayMongo hosts checkout, and the webhook is verified with an HMAC-SHA256 signature before any state changes.
 
 **Q: What about the public CMS bridge you mentioned?**  
-A: It is no longer public. It now requires `X-CMS-Bridge-Key`, compared with `hash_equals`, and returns `503` if no key is configured, so it fails closed. There is a test for `401` and `200`.
+A: It is no longer public. It requires `X-CMS-Bridge-Key`, compared with `hash_equals`, and returns `503` if no key is configured, so it fails closed. The WordPress plugin can only moderate product status and activate/deactivate accounts, and every write action is nonce- and capability-guarded. There are tests for `401`, `503`, product moderation, token revocation, and admin protection.
 
 **Q: How is the API protected from brute force?**  
 A: Login and registration use `throttle:5,1` per IP, returning `429` after five attempts in a minute.
@@ -369,7 +370,7 @@ A: Every async panel has a loading skeleton, an empty-state message, and a retry
 ### Testing
 
 **Q: What did you test?**  
-A: Escrow math and lifecycle, Pro payout, refund on cancellation, storefront verification, payout balance rules, RBAC, role-safety guards, catalog visibility, admin oversight, seller analytics, CMS bridge authentication, and report summaries.
+A: Escrow math and lifecycle, Pro payout, refund on cancellation, storefront verification, payout balance rules, RBAC, role-safety guards, catalog visibility, admin oversight, seller analytics, CMS bridge authentication and moderation, token revocation, and report summaries.
 
 **Q: Show me a failing case.**  
 A: A guest hitting `/api/admin/reports` gets `401`; a customer or seller gets `403`; an unverified product detail returns `404`; an admin demoting themselves gets `422`.

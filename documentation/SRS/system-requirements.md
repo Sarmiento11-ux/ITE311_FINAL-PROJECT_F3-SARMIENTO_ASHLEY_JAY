@@ -104,7 +104,7 @@ CraftMarket is a **three-tier decoupled system**:
 | **Customer** | Registered shopper | Buy safely, track orders, save favorites, review purchases |
 | **Seller** | Verified artisan | List products, fulfil orders, understand sales, get paid |
 | **Administrator** | Platform operator | Trust and safety, user management, financial oversight |
-| **WordPress CMS** | System actor | Read aggregate data for editorial/reporting dashboards |
+| **WordPress CMS** | System actor | Read aggregate data and moderate product status / account activation |
 
 ### 2.3 Operating environment
 
@@ -124,7 +124,7 @@ CraftMarket is a **three-tier decoupled system**:
 - The API is stateless; the SPA authenticates with bearer tokens.
 - No card data may be stored or transmitted through CraftMarket servers.
 - Public catalog must never expose unverified storefronts.
-- CMS bridge must never be publicly readable.
+- CMS bridge must never be publicly readable or writable without the shared secret.
 
 ### 2.5 Assumptions and dependencies
 
@@ -258,9 +258,13 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 
 | ID | Requirement | Priority | Acceptance criteria |
 |---|---|---|---|
-| FR-CMS-01 | The CMS bridge exposes aggregate users and reports only with a valid shared secret. | M | Missing/wrong `X-CMS-Bridge-Key` returns `401`. |
+| FR-CMS-01 | The CMS bridge exposes catalog, users, and reports only with a valid shared secret. | M | Missing/wrong `X-CMS-Bridge-Key` returns `401`. |
 | FR-CMS-02 | The bridge fails closed when no key is configured. | M | Returns `503` instead of serving data. |
 | FR-CMS-03 | Editorial content is decoupled from transactional data. | M | WordPress cannot write orders, payments, or payouts. |
+| FR-CMS-04 | Administrators can moderate a product's listing status from the CMS. | M | `PATCH /api/cms-bridge/products/{id}/status` accepts `active`, `inactive`, `out_of_stock`, `archived`; any other value returns `422`. |
+| FR-CMS-05 | Administrators can activate or deactivate marketplace accounts from the CMS. | M | `PATCH /api/cms-bridge/users/{id}/toggle-active` updates `is_active`; deactivation revokes all Sanctum tokens; admin deactivation returns `422`. |
+| FR-CMS-06 | The CMS reports page exposes revenue, escrow, payout, and subscription summaries. | M | `GET /api/cms-bridge/reports` returns `total_sales`, `total_commission`, `commission_ledger`, `payout_summary`, and `subscription_revenue`. |
+| FR-CMS-07 | Every CMS write action is protected against CSRF and unauthorized use. | M | WordPress handlers require a valid nonce and `manage_options`; Laravel validates all input. |
 
 ---
 
@@ -353,6 +357,10 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | `GET` | `/api/admin/reports` | Admin | Platform reports |
 | `PATCH` | `/api/admin/payouts/{id}` | Admin | Settle payout |
 | `GET/PUT` | `/api/users/{id}` | Admin | User management / role assignment |
+| `GET` | `/api/cms-bridge/products` | Shared secret | CMS catalog |
+| `PATCH` | `/api/cms-bridge/products/{id}/status` | Shared secret | CMS product moderation |
+| `GET` | `/api/cms-bridge/users` | Shared secret | CMS user directory |
+| `PATCH` | `/api/cms-bridge/users/{id}/toggle-active` | Shared secret | CMS account activation |
 | `GET` | `/api/cms-bridge/reports` | Shared secret | CMS reporting |
 
 ### 5.3 Software interfaces
@@ -360,7 +368,7 @@ Priority scale: **M** = Must have, **S** = Should have, **C** = Could have.
 | Interface | Protocol | Data |
 |---|---|---|
 | PayMongo | HTTPS REST + webhooks | Checkout sessions, payment events |
-| WordPress | HTTPS REST | Aggregate users/reports, editorial content |
+| WordPress | HTTPS REST | Catalog/users/reports, product-status and account moderation, editorial content |
 | SMTP | SMTP/TLS | Transactional email |
 | Database | MySQL protocol | Persistent relational data |
 
@@ -390,7 +398,7 @@ None beyond standard client devices and commodity servers.
 | **UI/UX & Responsiveness (15%)** | NFR-USE-01…05 | Wireframes, design tokens, responsive matrix | Responsive Vue views |
 | **Business Model & Revenue (15%)** | FR-PAY-02/03/08/12, FR-SUB | `business-model.md` | Commission ledger, Pro MRR, payout summary in Reports |
 | **Database Design (10%)** | FR-ORD-07, NFR-REL-01…04 | ERD + schema.sql | Migrations, FKs, snapshot columns |
-| **Security & Validation (10%)** | FR-AUTH-04, FR-ADM-09/12, NFR-SEC-01…10 | `security-controls.md` | `SecurityAndAuthorizationTest` (9 tests) |
+| **Security & Validation (10%)** | FR-AUTH-04, FR-ADM-09/12, FR-CMS-01…07, NFR-SEC-01…10 | `security-controls.md` | `SecurityAndAuthorizationTest` (9 tests), `CmsBridgeTest` (6 tests) |
 | **Documentation & System Design (10%)** | All | SRS, use case, ERD, context, architecture, schema, wireframes | This documentation set |
 | **Presentation & Defense (10%)** | All | `presentation/defense-guide.md` | Demo script and Q&A prep |
 
@@ -413,8 +421,9 @@ Current status:
 | Suite | Result |
 |---|---|
 | `OrderEscrowTest` | 5 passed — commission split, Pro payout, escrow on payment, release on delivery, refund on cancel |
-| `SellerPayoutAndVerificationTest` | 8 passed — storefront approval, payout balance rules |
+| `SellerPayoutAndVerificationTest` | 4 passed — storefront approval, payout balance rules, manual escrow release, QR dispatch |
 | `SecurityAndAuthorizationTest` | 9 passed / 43 assertions — RBAC, role guards, catalog visibility, admin oversight, analytics, CMS bridge, reports |
+| `CmsBridgeTest` | 6 passed — secret/fail-closed guard, catalog, product moderation, token revocation, admin protection |
 | Frontend production build | Passed (chunk-size warning only) |
 
 ### 8.2 Manual acceptance scenarios
@@ -428,9 +437,10 @@ Current status:
 7. An admin can approve a storefront and see it instantly in the public catalog.
 8. An admin cannot demote themselves or the final administrator.
 9. Promoting a user to seller creates a pending storefront and revokes old tokens.
-10. The CMS bridge returns `401` without the secret and `200` with it.
-11. The SPA remains usable at 360 px, 768 px, and 1440 px widths.
-12. Rate limiting returns `429` after repeated login attempts.
+10. The CMS bridge returns `401` without the secret, `503` when unconfigured, and `200` with it.
+11. A CMS admin can archive a product and deactivate/reactivate a customer; admin deactivation returns `422`.
+12. The SPA remains usable at 360 px, 768 px, and 1440 px widths.
+13. Rate limiting returns `429` after repeated login attempts.
 
 ---
 

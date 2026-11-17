@@ -13,7 +13,7 @@ CraftMarket separates presentation, business logic, and data so each layer can e
 - **Presentation tier** — Vue 3 SPA (Vite build, Vue Router, Axios, DOMPurify) served as static assets.
 - **Application tier** — Laravel 12 REST API (PHP 8.2+), Sanctum bearer tokens, RBAC middleware, domain services, queued notifications.
 - **Data tier** — MySQL 8 / InnoDB in production (SQLite for local development), schema owned by migrations.
-- **Content sidecar** — Headless WordPress reads aggregate data through a shared-secret bridge; it never owns transactional data.
+- **Content sidecar** — Headless WordPress reads aggregate data and performs limited moderation through a shared-secret bridge; it never owns transactional data.
 - **External services** — PayMongo hosted checkout and signed webhooks.
 
 ---

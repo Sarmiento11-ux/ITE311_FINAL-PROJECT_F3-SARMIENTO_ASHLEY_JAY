@@ -301,11 +301,11 @@ flowchart LR
 
 | Field | Detail |
 |---|---|
-| **Actor** | WordPress CMS |
-| **Main flow** | 1. The plugin calls `/api/cms-bridge/users` or `/api/cms-bridge/reports` with the `X-CMS-Bridge-Key` header.<br>2. API compares the header to `CMS_BRIDGE_KEY` using a constant-time comparison.<br>3. Matching requests receive JSON data; missing or incorrect keys receive `401`. |
-| **Alternate flow** | A1. Key not configured on the server → `503` (fail closed). |
-| **Postcondition** | Aggregate CMS data is shared securely, while transactional data stays read-only in Laravel. |
-| **Traceability** | FR-CMS-01, FR-CMS-02, NFR-SEC-06 |
+| **Actor** | WordPress CMS Administrator |
+| **Main flow** | 1. The plugin calls `/api/cms-bridge/products`, `/users`, or `/reports` with the `X-CMS-Bridge-Key` header.<br>2. API compares the header to `CMS_BRIDGE_KEY` using a constant-time comparison.<br>3. Matching requests receive JSON data; missing or incorrect keys receive `401`.<br>4. For moderation, the administrator submits a nonce-protected WordPress form.<br>5. The plugin calls `PATCH /api/cms-bridge/products/{id}/status` or `PATCH /api/cms-bridge/users/{id}/toggle-active`.<br>6. Laravel validates the value, applies the change, and revokes tokens when an account is deactivated. |
+| **Alternate flow** | A1. Key not configured on the server → `503` (fail closed).<br>A2. Invalid product status → `422`.<br>A3. Attempt to deactivate an administrator → `422`. |
+| **Postcondition** | Catalog and account state reflect the CMS action, while orders, payments, escrow, and payouts remain read-only in Laravel. |
+| **Traceability** | FR-CMS-01…FR-CMS-07, NFR-SEC-06 |
 
 ### UC-22 Process Payment Webhook
 

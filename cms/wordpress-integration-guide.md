@@ -19,9 +19,24 @@ flowchart LR
 | :--- | :--- | :--- |
 | **1. Website Content** | WordPress Pages | `GET /wp-json/wp/v2/pages?slug=homepage`, `GET /wp-json/wp/v2/pages?slug=about-us` |
 | **2. Announcements** | WordPress Posts | `GET /wp-json/wp/v2/posts?search=announcement` |
-| **3. Products / Services** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-products` & `GET /api/products` |
-| **4. User Data** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-users` & `GET /api/cms-bridge/users` |
-| **5. Reports** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-reports` & `GET /api/cms-bridge/reports` |
+| **3. Products / Services** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-products` · `GET /api/cms-bridge/products` · `PATCH /api/cms-bridge/products/{id}/status` |
+| **4. User Data** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-users` · `GET /api/cms-bridge/users` · `PATCH /api/cms-bridge/users/{id}/toggle-active` |
+| **5. Reports** | WordPress Admin + Laravel | `wp-admin/admin.php?page=craftmarket-reports` · `GET /api/cms-bridge/reports` |
+
+### 2.1 Management actions exposed to the CMS
+
+| CMS action | WordPress surface | Laravel effect |
+| :--- | :--- | :--- |
+| Change a listing's status | Per-row select + **Update** (Products page) | Sets `products.status` to `active`, `inactive`, `out_of_stock`, or `archived` |
+| Activate / deactivate an account | Per-row **Activate** / **Deactivate** (Users page) | Sets `users.is_active`; deactivation revokes all Sanctum tokens |
+| View financial and operational reports | Escrow Reports page + dashboard widget | Reads aggregate sales, commission, escrow, payouts, MRR, best sellers |
+
+Every write action is protected twice:
+
+1. **WordPress side** — `check_admin_referer()` (nonce) and `current_user_can('manage_options')`.
+2. **Laravel side** — `cms.bridge` shared secret plus strict enum/boolean validation.
+
+Administrator accounts cannot be deactivated from the CMS bridge, and the bridge can never modify orders, payments, escrow, payouts, or product pricing.
 
 ---
 
@@ -36,7 +51,9 @@ Internal bridge synchronization endpoints (`/api/cms-bridge/*`) are protected fr
 2. **WordPress Plugin Configuration (`wp-config.php` or filter):**
    ```php
    define('CRAFTMARKET_CMS_BRIDGE_KEY', 'dev-cms-bridge-key');
+   define('CRAFTMARKET_API_BASE', 'http://127.0.0.1:8000/api'); // optional override
    ```
+   The API base can also be changed with the `craftmarket_api_base` filter, and the request timeout with `craftmarket_cms_timeout`.
 3. **Authentication Header:**
    The `craftmarket-cms-sync.php` plugin automatically includes the header with every server-to-server request:
    ```http
@@ -83,6 +100,17 @@ When hosting WordPress under Apache/WAMP/XAMPP and serving the Vue storefront fr
    - Reload CraftMarket Vue storefront (`http://localhost:5173`) &rarr; top banner immediately reflects the updated announcement text.
 2. **To demo Products, Users, and Reports in WordPress:**
    - In WordPress Admin sidebar, click **CraftMarket CMS**.
-   - Show the **Products & Crafts** table (displays live crafts and stock from Laravel).
-   - Show the **Marketplace Users** table (displays active shopper and seller accounts).
-   - Show the **Escrow Reports** card (displays total realized sales and orders).
+   - Show the **Products & Crafts** table (live crafts, stock, artisan, status).
+   - Change one listing to **Archived** and click **Update**; reload the storefront to show it disappeared from the public catalog.
+   - Show the **Marketplace Users** table (shoppers, artisans, admins).
+   - Deactivate a demo customer; the notice confirms the account and its sessions were revoked.
+   - Reactivate the same customer to restore access.
+   - Show the **Escrow Reports** page: GMV, orders, commission, MRR, escrow ledger, payout summary, order breakdown, best sellers.
+3. **To demo the bridge security:**
+   - Open `http://127.0.0.1:8000/api/cms-bridge/products` without the header → `401`.
+   - Remove `CMS_BRIDGE_KEY` from `backend/.env` and reload → `503` (fail closed).
+4. **To run the automated proof:**
+   ```powershell
+   cd backend
+   php artisan test --filter=CmsBridgeTest
+   ```

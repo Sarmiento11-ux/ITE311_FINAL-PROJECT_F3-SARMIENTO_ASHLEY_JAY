@@ -18,6 +18,7 @@ This folder contains the complete system design and defense documentation for **
 | 8 | [Business Model & Revenue Generation](business-model.md) | Pricing, unit economics, break-even, market, risks |
 | 9 | [Security & Validation Controls](security/security-controls.md) | AuthN/AuthZ, validation, OWASP mapping, test evidence |
 | 10 | [Final Defense Guide](presentation/defense-guide.md) | Demo script, rubric mapping, Q&A, slide outline |
+| 11 | [Final Project Compliance Matrix](compliance-matrix.md) | Requirement A–G and rubric 1–7 mapping, CMS five functions, demo script |
 
 ---
 
@@ -29,7 +30,7 @@ This folder contains the complete system design and defense documentation for **
 | **UI/UX & Responsiveness** | 15% | Wireframes, SRS §4.4 | Responsive views, design tokens, loading/empty/error states |
 | **Business Model & Revenue** | 15% | Business model | 8%/3% commission, ₱299 Pro, payout summary, MRR reporting |
 | **Database Design** | 10% | ERD, schema.sql | Migrations, FKs, snapshot columns, transactions, indexes |
-| **Security & Validation** | 10% | Security controls, SRS §4.1 | RBAC, rate limiting, signed webhooks, CMS bridge secret, 9 security tests |
+| **Security & Validation** | 10% | Security controls, SRS §4.1 | RBAC, rate limiting, signed webhooks, fail-closed CMS bridge with nonce-guarded write actions, 35 automated tests |
 | **Documentation & System Design** | 10% | This entire folder | SRS, use case, ERD, context, architecture, schema, wireframes |
 | **Presentation & Defense** | 10% | Defense guide | Demo script, rubric talking points, Q&A bank |
 
@@ -51,6 +52,7 @@ documentation/
 ├── database/
 │   └── schema.sql                     ← MySQL DDL snapshot
 ├── business-model.md                  ← revenue, unit economics, break-even, risks
+├── compliance-matrix.md               ← requirement A–G + rubric 1–7 mapping
 ├── security/
 │   └── security-controls.md           ← controls + OWASP Top 10 mapping
 └── presentation/
@@ -92,8 +94,12 @@ npm run build
 | Suite | Expected |
 |---|---|
 | `OrderEscrowTest` | 5 passed |
-| `SellerPayoutAndVerificationTest` | 8 passed |
-| `SecurityAndAuthorizationTest` | 9 passed / 43 assertions |
+| `SellerPayoutAndVerificationTest` | 4 passed |
+| `SecurityAndAuthorizationTest` | 9 passed |
+| `PhaseCFeatureTest` | 4 passed |
+| `CmsBridgeTest` | 6 passed |
+| `SandboxPaymentSimulationTest` | 5 passed |
+| **Total** | **35 passed / 191 assertions** |
 | Frontend build | Success (chunk-size warning acceptable) |
 
 ---
@@ -109,7 +115,8 @@ npm run build
 7. **Safe role management** — no self-demotion, no self-deactivation, no last-admin demotion.
 8. **Two revenue streams** — 8%/3% commission plus ₱299 Artisan Pro.
 9. **Fail-closed CMS bridge** — shared secret, constant-time comparison, `503` when unconfigured.
-10. **Documentation as code** — Mermaid diagrams versioned beside the implementation.
+10. **Least-privilege CMS writes** — WordPress can only moderate product status and activate/deactivate accounts, with nonces and capability checks.
+11. **Documentation as code** — Mermaid diagrams versioned beside the implementation.
 
 ---
 
