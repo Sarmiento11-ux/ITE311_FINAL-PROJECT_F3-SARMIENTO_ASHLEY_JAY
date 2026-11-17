@@ -479,23 +479,10 @@
                           >
                             View
                           </button>
-                          <button 
-                            type="button" 
-                            class="btn-action" 
-                            :class="u.is_active ? 'btn-delete' : 'btn-view'"
-                            @click="toggleUserActive(u)" 
-                            :title="u.is_active ? 'Deactivate user account' : 'Reactivate user account'"
-                          >
-                            {{ u.is_active ? 'Deactivate' : 'Activate' }}
-                          </button>
-                          <button 
-                            type="button" 
-                            class="btn-action btn-delete" 
-                            @click="handleDeleteUser(u)" 
-                            title="Delete or safely archive user account" 
-                          >
-                            Delete
-                          </button>
+                          <!-- Deactivate and Delete are managed in WordPress CMS -->
+                          <span class="text-muted" style="font-size: 12px; align-self: center;">
+                            Managed in WordPress CMS
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -1638,14 +1625,9 @@
         </div>
 
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-          <button 
-            type="button" 
-            class="btn btn-sm"
-            :class="activeUser?.is_active ? 'btn-danger' : 'btn-primary'"
-            @click="toggleUserActive(activeUser); if (activeUser) activeUser.is_active = !activeUser.is_active;"
-          >
-            {{ activeUser?.is_active ? 'Deactivate User Account' : 'Activate User Account' }}
-          </button>
+          <span class="text-muted" style="font-size: 12px;">
+            Account deactivation and deletion are managed in WordPress CMS.
+          </span>
           <button type="button" class="btn btn-secondary" @click="showUserDetailsModal = false">Close</button>
         </div>
       </div>
@@ -2198,33 +2180,6 @@ const saveUserRole = async () => {
     showToast(err.response?.data?.message || err.message || 'Failed to update user role.', 'alert-danger');
   } finally {
     isSavingUserRole.value = false;
-  }
-};
-
-const handleDeleteUser = async (u) => {
-  if (confirm(`Are you sure you want to delete user account "${u.name}" (${u.email})?`)) {
-    try {
-      const res = await adminService.deleteUser(u.id);
-      showToast(res.message || 'User account deleted.', 'alert-success');
-      await fetchUsers();
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Could not delete user account.', 'alert-danger');
-    }
-  }
-};
-
-const toggleUserActive = async (u) => {
-  const actionWord = u.is_active ? 'deactivate' : 'activate';
-  if (!confirm(`Are you sure you want to ${actionWord} the account of ${u.name}?`)) return;
-
-  try {
-    const res = await adminService.toggleUserActive(u.id);
-    if (res && res.success) {
-      u.is_active = res.data.is_active;
-      showToast(res.message, 'alert-success');
-    }
-  } catch (err) {
-    showToast(err.response?.data?.message || err.message || 'Failed to update user status.', 'alert-danger');
   }
 };
 
