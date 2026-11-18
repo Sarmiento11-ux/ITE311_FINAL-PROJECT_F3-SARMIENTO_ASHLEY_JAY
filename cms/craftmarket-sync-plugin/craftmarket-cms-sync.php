@@ -237,38 +237,38 @@ class CraftMarket_CMS_Bridge {
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px;">
                 <div style="background: #fff; padding: 20px; border-left: 4px solid #2F4533; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3>📢 Website Content & Announcements</h3>
+                    <h3>Website Content & Announcements</h3>
                     <p>Manage promotional bars, seasonal notices, and the About page as WordPress pages and posts.</p>
                     <a href="<?php echo esc_url(admin_url('edit.php')); ?>" class="button button-primary">Edit Announcements (Posts)</a>
                     <a href="<?php echo esc_url(admin_url('edit.php?post_type=page')); ?>" class="button">Edit Pages</a>
                 </div>
 
                 <div style="background: #fff; padding: 20px; border-left: 4px solid #C25E3E; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3>🏺 Products & Services</h3>
+                    <h3>Products & Services</h3>
                     <p>Review artisan listings, then set each product to active, inactive, out of stock, or archived.</p>
                     <a href="<?php echo esc_url(admin_url('admin.php?page=craftmarket-products')); ?>" class="button button-primary">Manage Products</a>
                 </div>
 
                 <div style="background: #fff; padding: 20px; border-left: 4px solid #8B5CF6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3>🏷️ Category Taxonomy</h3>
+                    <h3>Category Taxonomy</h3>
                     <p>Add, rename, publish, or retire product categories. Deletion is blocked while a category still owns listings.</p>
                     <a href="<?php echo esc_url(admin_url('admin.php?page=craftmarket-categories')); ?>" class="button button-primary">Manage Categories</a>
                 </div>
 
                 <div style="background: #fff; padding: 20px; border-left: 4px solid #D97706; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3>✅ Artisan Verification</h3>
+                    <h3>Artisan Verification</h3>
                     <p>Approve or reject artisan storefront applications and send moderator notes to the maker by email.</p>
                     <a href="<?php echo esc_url(admin_url('admin.php?page=craftmarket-verification')); ?>" class="button button-primary">Review Storefronts</a>
                 </div>
 
                 <div style="background: #fff; padding: 20px; border-left: 4px solid #3B82F6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3>👥 User Data Management</h3>
+                    <h3>User Data Management</h3>
                     <p>Oversee customers and artisans, and activate or deactivate marketplace accounts.</p>
                     <a href="<?php echo esc_url(admin_url('admin.php?page=craftmarket-users')); ?>" class="button button-primary">Manage Users</a>
                 </div>
 
                 <div style="background: #fff; padding: 20px; border-left: 4px solid #10B981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3>📈 Reports</h3>
+                    <h3>Reports</h3>
                     <p>Track GMV, commissions, escrow exposure, artisan payouts, and subscription revenue.</p>
                     <a href="<?php echo esc_url(admin_url('admin.php?page=craftmarket-reports')); ?>" class="button button-primary">View Reports</a>
                 </div>
@@ -506,9 +506,9 @@ class CraftMarket_CMS_Bridge {
                                 <td><?php echo esc_html($product_count); ?> product(s)</td>
                                 <td>
                                     <?php if (!empty($c['is_active'])): ?>
-                                        <span style="color: #1a7f37;">✅ Active</span>
+                                        <span style="color: #1a7f37;">Active</span>
                                     <?php else: ?>
-                                        <span style="color: #b32d2e;">❌ Inactive</span>
+                                        <span style="color: #b32d2e;">Inactive</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -518,7 +518,7 @@ class CraftMarket_CMS_Bridge {
                                     ], admin_url('admin.php'))); ?>">Edit</a>
 
                                     <?php if ($product_count > 0): ?>
-                                        <span style="display: inline-block; margin-left: 6px; color: #646970;" title="Reassign or delete the linked products first.">🔒 Delete blocked</span>
+                                        <span style="display: inline-block; margin-left: 6px; color: #646970;" title="Reassign or delete the linked products first.">Delete blocked</span>
                                     <?php else: ?>
                                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display: inline-block; margin-left: 6px;" onsubmit="return confirm('Delete category &quot;<?php echo esc_js($c['name']); ?>&quot;? This cannot be undone.');">
                                             <input type="hidden" name="action" value="craftmarket_category_delete" />
@@ -720,14 +720,14 @@ class CraftMarket_CMS_Bridge {
                                 <td>
                                     <?php
                                     $plan = $u['subscription_plan'] ?? null;
-                                    echo esc_html($plan === 'pro' ? '⭐ Artisan Pro' : ($plan === 'basic' ? 'Basic' : 'Free'));
+                                    echo esc_html($plan === 'pro' ? 'Artisan Pro' : ($plan === 'basic' ? 'Basic' : 'Free'));
                                     ?>
                                 </td>
                                 <td><?php echo $verification ? esc_html(strtoupper($verification)) : '—'; ?></td>
-                                <td><?php echo $is_active ? '✅ Active' : '❌ Deactivated'; ?></td>
+                                <td><?php echo $is_active ? 'Active' : 'Deactivated'; ?></td>
                                 <td>
                                     <?php if ($is_admin): ?>
-                                        <span style="color: #646970;">🔒 Protected</span>
+                                        <span style="color: #646970;">Protected</span>
                                     <?php else: ?>
                                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                                             <input type="hidden" name="action" value="craftmarket_toggle_user" />
@@ -1070,9 +1070,9 @@ class CraftMarket_CMS_Bridge {
                 $reports = $this->fetch_api('/cms-bridge/reports');
 
                 if (!is_array($reports)) {
-                    echo '<p><strong>Headless System Status:</strong> ⚠️ Laravel API unreachable.</p>';
+                    echo '<p><strong>Headless System Status:</strong> Laravel API unreachable.</p>';
                 } else {
-                    echo '<p><strong>Headless System Status:</strong> ✅ Connected to Laravel API</p>';
+                    echo '<p><strong>Headless System Status:</strong> Connected to Laravel API</p>';
                     echo '<p>Total sales: <strong>₱' . esc_html(number_format((float) ($reports['total_sales'] ?? 0), 2)) . '</strong></p>';
                     echo '<p>Platform commission: <strong>₱' . esc_html(number_format((float) ($reports['total_commission'] ?? 0), 2)) . '</strong></p>';
                 }
