@@ -5,6 +5,9 @@ node_modules/
 dist/
 *.log
 *.docx
+*.pptx
+generate_*.py
+build_*.py
 __pycache__/
 
 docs/

@@ -140,8 +140,9 @@ class CraftMarket_CMS_Bridge {
             $url = add_query_arg($query, $url);
         }
 
+        $timeout = defined('CRAFTMARKET_CMS_TIMEOUT') ? (int) CRAFTMARKET_CMS_TIMEOUT : (int) apply_filters('craftmarket_cms_timeout', 15);
         $response = wp_remote_get($url, [
-            'timeout' => (int) apply_filters('craftmarket_cms_timeout', 5),
+            'timeout' => $timeout,
             'headers' => $this->api_headers(),
         ]);
 
@@ -160,9 +161,10 @@ class CraftMarket_CMS_Bridge {
      * @return array{ok: bool, message: string, data: mixed}
      */
     private function request_api($endpoint, array $payload, $method = 'POST') {
+        $timeout = defined('CRAFTMARKET_CMS_TIMEOUT') ? (int) CRAFTMARKET_CMS_TIMEOUT : (int) apply_filters('craftmarket_cms_timeout', 15);
         $response = wp_remote_request($this->api_base . $endpoint, [
             'method'  => $method,
-            'timeout' => (int) apply_filters('craftmarket_cms_timeout', 5),
+            'timeout' => $timeout,
             'headers' => $this->api_headers(),
             'body'    => wp_json_encode($payload),
         ]);

@@ -11,8 +11,9 @@ function saveSession(user, token) {
   try {
     sessionStorage.setItem(TOKEN_KEY, token);
     sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    // Clear any lingering localStorage auth keys so session does not survive browser close
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   } catch {
     // Ignore storage errors
   }
@@ -34,7 +35,11 @@ function clearSession() {
 
 function restoreSession() {
   try {
-    const token = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+    // Ensure legacy localStorage keys are purged
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+
+    const token = sessionStorage.getItem(TOKEN_KEY);
     if (token) {
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
@@ -135,7 +140,7 @@ export const authService = {
 
   getToken() {
     try {
-      return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+      return sessionStorage.getItem(TOKEN_KEY);
     } catch {
       return null;
     }
@@ -143,7 +148,7 @@ export const authService = {
 
   getUser() {
     try {
-      const raw = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
+      const raw = sessionStorage.getItem(USER_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;

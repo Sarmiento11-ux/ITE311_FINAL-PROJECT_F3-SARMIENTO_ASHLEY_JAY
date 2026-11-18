@@ -30,8 +30,7 @@
             :class="{ active: currentTab === 'dashboard' }"
             @click="setTab('dashboard')"
           >
-            
-            <span class="nav-icon">📊</span><span>Dashboard</span>
+            <span>Dashboard</span>
           </button>
 
           <button 
@@ -40,8 +39,7 @@
             :class="{ active: currentTab === 'users' }"
             @click="setTab('users')"
           >
-            
-            <span class="nav-icon">👥</span><span>Users ({{ stats?.total_users ?? users.length }})</span>
+            <span>Users ({{ stats?.total_users ?? users.length }})</span>
           </button>
 
           <button 
@@ -50,8 +48,7 @@
             :class="{ active: currentTab === 'sellers' }"
             @click="setTab('sellers')"
           >
-            
-            <span class="nav-icon">🏪</span><span>Sellers ({{ stats?.total_sellers ?? sellers.length }})</span>
+            <span>Sellers ({{ stats?.total_sellers ?? sellers.length }})</span>
           </button>
 
           <button 
@@ -60,8 +57,7 @@
             :class="{ active: currentTab === 'products' }"
             @click="setTab('products')"
           >
-            
-            <span class="nav-icon">🎨</span><span>Products ({{ stats?.total_products ?? products.length }})</span>
+            <span>Products ({{ stats?.total_products ?? products.length }})</span>
           </button>
 
           <button 
@@ -70,8 +66,7 @@
             :class="{ active: currentTab === 'categories' }"
             @click="setTab('categories')"
           >
-            
-            <span class="nav-icon">🏷️</span><span>Categories ({{ categories.length }})</span>
+            <span>Categories ({{ categories.length }})</span>
           </button>
 
           <button 
@@ -80,8 +75,7 @@
             :class="{ active: currentTab === 'orders' }"
             @click="setTab('orders')"
           >
-            
-            <span class="nav-icon">📦</span><span>Orders ({{ stats?.total_orders ?? orders.length }})</span>
+            <span>Orders ({{ stats?.total_orders ?? orders.length }})</span>
           </button>
 
           <button 
@@ -90,7 +84,7 @@
             :class="{ active: currentTab === 'payouts' }"
             @click="setTab('payouts')"
           >
-            <span class="nav-icon">💸</span><span>Payouts</span>
+            <span>Payouts</span>
           </button>
 
           <button 
@@ -99,8 +93,7 @@
             :class="{ active: currentTab === 'reports' }"
             @click="setTab('reports')"
           >
-            
-            <span class="nav-icon">📈</span><span>Reports</span>
+            <span>Reports</span>
           </button>
 
           <button 
@@ -109,7 +102,7 @@
             :class="{ active: currentTab === 'subscriptions' }"
             @click="setTab('subscriptions')"
           >
-            <span class="nav-icon">💎</span><span>Subscriptions</span>
+            <span>Subscriptions</span>
           </button>
 
           <button 
@@ -118,7 +111,7 @@
             :class="{ active: currentTab === 'reviews' }"
             @click="setTab('reviews')"
           >
-            <span class="nav-icon">★</span><span>Reviews</span>
+            <span>Reviews</span>
           </button>
 
           <button 
@@ -127,7 +120,7 @@
             :class="{ active: currentTab === 'cms' }"
             @click="setTab('cms')"
           >
-            <span class="nav-icon">🌐</span><span>WordPress CMS</span>
+            <span>WordPress CMS</span>
           </button>
 
           <hr class="sidebar-divider" />
@@ -849,7 +842,7 @@
                   style="display: inline-flex; align-items: center; gap: 6px;"
                   @click="exportAdminPayoutsToCsv"
                 >
-                  <span>📥 Export Payouts (CSV)</span>
+                  <span>Export Payouts (CSV)</span>
                 </button>
               </div>
 
@@ -981,7 +974,7 @@
                   style="display: inline-flex; align-items: center; gap: 6px;"
                   @click="exportAdminReportsToCsv"
                 >
-                  <span>📥 Export Financials (CSV)</span>
+                  <span>Export Financials (CSV)</span>
                 </button>
               </div>
             </div>
@@ -1050,7 +1043,7 @@
                     </div>
                   </div>
                   <div class="metric-card metric-forest">
-                    <div class="metric-icon">💎</div>
+                    <div class="metric-icon">★</div>
                     <div class="metric-info">
                       <span class="metric-label" title="Artisan Pro MRR">Artisan Pro MRR</span>
                       <strong class="metric-value" :title="'₱' + formatMoney(reports?.subscription_revenue?.mrr ?? 0)">₱{{ formatMoney(reports?.subscription_revenue?.mrr ?? 0) }}</strong>
@@ -1231,7 +1224,7 @@
           <div v-else-if="currentTab === 'subscriptions'" class="tab-pane">
             <div class="admin-metrics-grid">
               <div class="metric-card metric-gold">
-                <div class="metric-icon">💎</div>
+                <div class="metric-icon">₱</div>
                 <div class="metric-info">
                   <span class="metric-label" title="Monthly Recurring Revenue (MRR)">Monthly Recurring Revenue (MRR)</span>
                   <strong class="metric-value" :title="'₱' + formatMoney(subscriptionMetrics?.mrr ?? 0)">₱{{ formatMoney(subscriptionMetrics?.mrr ?? 0) }}</strong>
@@ -1240,7 +1233,7 @@
               </div>
 
               <div class="metric-card metric-primary">
-                <div class="metric-icon">⭐</div>
+                <div class="metric-icon">★</div>
                 <div class="metric-info">
                   <span class="metric-label" title="Premium Artisan Pro">Premium Artisan Pro</span>
                   <strong class="metric-value" :title="String(subscriptionMetrics?.pro_subscribers_count ?? subscriptionMetrics?.premium_subscribers_count ?? 0)">{{ subscriptionMetrics?.pro_subscribers_count ?? subscriptionMetrics?.premium_subscribers_count ?? 0 }}</strong>
@@ -1258,7 +1251,7 @@
               </div>
 
               <div class="metric-card metric-amber">
-                <div class="metric-icon">🏛️</div>
+                <div class="metric-icon">○</div>
                 <div class="metric-info">
                   <span class="metric-label" title="Free Artisan Starters">Free Artisan Starters</span>
                   <strong class="metric-value" :title="String(subscriptionMetrics?.free_sellers_count ?? 0)">{{ subscriptionMetrics?.free_sellers_count ?? 0 }}</strong>
@@ -1442,7 +1435,7 @@
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>📢 1. Announcements</h4>
+                    <h4>1. Announcements</h4>
                     <p class="admin-card-sub">Top bar announcement visible across the storefront</p>
                   </div>
                 </div>
@@ -1464,7 +1457,7 @@
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>🎨 2. Website Content</h4>
+                    <h4>2. Website Content</h4>
                     <p class="admin-card-sub">Homepage narrative, About Us, & cultural blogs</p>
                   </div>
                 </div>
@@ -1487,7 +1480,7 @@
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>🏺 3. Products & Services</h4>
+                    <h4>3. Products & Services</h4>
                     <p class="admin-card-sub">Artisan catalog listings & inventory synced to CMS</p>
                   </div>
                 </div>
@@ -1507,7 +1500,7 @@
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>👥 4. User Data</h4>
+                    <h4>4. User Data</h4>
                     <p class="admin-card-sub">Artisan makers & customer directory synced to CMS</p>
                   </div>
                 </div>
@@ -1527,7 +1520,7 @@
               <div class="admin-card">
                 <div class="admin-card-header">
                   <div>
-                    <h4>📈 5. Financial & Sales Reports</h4>
+                    <h4>5. Financial & Sales Reports</h4>
                     <p class="admin-card-sub">Order summaries & escrow payouts mirrored in CMS</p>
                   </div>
                 </div>
