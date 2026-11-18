@@ -1552,6 +1552,37 @@
 
     </div>
 
+    <!-- ─── MODAL 0: SIGN OUT CONFIRMATION MODAL ────────────────────────── -->
+    <div v-if="showLogoutModal" class="admin-modal-backdrop" @click.self="showLogoutModal = false">
+      <div class="admin-modal-box" style="max-width: 440px;">
+        <div class="modal-header">
+          <div>
+            <h3>Sign Out</h3>
+            <p class="modal-sub">End administrator session</p>
+          </div>
+          <button type="button" class="btn-modal-close" @click="showLogoutModal = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="margin: 0; color: #555555; font-size: 0.95rem; line-height: 1.55;">
+            Are you sure you want to sign out from the Admin Panel? You will need to log in again to access administrative controls.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" @click="showLogoutModal = false">
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            style="background: #dc2626; color: #ffffff; border: none; font-weight: 600; padding: 8px 18px; border-radius: 8px; cursor: pointer;"
+            @click="confirmLogout"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ─── MODAL 1: USER ACCOUNT AUDIT MODAL ─────────────────────────────── -->
     <div v-if="showUserDetailsModal" class="admin-modal-backdrop" @click.self="showUserDetailsModal = false">
       <div class="admin-modal-box">
@@ -2345,7 +2376,14 @@ const formatDate = (dateStr) => {
   });
 };
 
-const handleLogout = async () => {
+const showLogoutModal = ref(false);
+
+const handleLogout = () => {
+  showLogoutModal.value = true;
+};
+
+const confirmLogout = async () => {
+  showLogoutModal.value = false;
   await logout();
   router.push('/login');
 };
