@@ -2346,10 +2346,8 @@ const formatDate = (dateStr) => {
 };
 
 const handleLogout = async () => {
-  if (confirm('Are you sure you want to log out from the Admin Panel?')) {
-    await logout();
-    router.push('/login');
-  }
+  await logout();
+  router.push('/login');
 };
 const reportPeriod = ref('all');
 const fetchReports = async () => {
