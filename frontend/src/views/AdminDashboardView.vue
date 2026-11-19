@@ -143,7 +143,7 @@
           <!-- Global Feedback Message -->
           <div v-if="feedbackMsg" class="admin-alert" :class="feedbackClass">
             <span>{{ feedbackMsg }}</span>
-            <button type="button" class="btn-close-alert" @click="feedbackMsg = ''"></button>
+            <button type="button" class="btn-close-alert" @click="feedbackMsg = ''" aria-label="Dismiss alert">&times;</button>
           </div>
 
           <!-- Loading State Spinner -->
@@ -1560,7 +1560,7 @@
             <h3>Sign Out</h3>
             <p class="modal-sub">End administrator session</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showLogoutModal = false">✕</button>
+          <button type="button" class="btn-modal-close" @click="showLogoutModal = false" aria-label="Close dialog">&times;</button>
         </div>
         <div class="modal-body">
           <p style="margin: 0; color: #555555; font-size: 0.95rem; line-height: 1.55;">
@@ -1591,7 +1591,7 @@
             <h3>User Account Audit: {{ activeUser?.name }}</h3>
             <p class="modal-sub">Account ID: #{{ activeUser?.id }} • Registered on {{ formatDate(activeUser?.created_at) }}</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showUserDetailsModal = false"></button>
+          <button type="button" class="btn-modal-close" @click="showUserDetailsModal = false" aria-label="Close dialog">&times;</button>
         </div>
         
         <div class="modal-body">
@@ -1665,7 +1665,7 @@
             <h3>Artisan Workshop: {{ activeSeller?.shop_name }}</h3>
             <p class="modal-sub">Maker: {{ activeSeller?.name }} ({{ activeSeller?.email }})</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showSellerDetailsModal = false"></button>
+          <button type="button" class="btn-modal-close" @click="showSellerDetailsModal = false" aria-label="Close dialog">&times;</button>
         </div>
 
         <div class="modal-body">
@@ -1753,7 +1753,7 @@
             <h3>Product Inspection: {{ activeProduct?.name }}</h3>
             <p class="modal-sub">Listing ID: #{{ activeProduct?.id }} • Category: {{ activeProduct?.category?.name || 'Handmade' }}</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showProductDetailsModal = false"></button>
+          <button type="button" class="btn-modal-close" @click="showProductDetailsModal = false" aria-label="Close dialog">&times;</button>
         </div>
 
         <div class="modal-body">
@@ -1810,7 +1810,7 @@
             <h3>Order Details: {{ activeOrder?.order_number }}</h3>
             <p class="modal-sub">Placed on {{ formatDate(activeOrder?.created_at) }}</p>
           </div>
-          <button type="button" class="btn-modal-close" @click="showOrderModal = false"></button>
+          <button type="button" class="btn-modal-close" @click="showOrderModal = false" aria-label="Close dialog">&times;</button>
         </div>
 
         <div class="modal-body">
@@ -3255,11 +3255,28 @@ const fetchSubscriptionMetrics = async () => {
   margin: 4px 0 0;
 }
 .btn-modal-close {
-  background: transparent;
-  border: none;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.25rem;
+  font-weight: 700;
   cursor: pointer;
-  color: #9c8a80;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+.btn-modal-close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+  transform: scale(1.05);
 }
 .modal-body {
   padding: 20px 24px;
