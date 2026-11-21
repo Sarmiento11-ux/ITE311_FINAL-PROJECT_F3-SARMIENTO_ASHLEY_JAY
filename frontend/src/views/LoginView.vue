@@ -144,19 +144,19 @@ const handleLogin = async () => {
     statusMsg.value  = `Welcome back, ${user.name}! Redirecting…`;
     statusClass.value = 'alert-success';
 
-    // Redirect: honour ?redirect= param or go to role-based dashboard
-    setTimeout(() => {
+    // Redirect: honour ?redirect= param or go to role-based dashboard immediately
+    setTimeout(async () => {
       const redirect = route.query.redirect;
-      if (redirect) {
-        router.push(redirect);
+      if (redirect && redirect !== '/login') {
+        await router.push(redirect);
       } else if (user.role === 'seller') {
-        router.push('/dashboard/seller');
+        await router.push('/dashboard/seller');
       } else if (user.role === 'admin') {
-        router.push('/dashboard/admin');
+        await router.push('/dashboard/admin');
       } else {
-        router.push('/dashboard/customer');
+        await router.push('/dashboard/customer');
       }
-    }, 600);
+    }, 150);
 
   } catch (err) {
     statusMsg.value   = err.message || 'Login failed. Please check your credentials.';
