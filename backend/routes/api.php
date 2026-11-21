@@ -39,8 +39,8 @@ Route::post('/webhooks/paymongo', [WebhookController::class, 'handlePayMongo']);
 // ─── Public Auth Routes ───────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     // Security: brute-force protection on credential endpoints (per IP).
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-    Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:15,1');
+    Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:15,1')->name('login');
 });
 
 // ─── Public Read-Only Routes (Products / Categories) ─────────────────────────

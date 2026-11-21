@@ -3,7 +3,7 @@ import axios from 'axios';
 // Centralized Axios instance with environment variable fallback
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api',
-  timeout: 10000,
+  timeout: 45000,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -41,8 +41,12 @@ apiClient.interceptors.response.use(
       // Backend returned an error response (4xx, 5xx)
       message = error.response.data?.message || `Server error: ${error.response.status}`;
     } else if (error.request) {
-      // Request made but no response (server offline / connection refused)
-      message = 'Unable to connect to the CraftMarket backend server. Please check your connection.';
+      // Request made but no response (server offline / connection refused / timeout)
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        message = 'The cloud server took too long to respond while waking up. Please try again.';
+      } else {
+        message = 'Unable to connect to the CraftMarket backend server. Please check your connection.';
+      }
     }
 
     // Expired/revoked token on a protected request → drop the stale session so

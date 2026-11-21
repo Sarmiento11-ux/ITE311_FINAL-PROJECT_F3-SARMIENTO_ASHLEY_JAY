@@ -42,7 +42,7 @@ export const useAuth = () => {
       wishlist.loadWishlist(true);
       return user;
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed. Please try again.';
+      const msg = err.response?.data?.message || err.userFriendlyMessage || err.message || 'Login failed. Please try again.';
       state.error = msg;
       throw new Error(msg);
     } finally {
